@@ -1,0 +1,14 @@
+body {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+@keyframes float {
+0%, 100% { transform: translateY(0px) scale(1); }
+50% { transform: translateY(-15px) scale(1.05); }
+}
+.animate-float-slow {
+animation: float 7s ease-in-out infinite;
+}
+.animate-float-delayed {
+animation: float 9s ease-in-out infinite 2s;
+}

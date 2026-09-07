@@ -1,0 +1,69 @@
+document.addEventListener('DOMContentLoaded', () => {
+            let isSignUp = false;
+
+            const formTitle = document.getElementById('form-title');
+            const submitBtn = document.getElementById('submit-btn');
+            const fullNameGroup = document.getElementById('full-name-group');
+            const toggleText = document.getElementById('toggle-text');
+            const toggleBtn = document.getElementById('toggle-btn');
+            const errorDiv = document.getElementById('error-msg');
+
+
+            function toggleForm() {
+                isSignUp = !isSignUp;
+                
+                formTitle.innerText = isSignUp ? 'Sign Up' : 'Login';
+                submitBtn.innerText = isSignUp ? 'Sign Up' : 'Log In';
+                
+                if (isSignUp) {
+                    fullNameGroup.classList.remove('hidden');
+                    toggleText.innerHTML = 'Already have an account? <span class="text-emerald-400 underline underline-offset-4">Log In</span>';
+                } else {
+                    fullNameGroup.classList.add('hidden');
+                    toggleText.innerHTML = 'Don\'t have an account? <span class="text-emerald-400 underline underline-offset-4">Sign Up</span>';
+                }
+                
+                errorDiv.innerText = '';
+            }
+            async function handleSubmit() {
+                const email = document.getElementById('email').value.trim();
+                const password = document.getElementById('password').value.trim();
+                const fullName = document.getElementById('full_name').value.trim();
+
+                errorDiv.innerText = '';
+
+                if (!email || !password || (isSignUp && !fullName)) {
+                    errorDiv.innerText = 'Please fill out all required fields.';
+                    return;
+                }
+
+                const endpoint = isSignUp ? '/api/signup' : '/api/login';
+                const payload = { email, password };
+                if (isSignUp) payload.full_name = fullName;
+
+                try {
+                    const response = await fetch(endpoint, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        if (isSignUp) {
+                            alert('Account created! Switching to Login...');
+                            toggleForm();
+                        } else {
+                            window.location.href = '/dashboard';
+                        }
+                    } else {
+                        errorDiv.innerText = data.error || 'An error occurred during authentication';
+                    }
+                } catch (err) {
+                    errorDiv.innerText = 'Unable to connect to the server.';
+                }
+            }
+            toggleBtn.addEventListener('click', toggleForm);
+            submitBtn.addEventListener('click', handleSubmit);
+        });

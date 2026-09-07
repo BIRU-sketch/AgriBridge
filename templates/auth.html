@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgriBridge - Authentication</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+    <script src="{{ url_for('static', filename='js/auth.js')}}"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body class="bg-gray-950 text-gray-100 antialiased min-h-screen flex flex-col justify-center items-center relative overflow-hidden p-4 selection:bg-emerald-500 selection:text-white">
+
+    <div class="absolute -top-24 -left-24 w-96 h-96 bg-emerald-600/20 rounded-full blur-[120px] pointer-events-none animate-float-slow"></div>
+    <div class="absolute -bottom-24 -right-24 w-96 h-96 bg-amber-500/15 rounded-full blur-[120px] pointer-events-none animate-float-delayed"></div>
+
+    <a href="http://127.0.0.1:3000/" class="absolute top-8 left-8 inline-flex items-center gap-2 text-sm text-gray-400 hover:text-emerald-400 font-medium transition duration-200 group">
+        <svg class="w-4 h-4 transform group-hover:-translate-x-1 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+        </svg>
+        Back to Home
+    </a>
+
+    <div class="w-full max-w-md relative z-10">
+
+        <div class="text-center mb-8">
+            <a href="/" class="inline-flex items-center gap-3 mb-3 group">
+                <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-emerald-600 to-emerald-400 flex items-center justify-center shadow-lg shadow-emerald-500/20 transition group-hover:scale-105">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <span class="font-extrabold text-2xl tracking-tight text-white">Agri<span class="text-emerald-400">Bridge</span></span>
+            </a>
+            <p class="text-xs text-gray-400 uppercase tracking-widest font-semibold">Digital Agriculture Platform</p>
+        </div>
+
+
+        <div class="bg-gray-900/60 border border-white/10 backdrop-blur-xl shadow-2xl shadow-emerald-500/10 rounded-3xl p-8 sm:p-10 transition-all duration-300">
+            
+            <h2 id="form-title" class="text-2xl font-bold text-white text-center mb-6 tracking-tight">Login</h2>
+
+            <div class="space-y-4">
+  
+                <div id="full-name-group" class="hidden">
+                    <label class="block text-xs font-semibold text-gray-300 mb-1.5 uppercase tracking-wider">Full Name</label>
+                    <input type="text" id="full_name" placeholder="John Doe" class="w-full px-4 py-3 rounded-xl bg-gray-950/70 border border-white/10 text-white placeholder-gray-500 text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition duration-200">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-gray-300 mb-1.5 uppercase tracking-wider">Email Address</label>
+                    <input type="email" id="email" placeholder="name@agribridge.et" required class="w-full px-4 py-3 rounded-xl bg-gray-950/70 border border-white/10 text-white placeholder-gray-500 text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition duration-200">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-300 mb-1.5 uppercase tracking-wider">Password</label>
+                    <input type="password" id="password" placeholder="••••••••" required class="w-full px-4 py-3 rounded-xl bg-gray-950/70 border border-white/10 text-white placeholder-gray-500 text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition duration-200">
+                </div>
+
+                <button type="button" id="submit-btn" class="w-full mt-2 py-3.5 px-4 bg-emerald-500 hover:bg-emerald-400 text-gray-950 font-bold rounded-xl text-sm transition duration-300 shadow-lg shadow-emerald-500/20 hover:shadow-emerald-400/30 transform hover:-translate-y-0.5 active:translate-y-0">
+                    Log In
+                </button>
+
+                <div id="error-msg" class="error text-red-400 text-sm font-medium text-center transition-all duration-200 empty:hidden pt-2"></div>
+
+                <button type="button" id="toggle-btn" class="w-full text-center pt-4 border-t border-white/5 mt-6 cursor-pointer focus:outline-none group">
+                    <span id="toggle-text" class="text-xs sm:text-sm text-gray-400 group-hover:text-emerald-400 transition font-medium">
+                        Don't have an account? <span class="text-emerald-400 underline underline-offset-4">Sign Up</span>
+                    </span>
+                </button>
+            </div>
+
+        </div>
+
+        <div class="text-center mt-8 text-xs text-gray-500">
+            Protected by AgriBridge End-to-End Encryption
+        </div>
+
+    </div>
+
+</body>
+</html>
