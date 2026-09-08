@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const formTitle = document.getElementById('form-title');
             const submitBtn = document.getElementById('submit-btn');
             const fullNameGroup = document.getElementById('full-name-group');
+            const roleGroup = document.getElementById('role-group');
             const toggleText = document.getElementById('toggle-text');
             const toggleBtn = document.getElementById('toggle-btn');
             const errorDiv = document.getElementById('error-msg');
@@ -17,9 +18,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 if (isSignUp) {
                     fullNameGroup.classList.remove('hidden');
+                    roleGroup.classList.remove('hidden');
                     toggleText.innerHTML = 'Already have an account? <span class="text-emerald-400 underline underline-offset-4">Log In</span>';
                 } else {
                     fullNameGroup.classList.add('hidden');
+                    roleGroup.classList.add('hidden');
                     toggleText.innerHTML = 'Don\'t have an account? <span class="text-emerald-400 underline underline-offset-4">Sign Up</span>';
                 }
                 
@@ -29,17 +32,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 const email = document.getElementById('email').value.trim();
                 const password = document.getElementById('password').value.trim();
                 const fullName = document.getElementById('full_name').value.trim();
+                const role = document.getElementById('role').value;
 
                 errorDiv.innerText = '';
 
-                if (!email || !password || (isSignUp && !fullName)) {
+                if (!email || !password || (isSignUp && !fullName) || (isSignUp && !role)) {
                     errorDiv.innerText = 'Please fill out all required fields.';
                     return;
                 }
 
                 const endpoint = isSignUp ? '/api/signup' : '/api/login';
                 const payload = { email, password };
-                if (isSignUp) payload.full_name = fullName;
+                if (isSignUp) {
+                    payload.full_name = fullName;
+                    payload.role = role;
+                }
 
                 try {
                     const response = await fetch(endpoint, {

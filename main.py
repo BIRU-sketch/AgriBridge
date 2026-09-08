@@ -23,7 +23,9 @@ def api_signup():
             "email": data.get("email"),
             "password": data.get("password"),
             "options": {
-                "data": {"full_name": data.get("full_name")}
+                "data": {"full_name": data.get("full_name"),
+                         "role": data.get("role")
+                         }
             }
         })
         return jsonify({"message": "Signup successful!", "user_id": response.user.id}), 200
@@ -49,7 +51,18 @@ def dashboard():
     token = request.cookies.get('access_token')
     if not token:
         return redirect('/auth')
-    return render_template('dashboard.html')
-
+    response = supabase.auth.get_user(token)
+    user = response.user
+    role = user.user_metadata.get('role') if user else None
+    if role == 'agent':
+        return render_template('agent_dashboard.html')
+    elif role == 'buyer':
+        return render_template('buyer_dashboard.html')
+    elif role == 'transporter':
+        return render_template('transporter_dashboard.html')
+    elif role == 'admin':
+        return render_template('admin_dashboard.html')
+    else:
+        return render_template('dashboard.html')
 if __name__ == '__main__':
     app.run(port=3000, debug=True)

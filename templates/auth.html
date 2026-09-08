@@ -48,6 +48,15 @@
                     <input type="text" id="full_name" placeholder="John Doe" class="w-full px-4 py-3 rounded-xl bg-gray-950/70 border border-white/10 text-white placeholder-gray-500 text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition duration-200">
                 </div>
 
+                <div id="role-group" class="hidden">
+                    <label class="block text-xs font-semibold text-gray-300 mb-1.5 uppercase tracking-wider">Role</label>
+                    <select id="role" required class="w-full px-4 py-3 rounded-xl bg-gray-950/70 border border-white/10 text-white text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition duration-200">
+                        <option value="" disabled selected>Select your role</option>
+                        <option value="buyer">Buyer</option>
+                        <option value="transporter">Transporter</option>
+                    </select>
+                </div>
+
                 <div>
                     <label class="block text-xs font-semibold text-gray-300 mb-1.5 uppercase tracking-wider">Email Address</label>
                     <input type="email" id="email" placeholder="name@agribridge.et" required class="w-full px-4 py-3 rounded-xl bg-gray-950/70 border border-white/10 text-white placeholder-gray-500 text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition duration-200">
