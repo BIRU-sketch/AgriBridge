@@ -49,13 +49,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 try {
+                    submitBtn.innerText = isSignUp ? 'creating account...' : 'Logging In...';
+                    submitBtn.disabled = true;
+
                     const response = await fetch(endpoint, {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: {'Content-Type': 'application/json'},
                         body: JSON.stringify(payload)
                     });
-
-                    const data = await response.json();
 
                     if (response.ok) {
                         if (isSignUp) {
@@ -65,12 +66,35 @@ document.addEventListener('DOMContentLoaded', () => {
                             window.location.href = '/dashboard';
                         }
                     } else {
+                        const data = await response.json();
                         errorDiv.innerText = data.error || 'An error occurred during authentication';
+
+                        submitBtn.innerText = isSignUp ? 'Sign Up' : 'Log In';
+                        submitBtn.disabled = false;
                     }
                 } catch (err) {
                     errorDiv.innerText = 'Unable to connect to the server.';
+                    submitBtn.innerText = isSignUp ? 'Sign Up' : 'Log In';
+                    submitBtn.disabled = false;
                 }
             }
             toggleBtn.addEventListener('click', toggleForm);
             submitBtn.addEventListener('click', handleSubmit);
+            
+            document.addEventListener('click', (e) => {
+                const toggleBtn = e.target.closest('#toggle-password');
+
+                if (toggleBtn) {
+                  e.preventDefault();
+                  console.log(" toggle button clicked!");
+                  
+                  const passwordInput = document.getElementById('password');
+
+                  if (passwordInput) {
+                    const isPassword = passwordInput.type === 'password';
+                    passwordInput.type = isPassword ? 'text' : 'password';
+                    toggleBtn.textContent = isPassword ? '🙈' : '👁️';
+                }
+                }
+            });
         });
