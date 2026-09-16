@@ -1,128 +1,380 @@
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Transporter Dashboard | AgriBridge</title>
+    <title>AgriBridge - Transporter Logistics Dashboard</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #030712; /* Tailwind gray-950 */
+            color: #f3f4f6;
+        }
+
+        /* Custom Keyframe Animations */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-12px) rotate(1deg); }
+        }
+
+        @keyframes float-slow {
+            0%, 100% { transform: translateY(0px) scale(1); }
+            50% { transform: translateY(-20px) scale(1.05); }
+        }
+
+        .animate-float {
+            animation: float 5s ease-in-out infinite;
+        }
+
+        .animate-float-slow {
+            animation: float-slow 8s ease-in-out infinite;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: rgba(17, 24, 39, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1.5rem;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Table Styles */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
+            padding: 1rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #9ca3af;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        td {
+            padding: 1rem;
+            font-size: 0.875rem;
+            color: #e5e7eb;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Status Badges */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.025em;
+        }
+
+        .badge-emerald {
+            background: rgba(16, 185, 129, 0.1);
+            color: #34d399;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .badge-amber {
+            background: rgba(245, 158, 11, 0.1);
+            color: #fbbf24;
+            border: 1px solid rgba(245, 158, 11, 0.2);
+        }
+
+        .badge-red {
+            background: rgba(239, 68, 68, 0.1);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .badge-blue {
+            background: rgba(59, 130, 246, 0.1);
+            color: #60a5fa;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+
+        /* Custom Scrollbar for Main Content */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+    </style>
 </head>
-<body class="bg-gray-950 text-gray-100 antialiased selection:bg-emerald-500 selection:text-white flex flex-col min-h-screen overflow-x-hidden">
-    <div class="fixed top-0 left-1/4 w-96 h-96 bg-amber-600/20 rounded-full blur-[120px] pointer-events-none animate-float-slow -z-10"></div>
-    <div class="fixed top-1/3 right-10 w-80 h-80 bg-orange-500/15 rounded-full blur-[100px] pointer-events-none animate-float -z-10"></div>
+<body class="flex h-screen overflow-hidden selection:bg-emerald-500 selection:text-white relative">
 
-    <nav class="fixed top-0 left-0 right-0 z-50 bg-gray-950/70 backdrop-blur-xl border-b border-white/10 transition-all duration-300">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-20 items-center">
-                <a href="/" class="flex items-center gap-3 group">
-                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-600 to-emerald-400 flex items-center justify-center shadow-lg shadow-emerald-500/20 transition group-hover:scale-105">
-                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                    </div>
-                    <span class="font-extrabold text-2xl tracking-tight text-white">Agri<span class="text-emerald-400">Bridge</span></span>
-                </a>
+    <!-- Ambient Gradient Blur Blobs -->
+    <div class="fixed top-[-10%] left-[-5%] w-[500px] h-[500px] bg-emerald-900/20 rounded-full blur-[150px] pointer-events-none animate-float-slow z-0"></div>
+    <div class="fixed bottom-[-10%] right-[-5%] w-[400px] h-[400px] bg-amber-900/15 rounded-full blur-[120px] pointer-events-none animate-float z-0"></div>
 
-                <div class="hidden md:flex items-center space-x-8">
-                    <a href="#vehicles" class="text-gray-300 hover:text-emerald-400 text-sm font-medium transition duration-200">Vehicles</a>
-                    <a href="#shipments" class="text-gray-300 hover:text-emerald-400 text-sm font-medium transition duration-200">Shipments</a>
-                    <a href="#available" class="text-gray-300 hover:text-emerald-400 text-sm font-medium transition duration-200">Available Loads</a>
-                    
-                    <div class="flex items-center space-x-4 pl-6 border-l border-white/10">
-                        <span class="text-gray-400 text-sm">Welcome, Transporter</span>
-                        <a href="/logout" class="text-red-400 hover:text-red-300 text-sm font-semibold transition">Logout</a>
-                    </div>
+    <!-- Sidebar Navigation -->
+    <aside class="w-64 bg-gray-950/80 border-r border-white/5 backdrop-blur-2xl flex flex-col z-20">
+        <div class="h-20 flex items-center px-6 border-b border-white/5">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-emerald-600 to-emerald-400 flex items-center justify-center shadow-lg shadow-emerald-500/20">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                </div>
+                <span class="font-extrabold text-lg tracking-tight text-white">Agri<span class="text-emerald-400">Bridge</span></span>
+            </div>
+        </div>
+
+        <nav class="flex-1 px-4 py-6 space-y-2">
+            <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-semibold text-sm transition">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"></path></svg>
+                Active Route Log
+            </a>
+            <a href="#" class="flex items-center justify-between px-4 py-3 rounded-xl text-gray-400 hover:bg-white/5 hover:text-white font-medium text-sm transition group">
+                <div class="flex items-center gap-3">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                    Available Loads
+                </div>
+                <span class="bg-emerald-500/20 text-emerald-400 text-xs py-0.5 px-2 rounded-md font-bold">4</span>
+            </a>
+            <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:bg-white/5 hover:text-white font-medium text-sm transition">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                Waybills & Permits
+            </a>
+            <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:bg-white/5 hover:text-white font-medium text-sm transition">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                Trip History
+            </a>
+        </nav>
+
+        <div class="p-4 border-t border-white/5">
+            <div class="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/[0.02] border border-white/5">
+                <div class="w-8 h-8 rounded-full bg-emerald-900/50 flex items-center justify-center text-sm font-bold text-emerald-400">TF</div>
+                <div class="flex-col">
+                    <div class="text-xs font-bold text-white">{{username}}</div>
+                    <div class="text-[10px] text-emerald-400">Truck: Isuzu FSR (AA-4521)</div>
                 </div>
             </div>
         </div>
-    </nav>
+    </aside>
 
-    <main class="pt-28 pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full flex-grow">
+    <!-- Main Content Area -->
+    <main class="flex-1 overflow-y-auto relative z-10 scroll-smooth">
         
-        <div class="mb-12">
-            <h1 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mb-2">Transporter Dashboard</h1>
-            <p class="text-gray-400 text-sm">Manage your vehicle fleet, claim shipment loads, and track delivery progress.</p>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
-            <div class="p-6 rounded-2xl bg-gray-900/60 border border-white/10 backdrop-blur-xl">
-                <div class="flex items-center justify-between mb-4">
-                    <div class="w-12 h-12 rounded-xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center">
-                        <svg class="w-6 h-6 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
-                    </div>
-                    <span class="text-3xl font-extrabold text-amber-400">0</span>
-                </div>
-                <div class="text-xs text-gray-400 uppercase tracking-wider">Active Vehicles</div>
+        <!-- Top Header -->
+        <header class="h-20 px-8 flex items-center justify-between border-b border-white/5 sticky top-0 bg-gray-950/80 backdrop-blur-xl z-30">
+            <h1 class="text-xl font-bold text-white tracking-tight">Logistics Command Center</h1>
+            <div class="flex items-center gap-4">
+                <span class="badge badge-blue gap-1.5 px-3 py-1.5 shadow-sm shadow-blue-500/10">
+                    <span class="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse"></span> State Buffer Fleet
+                </span>
+                <button class="p-2 text-gray-400 hover:text-white transition bg-white/5 rounded-lg border border-white/5 hover:border-white/20">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+                </button>
             </div>
+        </header>
 
-            <div class="p-6 rounded-2xl bg-gray-900/60 border border-white/10 backdrop-blur-xl">
-                <div class="flex items-center justify-between mb-4">
-                    <div class="w-12 h-12 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center">
-                        <svg class="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
-                    </div>
-                    <span class="text-3xl font-extrabold text-emerald-400">0</span>
-                </div>
-                <div class="text-xs text-gray-400 uppercase tracking-wider">Active Shipments</div>
-            </div>
-
-            <div class="p-6 rounded-2xl bg-gray-900/60 border border-white/10 backdrop-blur-xl">
-                <div class="flex items-center justify-between mb-4">
-                    <div class="w-12 h-12 rounded-xl bg-teal-500/20 border border-teal-500/30 flex items-center justify-center">
-                        <svg class="w-6 h-6 text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                    </div>
-                    <span class="text-3xl font-extrabold text-teal-400">0</span>
-                </div>
-                <div class="text-xs text-gray-400 uppercase tracking-wider">In Transit</div>
-            </div>
-
-            <div class="p-6 rounded-2xl bg-gray-900/60 border border-white/10 backdrop-blur-xl">
-                <div class="flex items-center justify-between mb-4">
-                    <div class="w-12 h-12 rounded-xl bg-purple-500/20 border border-purple-500/30 flex items-center justify-center">
-                        <svg class="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                    </div>
-                    <span class="text-3xl font-extrabold text-purple-400">0</span>
-                </div>
-                <div class="text-xs text-gray-400 uppercase tracking-wider">Completed Deliveries</div>
-            </div>
-        </div>
-
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div class="p-8 max-w-7xl mx-auto space-y-8">
             
-            <section id="vehicles" class="bg-gray-900/60 border border-white/10 rounded-3xl p-8 backdrop-blur-xl">
-                <div class="flex items-center justify-between mb-6">
-                    <h2 class="text-xl font-bold text-white">My Vehicles</h2>
-                    <button onclick="openModal('add-vehicle-modal')" class="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-gray-950 font-semibold text-sm transition duration-300">
-                        + Add Vehicle
-                    </button>
+            <!-- Active Assigned Route Card (The Driver's Focus) -->
+            <section class="bg-gradient-to-br from-gray-900/80 to-gray-900/40 border border-emerald-500/30 rounded-2xl p-6 md:p-8 backdrop-blur-md shadow-2xl shadow-emerald-500/10 relative overflow-hidden">
+                <div class="absolute -right-10 -bottom-10 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+                
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 pb-6 border-b border-white/10">
+                    <div>
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="badge badge-amber">Active Transport Assignment</span>
+                            <span class="text-xs text-gray-400 font-mono">Waybill #WB-9042</span>
+                        </div>
+                        <h2 class="text-2xl font-extrabold text-white">Humera Aggregation Hub ➔ Addis Central Warehouse</h2>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-xs text-gray-400 uppercase tracking-wider font-semibold">Assigned Cargo</div>
+                        <div class="text-lg font-bold text-emerald-400">120 Quintals (Sesame - Export)</div>
+                    </div>
                 </div>
-                <div class="text-center py-12 text-gray-500 text-sm">
-                    No vehicles registered yet. Click "Add Vehicle" to register your fleet.
+
+                <!-- Manual Journey Status Stepper (No Live GPS Required) -->
+                <div class="space-y-4">
+                    <div class="flex justify-between text-xs text-gray-400 font-semibold uppercase tracking-wider">
+                        <span>1. Assigned</span>
+                        <span>2. Loaded at Source</span>
+                        <span>3. In Transit</span>
+                        <span>4. Delivered to Hub</span>
+                    </div>
+                    
+                    <!-- Progress Bar Track -->
+                    <div class="w-full bg-gray-950 h-3 rounded-full overflow-hidden p-0.5 border border-white/10 relative">
+                        <div class="bg-gradient-to-r from-emerald-600 to-emerald-400 h-full rounded-full w-2/4 transition-all duration-500"></div>
+                    </div>
+
+                    <!-- Interactive Action Box for Driver -->
+                    <div class="bg-gray-950/60 border border-white/10 rounded-xl p-4 flex flex-col md:flex-row items-center justify-between gap-4 mt-4">
+                        <div>
+                            <div class="text-sm font-bold text-white flex items-center gap-2">
+                                <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                Current Status: <span class="text-amber-400">In Transit to Regional Warehouse</span>
+                            </div>
+                            <p class="text-xs text-gray-400 mt-0.5">Tap below once you have arrived and offloaded cargo at the destination warehouse.</p>
+                        </div>
+                        <button class="w-full md:w-auto bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs uppercase tracking-wider rounded-lg px-6 py-3 transition shadow-lg shadow-emerald-500/20">
+                            Mark as Delivered & Offloaded
+                        </button>
+                    </div>
                 </div>
             </section>
 
-            <section id="shipments" class="bg-gray-900/60 border border-white/10 rounded-3xl p-8 backdrop-blur-xl">
-                <h2 class="text-xl font-bold text-white mb-6">Active Shipments</h2>
-                <div class="text-center py-12 text-gray-500 text-sm">
-                    No active shipments. Claimed loads will appear here for tracking.
+            <!-- Available Loads Section (State Buffer Pool) -->
+            <section>
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <h3 class="text-sm font-bold text-white uppercase tracking-wider">Available Bulk Loads (State Acquisition)</h3>
+                        <p class="text-xs text-gray-400">Accept assignments to move bulk harvests from rural collection points to official government reserves.</p>
+                    </div>
+                    <span class="text-xs text-gray-400">4 routes ready for assignment</span>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    
+                    <!-- Load Card 1 -->
+                    <div class="bg-gray-900/60 border border-white/10 hover:border-emerald-500/50 rounded-2xl p-6 backdrop-blur-sm transition-all duration-300 flex flex-col justify-between">
+                        <div>
+                            <div class="flex justify-between items-start mb-3">
+                                <span class="badge badge-emerald">High Priority Route</span>
+                                <span class="text-xs font-mono text-gray-400">Distance: ~450 km</span>
+                            </div>
+                            <h4 class="text-lg font-bold text-white mb-2">Bishoftu Cooperative ➔ Adama Hub</h4>
+                            <div class="space-y-2 mb-6 text-sm">
+                                <div class="flex justify-between text-gray-300">
+                                    <span class="text-gray-400">Cargo Type:</span>
+                                    <span class="font-semibold text-white">Grade 1 Magna Teff (100 Qtl)</span>
+                                </div>
+                                <div class="flex justify-between text-gray-300">
+                                    <span class="text-gray-400">Agent Contact:</span>
+                                    <span class="text-white">Dawit K. (+251 91...)</span>
+                                </div>
+                                <div class="flex justify-between text-gray-300 pt-2 border-t border-white/5">
+                                    <span class="text-gray-400">Government Tariff:</span>
+                                    <span class="font-bold text-amber-400">18,500 ETB</span>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="w-full bg-white/5 hover:bg-emerald-500 hover:text-gray-950 text-white border border-white/10 hover:border-emerald-500 font-bold text-sm rounded-xl py-3 transition duration-300">
+                            Accept Route Assignment
+                        </button>
+                    </div>
+
+                    <!-- Load Card 2 -->
+                    <div class="bg-gray-900/60 border border-white/10 hover:border-emerald-500/50 rounded-2xl p-6 backdrop-blur-sm transition-all duration-300 flex flex-col justify-between">
+                        <div>
+                            <div class="flex justify-between items-start mb-3">
+                                <span class="badge badge-blue">Standard Route</span>
+                                <span class="text-xs font-mono text-gray-400">Distance: ~320 km</span>
+                            </div>
+                            <h4 class="text-lg font-bold text-white mb-2">Jimma Collection Point ➔ Addis Warehouse</h4>
+                            <div class="space-y-2 mb-6 text-sm">
+                                <div class="flex justify-between text-gray-300">
+                                    <span class="text-gray-400">Cargo Type:</span>
+                                    <span class="font-semibold text-white">Wollega Coffee - Grade 1 (80 Qtl)</span>
+                                </div>
+                                <div class="flex justify-between text-gray-300">
+                                    <span class="text-gray-400">Agent Contact:</span>
+                                    <span class="text-white">Amina M. (+251 92...)</span>
+                                </div>
+                                <div class="flex justify-between text-gray-300 pt-2 border-t border-white/5">
+                                    <span class="text-gray-400">Government Tariff:</span>
+                                    <span class="font-bold text-amber-400">15,000 ETB</span>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="w-full bg-white/5 hover:bg-emerald-500 hover:text-gray-950 text-white border border-white/10 hover:border-emerald-500 font-bold text-sm rounded-xl py-3 transition duration-300">
+                            Accept Route Assignment
+                        </button>
+                    </div>
+
                 </div>
             </section>
 
-            <section id="available" class="bg-gray-900/60 border border-white/10 rounded-3xl p-8 backdrop-blur-xl lg:col-span-2">
-                <h2 class="text-xl font-bold text-white mb-6">Available Loads to Claim</h2>
-                <div class="text-center py-12 text-gray-500 text-sm">
-                    No available loads at the moment. New shipment opportunities will appear here when matches are confirmed.
+            <!-- Completed & Historical Trips Table -->
+            <section class="mt-8">
+                <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-4">Completed Distribution History</h3>
+                
+                <div class="bg-gray-900/60 border border-white/10 rounded-2xl backdrop-blur-md overflow-hidden shadow-lg">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Waybill ID</th>
+                                <th>Route Details</th>
+                                <th>Tonnage Moved</th>
+                                <th>Completed Date</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="font-mono text-xs text-gray-400">#WB-9011</td>
+                                <td>
+                                    <div class="font-semibold text-white">Gojjam Union ➔ Addis Central</div>
+                                    <div class="text-xs text-gray-500">Wheat (Bulk Reserve)</div>
+                                </td>
+                                <td class="font-semibold text-white">200 Quintals</td>
+                                <td class="text-xs text-gray-400">Oct 24, 2026</td>
+                                <td>
+                                    <span class="badge badge-emerald">Verified & Settled</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="font-mono text-xs text-gray-400">#WB-8984</td>
+                                <td>
+                                    <div class="font-semibold text-white">Adama Hub ➔ Dire Dawa Depot</div>
+                                    <div class="text-xs text-gray-500">White Teff</div>
+                                </td>
+                                <td class="font-semibold text-white">150 Quintals</td>
+                                <td class="text-xs text-gray-400">Oct 19, 2026</td>
+                                <td>
+                                    <span class="badge badge-emerald">Verified & Settled</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </section>
 
         </div>
     </main>
-
-    <footer class="bg-gray-950 text-gray-400 py-8 border-t border-white/10 mt-auto">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-xs">
-            &copy; 2026 AgriBridge Ethiopia. All rights reserved.
-        </div>
-    </footer>
 
 </body>
 </html>

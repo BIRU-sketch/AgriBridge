@@ -3,124 +3,379 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Buyer Dashboard | AgriBridge</title>
+    <title>Buyer Terminal | AgriBridge</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    </style>
 </head>
-<body class="bg-gray-950 text-gray-100 antialiased selection:bg-emerald-500 selection:text-white flex flex-col min-h-screen overflow-x-hidden">
-    <div class="fixed top-0 left-1/4 w-96 h-96 bg-teal-600/20 rounded-full blur-[120px] pointer-events-none animate-float-slow -z-10"></div>
-    <div class="fixed top-1/3 right-10 w-80 h-80 bg-emerald-500/15 rounded-full blur-[100px] pointer-events-none animate-float -z-10"></div>
+<body class="bg-gray-950 text-gray-100 antialiased selection:bg-emerald-500 selection:text-white min-h-screen flex flex-col">
 
-    <nav class="fixed top-0 left-0 right-0 z-50 bg-gray-950/70 backdrop-blur-xl border-b border-white/10 transition-all duration-300">
+    <!-- Top Horizontal Navigation Bar -->
+    <header class="sticky top-0 z-50 bg-gray-950/90 backdrop-blur-md border-b border-white/10">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-20 items-center">
-                <a href="/" class="flex items-center gap-3 group">
-                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-600 to-emerald-400 flex items-center justify-center shadow-lg shadow-emerald-500/20 transition group-hover:scale-105">
-                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                    </div>
-                    <span class="font-extrabold text-2xl tracking-tight text-white">Agri<span class="text-emerald-400">Bridge</span></span>
-                </a>
+            <div class="flex h-16 items-center justify-between">
+                
+                <!-- Brand & Workspace Label -->
+                <div class="flex items-center gap-6">
+                    <a href="/" class="flex items-center gap-2.5">
+                        <div class="w-9 h-9 rounded-xl bg-emerald-500 flex items-center justify-center font-black text-gray-950 text-lg">
+                            A
+                        </div>
+                        <span class="font-extrabold text-xl tracking-tight text-white">Agri<span class="text-emerald-400">Bridge</span></span>
+                    </a>
+                    <span class="hidden md:inline-block h-4 w-px bg-white/10"></span>
+                    <span class="hidden md:inline-block text-xs font-semibold text-gray-400 uppercase tracking-wider">Buyer Terminal</span>
+                </div>
 
-                <div class="hidden md:flex items-center space-x-8">
-                    <a href="#demands" class="text-gray-300 hover:text-emerald-400 text-sm font-medium transition duration-200">My Demands</a>
-                    <a href="#matches" class="text-gray-300 hover:text-emerald-400 text-sm font-medium transition duration-200">Matches</a>
-                    <a href="#shipments" class="text-gray-300 hover:text-emerald-400 text-sm font-medium transition duration-200">Shipments</a>
-                    
-                    <div class="flex items-center space-x-4 pl-6 border-l border-white/10">
-                        <span class="text-gray-400 text-sm">Welcome, Buyer</span>
-                        <a href="/logout" class="text-red-400 hover:text-red-300 text-sm font-semibold transition">Logout</a>
+                <!-- Horizontal Navigation Links -->
+                <nav class="hidden sm:flex items-center space-x-6 text-sm font-medium text-gray-300">
+                    <a href="#search-stock" class="hover:text-emerald-400 transition">Search Stock</a>
+                    <a href="#pending-requests" class="hover:text-emerald-400 transition">Pending Requests</a>
+                    <a href="#trade-history" class="hover:text-emerald-400 transition">Trade History</a>
+                </nav>
+
+                <!-- Right Utility & Buyer Profile -->
+                <div class="flex items-center gap-4">
+                    <button class="relative p-2 rounded-lg bg-white/5 hover:bg-white/10 text-gray-300 transition border border-white/10">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+                        <span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    </button>
+
+                    <div class="flex items-center gap-3 pl-4 border-l border-white/10">
+                        <div class="text-right hidden sm:block">
+                            <div class="text-sm font-bold text-white leading-none">Abyssinia Flour Mills PLC</div>
+                            <div class="text-xs text-gray-400 mt-1">ID: BY-88402</div>
+                        </div>
+                        <div class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center font-bold">
+                            AF
+                        </div>
                     </div>
                 </div>
+
             </div>
         </div>
-    </nav>
+    </header>
 
-    <main class="pt-28 pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full flex-grow">
-        
-        <div class="mb-12">
-            <h1 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mb-2">Verified Buyer Dashboard</h1>
-            <p class="text-gray-400 text-sm">Post produce demands, evaluate match scores, and manage your procurement pipeline.</p>
+    <!-- Main Content Area -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-10">
+
+        <!-- Top Title -->
+        <div>
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">Buyer Dashboard</h1>
+            <p class="text-sm text-gray-400 mt-1">Search available produce stock, track active demand requests, and review trade logs.</p>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
-            <div class="p-6 rounded-2xl bg-gray-900/60 border border-white/10 backdrop-blur-xl">
-                <div class="flex items-center justify-between mb-4">
-                    <div class="w-12 h-12 rounded-xl bg-teal-500/20 border border-teal-500/30 flex items-center justify-center">
-                        <svg class="w-6 h-6 text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-                    </div>
-                    <span class="text-3xl font-extrabold text-teal-400">0</span>
+        <!-- REPLACED METRICS WITH MARKETPLACE SEARCH BAR -->
+        <section id="search-stock" class="bg-gray-900/80 border border-white/10 p-5 rounded-2xl shadow-2xl backdrop-blur-md">
+            <form id="marketplace-search-form" action="/api/marketplace/search" method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                
+                <!-- 1. Crop Name Input -->
+                <div class="space-y-1.5">
+                    <label for="crop_name" class="text-xs font-semibold text-gray-400 uppercase tracking-wider block">
+                        Crop Name
+                    </label>
+                    <input 
+                        type="text" 
+                        id="crop_name" 
+                        name="crop_name" 
+                        placeholder="e.g. White Teff, Wheat, Sesame..." 
+                        class="w-full bg-gray-950 border border-white/10 rounded-xl px-4 py-3 text-sm text-gray-100 placeholder-gray-500 focus:outline-none focus:border-emerald-500 transition"
+                    >
                 </div>
-                <div class="text-xs text-gray-400 uppercase tracking-wider">Active Demands</div>
-            </div>
 
-            <div class="p-6 rounded-2xl bg-gray-900/60 border border-white/10 backdrop-blur-xl">
-                <div class="flex items-center justify-between mb-4">
-                    <div class="w-12 h-12 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center">
-                        <svg class="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4.793"></path></svg>
-                    </div>
-                    <span class="text-3xl font-extrabold text-emerald-400">0</span>
+                <!-- 2. Location Input -->
+                <div class="space-y-1.5">
+                    <label for="location" class="text-xs font-semibold text-gray-400 uppercase tracking-wider block">
+                        Location / Hub
+                    </label>
+                    <input 
+                        type="text" 
+                        id="location" 
+                        name="location" 
+                        placeholder="e.g. Bishoftu, Asella, Gondar..." 
+                        class="w-full bg-gray-950 border border-white/10 rounded-xl px-4 py-3 text-sm text-gray-100 placeholder-gray-500 focus:outline-none focus:border-emerald-500 transition"
+                    >
                 </div>
-                <div class="text-xs text-gray-400 uppercase tracking-wider">Available Matches</div>
-            </div>
 
-            <div class="p-6 rounded-2xl bg-gray-900/60 border border-white/10 backdrop-blur-xl">
-                <div class="flex items-center justify-between mb-4">
-                    <div class="w-12 h-12 rounded-xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center">
-                        <svg class="w-6 h-6 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    </div>
-                    <span class="text-3xl font-extrabold text-amber-400">0</span>
+                <!-- 3. Quality Select Tag -->
+                <div class="space-y-1.5">
+                    <label for="quality" class="text-xs font-semibold text-gray-400 uppercase tracking-wider block">
+                        Quality Grade
+                    </label>
+                    <select 
+                        id="quality" 
+                        name="quality" 
+                        class="w-full bg-gray-950 border border-white/10 rounded-xl px-4 py-3 text-sm text-gray-200 focus:outline-none focus:border-emerald-500 transition cursor-pointer"
+                    >
+                        <option value="">All Quality Grades</option>
+                        <option value="grade_1_magna">Grade 1 (Magna / Premium)</option>
+                        <option value="grade_1_standard">Grade 1 (Standard)</option>
+                        <option value="grade_2">Grade 2 Commercial</option>
+                        <option value="export_quality">Export Quality Verified</option>
+                        <option value="industrial_feed">Industrial / Feed Grade</option>
+                    </select>
                 </div>
-                <div class="text-xs text-gray-400 uppercase tracking-wider">Pending Agreement</div>
-            </div>
 
-            <div class="p-6 rounded-2xl bg-gray-900/60 border border-white/10 backdrop-blur-xl">
-                <div class="flex items-center justify-between mb-4">
-                    <div class="w-12 h-12 rounded-xl bg-purple-500/20 border border-purple-500/30 flex items-center justify-center">
-                        <svg class="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                    </div>
-                    <span class="text-3xl font-extrabold text-purple-400">0</span>
-                </div>
-                <div class="text-xs text-gray-400 uppercase tracking-wider">Completed Orders</div>
-            </div>
-        </div>
-
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            
-            <section id="demands" class="bg-gray-900/60 border border-white/10 rounded-3xl p-8 backdrop-blur-xl">
-                <div class="flex items-center justify-between mb-6">
-                    <h2 class="text-xl font-bold text-white">My Demands</h2>
-                    <button onclick="openModal('post-demand-modal')" class="px-4 py-2 rounded-xl bg-teal-500 hover:bg-teal-400 text-gray-950 font-semibold text-sm transition duration-300">
-                        + Post Demand
+                <!-- 4. Submit Search Button -->
+                <div>
+                    <button type="submit" class="w-full bg-emerald-500 hover:bg-emerald-400 text-gray-950 font-bold text-sm rounded-xl px-6 py-3 transition duration-200 flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/10">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                        Search Stock
                     </button>
                 </div>
-                <div class="text-center py-12 text-gray-500 text-sm">
-                    No demands posted yet. Click "Post Demand" to submit your procurement requirements.
-                </div>
-            </section>
 
-            <section id="matches" class="bg-gray-900/60 border border-white/10 rounded-3xl p-8 backdrop-blur-xl">
-                <h2 class="text-xl font-bold text-white mb-6">Match Results</h2>
-                <div class="text-center py-12 text-gray-500 text-sm">
-                    No matches available yet. Matched produce lots will appear here based on your demands.
+            </form>
+            <div id="marketplace-result" class="hidden mt-4 rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-300" role="status" aria-live="polite"></div>
+            <form id="purchase-form" class="hidden mt-4 flex flex-col sm:flex-row sm:items-end gap-3">
+                <div class="space-y-1.5 flex-1">
+                    <label for="purchase-quantity" class="text-xs font-semibold text-gray-400 uppercase tracking-wider block">
+                        Purchase Quantity
+                    </label>
+                    <input type="number" id="purchase-quantity" name="quantity" min="0.01" step="any" required placeholder="Enter quantity to purchase" class="w-full bg-gray-950 border border-white/10 rounded-xl px-4 py-3 text-sm text-gray-100 placeholder-gray-500 focus:outline-none focus:border-emerald-500 transition">
                 </div>
-            </section>
+                <button type="submit" class="bg-sky-500 hover:bg-sky-400 text-gray-950 font-bold text-sm rounded-xl px-6 py-3 transition flex items-center justify-center gap-2">
+                    Request Purchase
+                </button>
+            </form>
+        </section>
 
-            <section id="shipments" class="bg-gray-900/60 border border-white/10 rounded-3xl p-8 backdrop-blur-xl lg:col-span-2">
-                <h2 class="text-xl font-bold text-white mb-6">Active Shipments</h2>
-                <div class="text-center py-12 text-gray-500 text-sm">
-                    No active shipments. Track your confirmed deliveries here once matches are agreed.
+        <!-- SECTION 1: PENDING PROCUREMENT REQUESTS -->
+        <section id="pending-requests" class="space-y-4">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h2 class="text-xl font-bold text-white tracking-tight flex items-center gap-2">
+                        <span>Pending Procurement Requests</span>
+                        <span class="px-2.5 py-0.5 rounded-full text-xs bg-amber-500/10 text-amber-400 border border-amber-500/20">3 Active</span>
+                    </h2>
+                    <p class="text-xs text-gray-400 mt-0.5">Custom volume requests submitted to regional hubs currently awaiting agent matching.</p>
                 </div>
-            </section>
+            </div>
 
-        </div>
+            <!-- Pending Requests Data Table -->
+            <div class="overflow-x-auto rounded-2xl border border-white/10 bg-gray-900/50 backdrop-blur-md">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="border-b border-white/10 bg-white/[0.02] text-xs uppercase tracking-wider text-gray-400 font-semibold">
+                            <th class="py-4 px-6">Request Reference</th>
+                            <th class="py-4 px-6">Commodity Specs</th>
+                            <th class="py-4 px-6 text-right">Volume Needed</th>
+                            <th class="py-4 px-6">Target Hub Location</th>
+                            <th class="py-4 px-6">Target Date</th>
+                            <th class="py-4 px-6 text-center">Matching Status</th>
+                            <th class="py-4 px-6 text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-white/5 text-sm">
+                        
+                        <!-- Pending Row 1 -->
+                        <tr class="hover:bg-white/[0.02] transition">
+                            <td class="py-4 px-6 font-mono font-bold text-white">#REQ-2026-091</td>
+                            <td class="py-4 px-6">
+                                <div class="font-bold text-white">White Teff (Magna Grade)</div>
+                                <div class="text-xs text-gray-400">Max Moisture 10% • Cleaned</div>
+                            </td>
+                            <td class="py-4 px-6 text-right font-bold text-emerald-400">800 Qtl</td>
+                            <td class="py-4 px-6 text-gray-300">Bishoftu Hub (Oromia)</td>
+                            <td class="py-4 px-6 text-gray-400 text-xs">Sept 22, 2026</td>
+                            <td class="py-4 px-6 text-center">
+                                <span class="px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20 inline-flex items-center gap-1.5">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping"></span>
+                                    Agent Aggregating
+                                </span>
+                            </td>
+                            <td class="py-4 px-6 text-right space-x-2">
+                                <button class="text-xs font-semibold text-gray-300 hover:text-white transition">Edit</button>
+                                <span class="text-gray-600">|</span>
+                                <button class="text-xs font-semibold text-rose-400 hover:text-rose-300 transition">Cancel</button>
+                            </td>
+                        </tr>
+
+                        <!-- Pending Row 2 -->
+                        <tr class="hover:bg-white/[0.02] transition">
+                            <td class="py-4 px-6 font-mono font-bold text-white">#REQ-2026-088</td>
+                            <td class="py-4 px-6">
+                                <div class="font-bold text-white">Bread Wheat (Grade 1)</div>
+                                <div class="text-xs text-gray-400">High Gluten • Minimum 12% Protein</div>
+                            </td>
+                            <td class="py-4 px-6 text-right font-bold text-emerald-400">1,500 Qtl</td>
+                            <td class="py-4 px-6 text-gray-300">Asella Hub (Arsi)</td>
+                            <td class="py-4 px-6 text-gray-400 text-xs">Sept 28, 2026</td>
+                            <td class="py-4 px-6 text-center">
+                                <span class="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 inline-flex items-center gap-1.5">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                                    Match Found (Review Offer)
+                                </span>
+                            </td>
+                            <td class="py-4 px-6 text-right">
+                                <button class="px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-gray-950 font-bold text-xs transition">
+                                    View Hub Offer
+                                </button>
+                            </td>
+                        </tr>
+
+                        <!-- Pending Row 3 -->
+                        <tr class="hover:bg-white/[0.02] transition">
+                            <td class="py-4 px-6 font-mono font-bold text-white">#REQ-2026-074</td>
+                            <td class="py-4 px-6">
+                                <div class="font-bold text-white">Humera White Sesame</div>
+                                <div class="text-xs text-gray-400">Export Grade • Machine Cleaned</div>
+                            </td>
+                            <td class="py-4 px-6 text-right font-bold text-emerald-400">300 Qtl</td>
+                            <td class="py-4 px-6 text-gray-300">Gondar Hub (Amhara)</td>
+                            <td class="py-4 px-6 text-gray-400 text-xs">Oct 05, 2026</td>
+                            <td class="py-4 px-6 text-center">
+                                <span class="px-3 py-1 rounded-full text-xs font-semibold bg-sky-500/10 text-sky-400 border border-sky-500/20 inline-flex items-center gap-1.5">
+                                    Pending Logistics Quote
+                                </span>
+                            </td>
+                            <td class="py-4 px-6 text-right space-x-2">
+                                <button class="text-xs font-semibold text-gray-300 hover:text-white transition">Details</button>
+                            </td>
+                        </tr>
+
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- SECTION 2: TRADE HISTORY -->
+        <section id="trade-history" class="space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-xl font-bold text-white tracking-tight">Trade History & Settled Orders</h2>
+                    <p class="text-xs text-gray-400 mt-0.5">Archived record of verified produce purchases, invoices, and fulfillment dates.</p>
+                </div>
+                <!-- Search/Filter Filter Bar for History -->
+                <div class="flex items-center gap-2">
+                    <input type="text" placeholder="Filter by Order # or Crop..." class="bg-gray-900 border border-white/10 text-xs rounded-xl px-3 py-2 text-gray-200 placeholder-gray-500 focus:outline-none focus:border-emerald-500 w-48 sm:w-64">
+                    <select class="bg-gray-900 border border-white/10 text-xs rounded-xl px-3 py-2 text-gray-300 focus:outline-none">
+                        <option value="">All Hubs</option>
+                        <option value="bishoftu">Bishoftu</option>
+                        <option value="asella">Asella</option>
+                        <option value="gondar">Gondar</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Trade History Data Table -->
+            <div class="overflow-x-auto rounded-2xl border border-white/10 bg-gray-900/50 backdrop-blur-md">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="border-b border-white/10 bg-white/[0.02] text-xs uppercase tracking-wider text-gray-400 font-semibold">
+                            <th class="py-4 px-6">Order ID</th>
+                            <th class="py-4 px-6">Crop Executed</th>
+                            <th class="py-4 px-6">Dispatch Hub</th>
+                            <th class="py-4 px-6 text-right">Volume</th>
+                            <th class="py-4 px-6 text-right">Rate / Qtl</th>
+                            <th class="py-4 px-6 text-right">Total Settled Amount</th>
+                            <th class="py-4 px-6">Fulfilled Date</th>
+                            <th class="py-4 px-6 text-center">Fulfillment</th>
+                            <th class="py-4 px-6 text-right">Documentation</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-white/5 text-sm">
+
+                        <!-- History Row 1 -->
+                        <tr class="hover:bg-white/[0.02] transition">
+                            <td class="py-4 px-6 font-mono font-bold text-white">#TRD-88201</td>
+                            <td class="py-4 px-6">
+                                <div class="font-bold text-white">White Teff (Sergegna)</div>
+                                <div class="text-xs text-gray-400">Lot #TF-9021</div>
+                            </td>
+                            <td class="py-4 px-6 text-gray-300">Bishoftu Hub</td>
+                            <td class="py-4 px-6 text-right font-medium text-white">450 Qtl</td>
+                            <td class="py-4 px-6 text-right text-gray-300">11,500 ETB</td>
+                            <td class="py-4 px-6 text-right font-bold text-emerald-400">5,175,000 ETB</td>
+                            <td class="py-4 px-6 text-gray-400 text-xs">Sept 04, 2026</td>
+                            <td class="py-4 px-6 text-center">
+                                <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                                    Delivered
+                                </span>
+                            </td>
+                            <td class="py-4 px-6 text-right">
+                                <a href="#" class="text-xs font-semibold text-emerald-400 hover:underline flex items-center justify-end gap-1">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                    PDF Receipt
+                                </a>
+                            </td>
+                        </tr>
+
+                        <!-- History Row 2 -->
+                        <tr class="hover:bg-white/[0.02] transition">
+                            <td class="py-4 px-6 font-mono font-bold text-white">#TRD-87940</td>
+                            <td class="py-4 px-6">
+                                <div class="font-bold text-white">Bread Wheat</div>
+                                <div class="text-xs text-gray-400">Lot #WH-4410</div>
+                            </td>
+                            <td class="py-4 px-6 text-gray-300">Asella Hub</td>
+                            <td class="py-4 px-6 text-right font-medium text-white">1,200 Qtl</td>
+                            <td class="py-4 px-6 text-right text-gray-300">5,200 ETB</td>
+                            <td class="py-4 px-6 text-right font-bold text-emerald-400">6,240,000 ETB</td>
+                            <td class="py-4 px-6 text-gray-400 text-xs">Aug 18, 2026</td>
+                            <td class="py-4 px-6 text-center">
+                                <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                                    Delivered
+                                </span>
+                            </td>
+                            <td class="py-4 px-6 text-right">
+                                <a href="#" class="text-xs font-semibold text-emerald-400 hover:underline flex items-center justify-end gap-1">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                    PDF Receipt
+                                </a>
+                            </td>
+                        </tr>
+
+                        <!-- History Row 3 -->
+                        <tr class="hover:bg-white/[0.02] transition">
+                            <td class="py-4 px-6 font-mono font-bold text-white">#TRD-86102</td>
+                            <td class="py-4 px-6">
+                                <div class="font-bold text-white">Yellow Maize</div>
+                                <div class="text-xs text-gray-400">Lot #MZ-3312</div>
+                            </td>
+                            <td class="py-4 px-6 text-gray-300">Hawassa Hub</td>
+                            <td class="py-4 px-6 text-right font-medium text-white">2,000 Qtl</td>
+                            <td class="py-4 px-6 text-right text-gray-300">3,750 ETB</td>
+                            <td class="py-4 px-6 text-right font-bold text-emerald-400">7,500,000 ETB</td>
+                            <td class="py-4 px-6 text-gray-400 text-xs">Jul 29, 2026</td>
+                            <td class="py-4 px-6 text-center">
+                                <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                                    Delivered
+                                </span>
+                            </td>
+                            <td class="py-4 px-6 text-right">
+                                <a href="#" class="text-xs font-semibold text-emerald-400 hover:underline flex items-center justify-end gap-1">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                    PDF Receipt
+                                </a>
+                            </td>
+                        </tr>
+
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="pt-2 text-right">
+                <a href="#" class="text-xs font-semibold text-gray-400 hover:text-emerald-400 transition">
+                    Export All Settlement History (.CSV) &rarr;
+                </a>
+            </div>
+        </section>
+
     </main>
 
-    <footer class="bg-gray-950 text-gray-400 py-8 border-t border-white/10 mt-auto">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-xs">
-            &copy; 2026 AgriBridge Ethiopia. All rights reserved.
+    <script src="{{ url_for('static', filename='js/buyer_dashboard.js') }}"></script>
+
+    <!-- Footer -->
+    <footer class="border-t border-white/10 bg-gray-950 py-6 mt-12 text-xs text-gray-500">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div>&copy; 2026 AgriBridge Ethiopia. Buyer Terminal Portal.</div>
+            <div class="flex gap-6">
+                <a href="#" class="hover:text-gray-400">Terms of Settlement</a>
+                <a href="#" class="hover:text-gray-400">Hub Escrow Policy</a>
+                <a href="#" class="hover:text-gray-400">Logistics SLAs</a>
+            </div>
         </div>
     </footer>
 

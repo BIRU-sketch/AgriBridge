@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgriBridge - Add Produce Lot</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #030712;
+            color: #f3f4f6;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-12px) rotate(1deg); }
+        }
+
+        @keyframes float-slow {
+            0%, 100% { transform: translateY(0px) scale(1); }
+            50% { transform: translateY(-20px) scale(1.05); }
+        }
+
+        .animate-float {
+            animation: float 5s ease-in-out infinite;
+        }
+
+        .animate-float-slow {
+            animation: float-slow 8s ease-in-out infinite;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.025em;
+        }
+
+        .badge-amber {
+            background: rgba(245, 158, 11, 0.1);
+            color: #fbbf24;
+            border: 1px solid rgba(245, 158, 11, 0.2);
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="min-h-screen selection:bg-emerald-500 selection:text-white relative flex flex-col justify-between overflow-x-hidden">
+
+    <div class="fixed top-[-10%] left-[-5%] w-[500px] h-[500px] bg-emerald-900/20 rounded-full blur-[150px] pointer-events-none animate-float-slow z-0"></div>
+    <div class="fixed bottom-[-10%] right-[-5%] w-[400px] h-[400px] bg-amber-900/15 rounded-full blur-[120px] pointer-events-none animate-float z-0"></div>
+
+    <header class="h-20 px-6 sm:px-12 flex items-center justify-between border-b border-white/5 bg-gray-950/80 backdrop-blur-xl sticky top-0 z-30">
+        <div class="flex items-center gap-4">
+            <a href="/dashboard" class="inline-flex items-center gap-2 text-xs font-semibold text-gray-400 hover:text-emerald-400 transition group py-2 px-3 rounded-lg hover:bg-white/5 border border-transparent hover:border-white/10">
+                <svg class="w-4 h-4 transform group-hover:-translate-x-1 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+                Back to Agent Portal
+            </a>
+            <div class="h-5 w-px bg-white/10 hidden sm:block"></div>
+            <div class="hidden sm:flex items-center gap-2">
+                <div class="w-7 h-7 rounded-lg bg-gradient-to-tr from-emerald-600 to-emerald-400 flex items-center justify-center shadow-lg shadow-emerald-500/20">
+                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                </div>
+                <span class="font-bold text-sm text-white">Agri<span class="text-emerald-400">Bridge</span></span>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <span class="badge badge-amber hidden sm:inline-flex">
+                Agent: Dawit Kassa (Bishoftu)
+            </span>
+        </div>
+    </header>
+
+    <main class="flex-1 py-10 px-4 sm:px-6 z-10 max-w-4xl mx-auto w-full">
+        
+        <div class="mb-8 text-center sm:text-left">
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">Add Produce Lot</h1>
+            <p class="text-xs sm:text-sm text-gray-400 mt-1">Register farmer's harvest to the state buffer stock system.</p>
+        </div>
+
+        <form class="bg-gray-900/60 border border-white/10 backdrop-blur-xl shadow-2xl rounded-3xl p-6 sm:p-10 space-y-8">
+            
+            <div>
+                <div class="flex items-center gap-3 mb-6 pb-3 border-b border-white/5">
+                    <div class="w-7 h-7 rounded-full bg-teal-500/10 text-teal-400 font-bold text-xs flex items-center justify-center border border-teal-500/20">
+                        1
+                    </div>
+                    <h2 class="text-sm font-bold uppercase tracking-wider text-white">Farmer Lookup</h2>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div class="sm:col-span-2">
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-gray-300 mb-2">Search Farmer by Kebele ID</label>
+                        <div class="flex gap-3">
+                            <input type="text" id="kebele_id_search" placeholder="e.g. KBL-88204-BS" class="flex-1 bg-gray-950/80 border border-white/10 text-white placeholder-gray-500 text-sm rounded-xl px-4 py-3 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition">
+                            <button type="button" onclick="searchFarmer()" class="px-6 py-3 rounded-xl bg-teal-500 hover:bg-teal-400 text-gray-950 font-bold text-sm transition duration-300 shadow-lg shadow-teal-500/20">
+                                Search
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="farmer_info" class="sm:col-span-2 hidden">
+                        <div class="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-4">
+                            <h3 class="text-sm font-semibold text-emerald-400 mb-2">Farmer Found</h3>
+                            <div id="farmer_details" class="text-sm text-gray-300 space-y-1"></div>
+                        </div>
+                    </div>
+
+                    <div id="farmer_not_found" class="sm:col-span-2 hidden">
+                        <div class="bg-red-500/10 border border-red-500/20 rounded-xl p-4">
+                            <p class="text-sm text-red-400">No farmer found with this Kebele ID. Please verify the ID or register the farmer first.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="produce_form_section" class="opacity-50 pointer-events-none">
+                <div class="flex items-center gap-3 mb-6 pb-3 border-b border-white/5">
+                    <div class="w-7 h-7 rounded-full bg-teal-500/10 text-teal-400 font-bold text-xs flex items-center justify-center border border-teal-500/20">
+                        2
+                    </div>
+                    <h2 class="text-sm font-bold uppercase tracking-wider text-white">Produce Details</h2>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-gray-300 mb-2">Crop Type</label>
+                        <select name="crop_type" class="w-full bg-gray-950/80 border border-white/10 text-white text-sm rounded-xl px-4 py-3 focus:outline-none focus:border-teal-500 appearance-none">
+                            <option value="teff_white">Grade 1 Magna (White Teff)</option>
+                            <option value="teff_mixed">Grade 2 Mixed Teff</option>
+                            <option value="wheat">Wheat (Bulk Grain)</option>
+                            <option value="maize">Maize / Corn</option>
+                            <option value="coffee">Wollega / Jimma Coffee</option>
+                            <option value="sesame">Humera / Wollega Sesame</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-gray-300 mb-2">Quality Grade</label>
+                        <select name="quality_grade" class="w-full bg-gray-950/80 border border-white/10 text-white text-sm rounded-xl px-4 py-3 focus:outline-none focus:border-teal-500 appearance-none">
+                            <option value="grade_1">Grade 1 (Premium)</option>
+                            <option value="grade_2">Grade 2 (Standard)</option>
+                            <option value="grade_3">Grade 3 (Commercial)</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-gray-300 mb-2">Quantity (Quintals)</label>
+                        <input type="number" name="quantity" step="0.1" placeholder="e.g. 15.5" required class="w-full bg-gray-950/80 border border-white/10 text-white placeholder-gray-500 text-sm rounded-xl px-4 py-3 focus:outline-none focus:border-teal-500 transition">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-gray-300 mb-2">Harvest Date</label>
+                        <input type="date" name="harvest_date" required class="w-full bg-gray-950/80 border border-white/10 text-white text-sm rounded-xl px-4 py-3 focus:outline-none focus:border-teal-500 transition">
+                    </div>
+                </div>
+            </div>
+
+            <input type="hidden" name="farmer_kebele_id" id="farmer_kebele_id" value="">
+
+            <div class="pt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-end gap-4">
+                <a href="/dashboard" class="w-full sm:w-auto text-center px-6 py-3 rounded-xl bg-white/5 hover:bg-white/10 text-gray-300 text-sm font-semibold transition border border-white/10">
+                    Cancel
+                </a>
+                <button type="submit" id="submit_btn" disabled class="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-teal-500 hover:bg-teal-400 text-gray-950 font-bold text-sm transition duration-300 shadow-lg shadow-teal-500/20 transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none">
+                    Add Produce Lot to Stock
+                </button>
+            </div>
+
+        </form>
+    </main>
+
+    <footer class="py-6 text-center text-xs text-gray-500 border-t border-white/5 z-10">
+        AgriBridge Ministry Extension Portal • Official Buffer Acquisition Platform
+    </footer>
+
+    <script>
+        let foundFarmer = null;
+
+        async function searchFarmer() {
+            const kebeleId = document.getElementById('kebele_id_search').value.trim();
+            if (!kebeleId) {
+                alert('Please enter a Kebele ID');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/farmer/${kebeleId}`);
+                const data = await response.json();
+
+                if (data.farmer) {
+                    foundFarmer = data.farmer;
+                    document.getElementById('farmer_info').classList.remove('hidden');
+                    document.getElementById('farmer_not_found').classList.add('hidden');
+                    document.getElementById('farmer_details').innerHTML = `
+                        <p><strong>Name:</strong> ${foundFarmer.full_name}</p>
+                        <p><strong>Phone:</strong> +251 ${foundFarmer.phone_number}</p>
+                        <p><strong>Kebele:</strong> ${foundFarmer.kebele}</p>
+                        <p><strong>Woreda:</strong> ${foundFarmer.woreda}</p>
+                    `;
+                    document.getElementById('farmer_kebele_id').value = foundFarmer.kebele_id;
+                    
+                    document.getElementById('produce_form_section').classList.remove('opacity-50', 'pointer-events-none');
+                    document.getElementById('submit_btn').disabled = false;
+                } else {
+                    foundFarmer = null;
+                    document.getElementById('farmer_info').classList.add('hidden');
+                    document.getElementById('farmer_not_found').classList.remove('hidden');
+                    document.getElementById('farmer_kebele_id').value = '';
+                    
+                    document.getElementById('produce_form_section').classList.add('opacity-50', 'pointer-events-none');
+                    document.getElementById('submit_btn').disabled = true;
+                }
+            } catch (error) {
+                console.error('Error searching farmer:', error);
+                alert('Error searching for farmer. Please try again.');
+            }
+        }
+
+        document.querySelector('form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            if (!foundFarmer) {
+                alert('Please search and select a farmer first');
+                return;
+            }
+
+            const formData = new FormData(this);
+            const data = {
+                farmer_kebele_id: formData.get('farmer_kebele_id'),
+                crop_type: formData.get('crop_type'),
+                quality_grade: formData.get('quality_grade'),
+                quantity: parseFloat(formData.get('quantity')),
+                harvest_date: formData.get('harvest_date')
+            };
+
+            try {
+                const response = await fetch('/api/add-produce-lot', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    alert('Produce lot added successfully!');
+                    window.location.href = '/dashboard';
+                } else {
+                    alert('Error adding produce lot: ' + (result.error || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Error submitting produce lot:', error);
+                alert('Error submitting produce lot. Please try again.');
+            }
+        });
+    </script>
+
+</body>
+</html>

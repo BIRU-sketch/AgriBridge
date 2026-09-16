@@ -9,6 +9,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const toggleBtn = document.getElementById('toggle-btn');
             const errorDiv = document.getElementById('error-msg');
 
+            // Check if elements exist
+            if (!submitBtn) {
+                console.error('Submit button not found');
+                return;
+            }
 
             function toggleForm() {
                 isSignUp = !isSignUp;
@@ -28,6 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 errorDiv.innerText = '';
             }
+            
             async function handleSubmit() {
                 const email = document.getElementById('email').value.trim();
                 const password = document.getElementById('password').value.trim();
@@ -49,7 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 try {
-                    submitBtn.innerText = isSignUp ? 'creating account...' : 'Logging In...';
+                    submitBtn.innerText = isSignUp ? 'Creating account...' : 'Logging In...';
                     submitBtn.disabled = true;
 
                     const response = await fetch(endpoint, {
@@ -78,22 +84,23 @@ document.addEventListener('DOMContentLoaded', () => {
                     submitBtn.disabled = false;
                 }
             }
+            
             toggleBtn.addEventListener('click', toggleForm);
             submitBtn.addEventListener('click', handleSubmit);
             
+            // Password toggle functionality (keeping inline onclick for simplicity)
             document.addEventListener('click', (e) => {
-                const toggleBtn = e.target.closest('#toggle-password');
+                const togglePasswordBtn = e.target.closest('#toggle-password');
 
-                if (toggleBtn) {
+                if (togglePasswordBtn) {
                   e.preventDefault();
-                  console.log(" toggle button clicked!");
                   
                   const passwordInput = document.getElementById('password');
 
                   if (passwordInput) {
                     const isPassword = passwordInput.type === 'password';
                     passwordInput.type = isPassword ? 'text' : 'password';
-                    toggleBtn.textContent = isPassword ? '🙈' : '👁️';
+                    togglePasswordBtn.textContent = isPassword ? '🙈' : '👁️';
                 }
                 }
             });
