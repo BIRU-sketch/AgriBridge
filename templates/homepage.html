@@ -1,262 +1,333 @@
+{% macro icon(name) -%}
+<svg class="icon" aria-hidden="true" focusable="false"><use href="#i-{{ name }}"/></svg>
+{%- endmacro %}
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AgriBridge | Wholesale Produce Marketplace</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>AgriBridge | Digital agricultural market and logistics for Ethiopia</title>
+    <meta name="description" content="AgriBridge connects registered farm supply with verified buyers and coordinates transport from collection point to delivery, across Ethiopia.">
+    <meta name="theme-color" content="#0A3D31">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M3.5 19.5C3.5 12 8 6.5 15.5 4.5c.4 7.5-3 13.5-12 15Z' fill='%230A7A41'/%3E%3Cpath d='M7 28C6 15 14 6 28.5 4.5 29 18.5 21 27 7 28Z' fill='%2312A05B'/%3E%3Cpath d='M8 26.5C13 19 18.5 13 25 8.5' fill='none' stroke='%23fff' stroke-width='1.7' stroke-linecap='round'/%3E%3C/svg%3E">
+    <script>document.documentElement.classList.add('js');</script>
+
+    <link rel="preload" as="image" href="{{ url_for('static', filename='img/hero-farmer-800.webp') }}" media="(max-width: 899px)">
+    <link rel="preload" as="image" href="{{ url_for('static', filename='img/hero-farmer-1600.webp') }}" media="(min-width: 900px)">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+Ethiopic:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/homepage.css') }}">
-    <script src="{{ url_for('static', filename='js/homepage.js') }}" async></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="{{ url_for('static', filename='js/homepage.js') }}" defer></script>
 </head>
-<body class="bg-gray-950 text-white antialiased selection:bg-emerald-500 selection:text-white flex flex-col min-h-screen overflow-x-hidden">
+<body>
+    {% include 'partials/icons.html' %}
+    <a class="skip-link" href="#main">Skip to content</a>
 
-    <!-- Ambient Glowing Backgrounds -->
-    <div class="fixed top-0 left-1/4 w-96 h-96 bg-emerald-600/15 rounded-full blur-[120px] pointer-events-none -z-10"></div>
-    <div class="fixed top-1/3 right-10 w-80 h-80 bg-amber-500/10 rounded-full blur-[100px] pointer-events-none -z-10"></div>
+    <!-- ===== Header ===== -->
+    <header class="site-header" id="site-header">
+        <div class="wrap header-row">
+            <a class="brand" href="/" aria-label="AgriBridge home">
+                {% include 'partials/logo.html' %}
+                AgriBridge
+            </a>
 
-    <!-- Navigation Bar -->
-    <nav class="fixed top-0 left-0 right-0 z-50 bg-gray-950/90 backdrop-blur-xl border-b border-white/10">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-20 items-center">
+            <nav class="site-nav" id="site-nav" aria-label="Main">
+                <a href="#top" data-spy="top" aria-current="true">Home</a>
+                <a href="#how" data-spy="how">How It Works</a>
+                <a href="#features" data-spy="features">Features</a>
+                <a href="#about" data-spy="about">About</a>
+                <a href="#contact" data-spy="contact">Contact</a>
+                <a class="nav-login" href="/auth">Login</a>
+                <a class="nav-cta btn btn-primary" href="/auth?mode=signup">Get Started</a>
+            </nav>
 
-                <!-- Logo -->
-                <a href="/" class="flex items-center gap-3 group">
-                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-600 to-emerald-400 flex items-center justify-center shadow-lg shadow-emerald-500/20 transition group-hover:scale-105">
-                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
+            <div class="header-actions">
+                <details class="lang">
+                    <summary aria-label="Language: English">
+                        {{ icon('globe') }}<span>EN</span>{{ icon('chevron-down') }}
+                    </summary>
+                    <div class="lang-menu">
+                        <span class="lang-item is-current">English</span>
+                        <span class="lang-item is-soon" lang="am">አማርኛ <small>(coming soon)</small></span>
                     </div>
-                    <span class="font-extrabold text-2xl tracking-tight text-white">Agri<span class="text-emerald-400">Bridge</span></span>
-                </a>
-
-                <!-- Buyer Main Navigation -->
-                <div class="hidden md:flex items-center space-x-8">
-                    <a href="/marketplace" class="text-gray-300 hover:text-emerald-400 text-sm font-medium transition">Browse Inventory</a>
-                    <a href="#how-buying-works" class="text-gray-300 hover:text-emerald-400 text-sm font-medium transition">How Procurement Works</a>
-                    
-                    <div class="flex items-center space-x-4 pl-6 border-l border-white/10">
-                        <a href="/auth" class="relative inline-flex items-center justify-center px-5 py-2.5 rounded-xl font-semibold text-sm text-gray-950 bg-emerald-400 hover:bg-emerald-300 shadow-lg shadow-emerald-500/20 transition duration-300 hover:-translate-y-0.5">
-                            Sign In
-                        </a>
-                    </div>
-                </div>
-
-                <!-- Secondary Portal Dropdown (For Agents & Logistics staff) -->
-                <div class="hidden lg:block text-xs text-gray-400">
-                    Staff? <a href="/agent/login" class="text-emerald-400 hover:underline">Agent Portal</a> | <a href="/transporter/login" class="text-amber-400 hover:underline">Logistics</a>
-                </div>
-
+                </details>
+                <a class="btn btn-outline btn-sm hide-md" href="/auth">Login</a>
+                <a class="btn btn-primary btn-sm hide-xs" href="/auth?mode=signup">Get Started</a>
+                <button class="nav-toggle" id="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Menu">
+                    <span class="nt-open">{{ icon('menu') }}</span>
+                    <span class="nt-close">{{ icon('x') }}</span>
+                </button>
             </div>
-        </div>
-    </nav>
-
-    <!-- Buyer Hero Section with Instant Search -->
-    <header class="relative pt-36 pb-20 md:pt-44 md:pb-28 flex flex-col justify-center border-b border-white/10">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-            
-            
-
-            <h1 class="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-white mb-6 leading-tight max-w-5xl mx-auto">
-                Source Verified Bulk Produce Directly From Ethiopian Regional Hubs
-            </h1>
-
-            <p class="text-lg sm:text-xl text-gray-300 max-w-2xl mx-auto mb-10 font-light leading-relaxed">
-                Connect directly with agent-graded inventory. Guaranteed crop quality, transparent per-quintal pricing, and integrated logistics to your warehouse.
-            </p>
-
-            <!-- Simple CTA Buttons -->
-            <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                
-                <a href="/register-buyer" class="inline-flex items-center justify-center px-8 py-3 rounded-xl font-semibold text-white bg-white/5 hover:bg-white/10 border border-white/10 transition duration-200">
-                    Register as Buyer
-                </a>
-            </div>
-
         </div>
     </header>
 
-    <!-- Platform Core Capabilities (Replaces Crop Listings) -->
-    <section id="platform-capabilities" class="py-24 bg-gray-950 relative border-t border-white/10 reveal">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            
-            <!-- Section Header -->
-            <div class="max-w-3xl mb-16">
-                <span class="text-emerald-400 font-bold text-xs uppercase tracking-widest block mb-2">Institutional Procurement Infrastructure</span>
-                <h2 class="text-3xl sm:text-5xl font-extrabold text-white tracking-tight leading-tight">
-                    Built for Commercial Processors, Wholesalers & Exporters
-                </h2>
-                <p class="text-gray-400 text-base sm:text-lg mt-4 font-light">
-                    AgriBridge removes the friction of fragmented supply chains by digitizing regional aggregation, standardization, and fulfillment.
-                </p>
-            </div>
+    <main id="main">
 
-            <!-- 4-Pillar Value Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                
-                <!-- Pillar 1: Regional Hub Network -->
-                <div class="p-8 rounded-2xl bg-gray-900/50 border border-white/10 hover:border-emerald-500/40 transition duration-300 flex flex-col justify-between">
-                    <div>
-                        <div class="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center mb-6">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5m0 0h5m0 0v-5a2 2 0 012-2h2a2 2 0 012 2v5"></path>
-                            </svg>
-                        </div>
-                        <h3 class="text-xl font-bold text-white mb-2">Aggregated Hub Network</h3>
-                        <p class="text-sm text-gray-400 leading-relaxed">
-                            Produce is consolidated directly at strategic regional collection centers, eliminating multi-layer broker markups.
-                        </p>
-                    </div>
-                    <div class="mt-6 pt-4 border-t border-white/5 text-xs text-emerald-400 font-medium">
-                        Verified Collection Points &rarr;
-                    </div>
-                </div>
-
-                <!-- Pillar 2: Agent Quality Verification -->
-                <div class="p-8 rounded-2xl bg-gray-900/50 border border-white/10 hover:border-emerald-500/40 transition duration-300 flex flex-col justify-between">
-                    <div>
-                        <div class="w-12 h-12 rounded-xl bg-teal-500/10 border border-teal-500/20 text-teal-400 flex items-center justify-center mb-6">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                        </div>
-                        <h3 class="text-xl font-bold text-white mb-2">Rigorous On-Site Grading</h3>
-                        <p class="text-sm text-gray-400 leading-relaxed">
-                            Every batch undergoes moisture testing, purity grading, and weighbridge verification by certified field extension agents.
-                        </p>
-                    </div>
-                    <div class="mt-6 pt-4 border-t border-white/5 text-xs text-teal-400 font-medium">
-                        Standardized Inspection Reports &rarr;
-                    </div>
-                </div>
-
-                <!-- Pillar 3: Secure Settlement -->
-                <div class="p-8 rounded-2xl bg-gray-900/50 border border-white/10 hover:border-emerald-500/40 transition duration-300 flex flex-col justify-between">
-                    <div>
-                        <div class="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center mb-6">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-                            </svg>
-                        </div>
-                        <h3 class="text-xl font-bold text-white mb-2">Protected Payments</h3>
-                        <p class="text-sm text-gray-400 leading-relaxed">
-                            Funds are held safely in escrow and only released to hubs once quality and weight specs are verified upon dispatch.
-                        </p>
-                    </div>
-                    <div class="mt-6 pt-4 border-t border-white/5 text-xs text-amber-400 font-medium">
-                        Escrow & Invoicing &rarr;
-                    </div>
-                </div>
-
-                <!-- Pillar 4: Integrated Freight -->
-                <div class="p-8 rounded-2xl bg-gray-900/50 border border-white/10 hover:border-emerald-500/40 transition duration-300 flex flex-col justify-between">
-                    <div>
-                        <div class="w-12 h-12 rounded-xl bg-sky-500/10 border border-sky-500/20 text-sky-400 flex items-center justify-center mb-6">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
-                            </svg>
-                        </div>
-                        <h3 class="text-xl font-bold text-white mb-2">Automated Dispatch</h3>
-                        <p class="text-sm text-gray-400 leading-relaxed">
-                            Seamless dispatching with registered regional transport networks ensuring tracked delivery directly to your facility.
-                        </p>
-                    </div>
-                    <div class="mt-6 pt-4 border-t border-white/5 text-xs text-sky-400 font-medium">
-                        Logistics SLA Tracking &rarr;
-                    </div>
-                </div>
-
-            </div>
-
-            <!-- Call to Action Banner -->
-            <div class="mt-16 p-8 sm:p-12 rounded-3xl bg-gradient-to-r from-emerald-950/80 via-gray-900 to-gray-900 border border-emerald-500/30 flex flex-col md:flex-row items-center justify-between gap-8">
-                <div>
-                    <h3 class="text-2xl font-bold text-white mb-2">Ready to access full supply catalog & live market rates?</h3>
-                    <p class="text-sm text-gray-400 max-w-xl">
-                        Create a verified buyer account to place bulk orders, submit custom procurement requests, and view current hub inventories.
+        <!-- ===== Hero ===== -->
+        <section class="hero" id="top">
+            <div class="wrap hero-inner">
+                <div class="hero-copy">
+                    <p class="hero-kicker">Digital Agricultural Market &amp; Logistics Coordination for Ethiopia</p>
+                    <h1>Connecting Agricultural <span class="accent">Supply</span> to <span class="accent">Verified Demand</span></h1>
+                    <p class="hero-lead">
+                        AgriBridge helps coordinate farm produce, verified buyers, and transportation
+                        &mdash; from collection point to delivery.
                     </p>
-                </div>
-                <div class="flex items-center gap-4 shrink-0">
-                    <a href="/register-buyer" class="px-6 py-3.5 rounded-xl font-bold text-sm text-gray-950 bg-emerald-400 hover:bg-emerald-300 shadow-lg shadow-emerald-500/20 transition">
-                        Create Buyer Account
-                    </a>
-                    <a href="/login" class="px-6 py-3.5 rounded-xl font-semibold text-sm text-white bg-white/5 hover:bg-white/10 border border-white/10 transition">
-                        Sign In
-                    </a>
-                </div>
-            </div>
-
-        </div>
-    </section>
-
-    <!-- Workflow Section: How Buyers Purchase -->
-    <section id="how-buying-works" class="py-20 bg-gray-900 border-t border-white/10 reveal">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16">
-                <span class="text-emerald-400 font-bold text-xs uppercase tracking-widest block mb-2">Transparent Purchasing</span>
-                <h2 class="text-3xl sm:text-4xl font-bold text-white tracking-tight">How Procurement Works for Buyers</h2>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-                <div class="p-8 rounded-2xl bg-gray-900/50 border border-white/10">
-                    <div class="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center justify-center font-bold text-lg mx-auto mb-6">1</div>
-                    <h3 class="text-xl font-bold text-white mb-3">Browse & Reserve Stock</h3>
-                    <p class="text-sm text-gray-400 leading-relaxed">Select crops from verified regional collection hubs with guaranteed quality ratings logged by field agents.</p>
-                </div>
-
-                <div class="p-8 rounded-2xl bg-gray-900/50 border border-white/10">
-                    <div class="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center justify-center font-bold text-lg mx-auto mb-6">2</div>
-                    <h3 class="text-xl font-bold text-white mb-3">Confirm Price & Order</h3>
-                    <p class="text-sm text-gray-400 leading-relaxed">System locks in the official company market rate. Funds are held securely until load inspection.</p>
-                </div>
-
-                <div class="p-8 rounded-2xl bg-gray-900/50 border border-white/10">
-                    <div class="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center justify-center font-bold text-lg mx-auto mb-6">3</div>
-                    <h3 class="text-xl font-bold text-white mb-3">Integrated Delivery</h3>
-                    <p class="text-sm text-gray-400 leading-relaxed">Our verified transport partners pick up the stock from the hub and deliver directly to your warehouse.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer class="bg-gray-950 text-gray-400 py-16 border-t border-white/10 mt-auto">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-4 gap-12">
-            
-            <div class="md:col-span-2">
-                <div class="flex items-center gap-3 mb-4 text-white">
-                    <div class="w-8 h-8 rounded-lg bg-emerald-500 flex items-center justify-center">
-                        <svg class="w-5 h-5 text-gray-950" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <div class="cta-row">
+                        <a class="btn btn-primary btn-lg" href="/auth?mode=signup">Get Started {{ icon('arrow-right') }}</a>
+                        <a class="btn btn-outline btn-lg" href="#how">{{ icon('play') }} How It Works</a>
                     </div>
-                    <span class="font-extrabold text-xl tracking-tight text-white">AgriBridge Marketplace</span>
                 </div>
-                <p class="text-sm text-gray-400 max-w-sm leading-relaxed mb-6">
-                    Ethiopia's digital B2B marketplace connecting verified buyers directly to hub-aggregated smallholder produce.
-                </p>
-                <div class="text-xs text-gray-500">&copy; 2026 AgriBridge Ethiopia. All rights reserved.</div>
             </div>
-
-            <div>
-                <h5 class="text-white font-semibold text-sm mb-4 uppercase tracking-wider">Marketplace</h5>
-                <ul class="space-y-3 text-sm">
-                    <li><a href="/marketplace" class="hover:text-emerald-400 transition">Browse Teff Stock</a></li>
-                    <li><a href="/marketplace" class="hover:text-emerald-400 transition">Browse Wheat Lots</a></li>
-                    <li><a href="/marketplace" class="hover:text-emerald-400 transition">Oilseeds & Sesame</a></li>
-                    <li><a href="/buyer/demand-request" class="hover:text-emerald-400 transition">Submit Custom Request</a></li>
-                </ul>
+            <div class="hero-media">
+                <img src="{{ url_for('static', filename='img/hero-farmer-1600.webp') }}"
+                     srcset="{{ url_for('static', filename='img/hero-farmer-800.webp') }} 800w, {{ url_for('static', filename='img/hero-farmer-1600.webp') }} 1600w"
+                     sizes="(min-width: 900px) 64vw, 100vw"
+                     width="1600" height="901" fetchpriority="high"
+                     alt="A smiling farmer in a straw hat holding a wooden crate of fresh vegetables in a green field">
             </div>
+        </section>
 
-            <div>
-                <h5 class="text-white font-semibold text-sm mb-4 uppercase tracking-wider">Internal Portals</h5>
-                <ul class="space-y-3 text-sm">
-                    <li><a href="/agent/login" class="hover:text-emerald-400 transition">Field Agent Portal</a></li>
-                    <li><a href="/transporter/login" class="hover:text-emerald-400 transition">Logistics & Transporters</a></li>
-                    <li><a href="/admin/login" class="hover:text-emerald-400 transition">Hub Admin Panel</a></li>
-                </ul>
-            </div>
-
+        <!-- ===== Flow strip ===== -->
+        <div class="wrap strip-wrap">
+            <ol class="strip" aria-label="The process in five words">
+                <li class="strip-item"><span class="ic">{{ icon('leaf') }}</span><span>Produce</span></li>
+                <li class="strip-item"><span class="ic">{{ icon('search') }}</span><span>Match</span></li>
+                <li class="strip-item"><span class="ic">{{ icon('handshake') }}</span><span>Agreement</span></li>
+                <li class="strip-item"><span class="ic">{{ icon('truck') }}</span><span>Transport</span></li>
+                <li class="strip-item"><span class="ic">{{ icon('package') }}</span><span>Delivery</span></li>
+            </ol>
         </div>
-    </footer>
 
+        <!-- ===== How it works ===== -->
+        <section class="section" id="how">
+            <div class="wrap">
+                <div class="section-head">
+                    <h2>How It Works</h2>
+                    <p>A simple and transparent process from supply to delivery.</p>
+                </div>
+                <ol class="how-grid">
+                    <li class="card how-card">
+                        <div class="card-top"><span class="num">1</span><span class="how-icon">{{ icon('users') }}</span></div>
+                        <h3>Register Farmers</h3>
+                        <p>Extension workers or cooperative agents register farmers.</p>
+                    </li>
+                    <li class="card how-card">
+                        <div class="card-top"><span class="num">2</span><span class="how-icon">{{ icon('leaf') }}</span></div>
+                        <h3>List Produce</h3>
+                        <p>Agents register available produce lots including crop, quantity, quality, price, location and availability.</p>
+                    </li>
+                    <li class="card how-card">
+                        <div class="card-top"><span class="num">3</span><span class="how-icon">{{ icon('search') }}</span></div>
+                        <h3>Match Supply &amp; Demand</h3>
+                        <p>The system evaluates produce against verified buyer demands using a transparent 0&ndash;100 matching score.</p>
+                    </li>
+                    <li class="card how-card">
+                        <div class="card-top"><span class="num">4</span><span class="how-icon">{{ icon('truck') }}</span></div>
+                        <h3>Coordinate Transport</h3>
+                        <p>After the buyer and agent agree to a match, transportation is coordinated.</p>
+                    </li>
+                    <li class="card how-card">
+                        <div class="card-top"><span class="num">5</span><span class="how-icon">{{ icon('check-circle') }}</span></div>
+                        <h3>Confirm Delivery</h3>
+                        <p>Shipment moves through: Assigned &rarr; Picked Up &rarr; In Transit &rarr; Delivered. The buyer confirms delivery.</p>
+                    </li>
+                </ol>
+            </div>
+        </section>
+
+        <!-- ===== Features ===== -->
+        <section class="section section-tight" id="features">
+            <div class="wrap">
+                <div class="section-head">
+                    <h2>Built for Agricultural Coordination</h2>
+                    <p>Everything you need for a smooth and transparent supply chain.</p>
+                </div>
+                <div class="feature-grid">
+                    <article class="card feature">
+                        <span class="ic ic-lg">{{ icon('leaf') }}</span>
+                        <div><h3>Farmer &amp; Produce Registration</h3><p>Agents register farmers and available produce lots.</p></div>
+                    </article>
+                    <article class="card feature">
+                        <span class="ic ic-lg">{{ icon('users') }}</span>
+                        <div><h3>Verified Buyer Demands</h3><p>Verified buyers publish their agricultural requirements.</p></div>
+                    </article>
+                    <article class="card feature">
+                        <span class="ic ic-lg">{{ icon('target') }}</span>
+                        <div><h3>Transparent Matching</h3><p>Matching considers crop, quantity, quality, price, location and availability.</p></div>
+                    </article>
+                    <article class="card feature">
+                        <span class="ic ic-lg">{{ icon('shield-check') }}</span>
+                        <div><h3>Agreement-Based Trading</h3><p>A match is never automatically completed. Buyer and agent must agree.</p></div>
+                    </article>
+                    <article class="card feature">
+                        <span class="ic ic-lg">{{ icon('truck') }}</span>
+                        <div><h3>Shipment Coordination</h3><p>Transporters handle shipments and update delivery status.</p></div>
+                    </article>
+                    <article class="card feature">
+                        <span class="ic ic-lg">{{ icon('activity') }}</span>
+                        <div><h3>Admin Monitoring</h3><p>Administrators verify users, monitor KPIs and alerts, and inspect audit history.</p></div>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== Transparent matching ===== -->
+        <section class="section section-mint" id="matching">
+            <div class="wrap match-layout">
+                <div class="match-text">
+                    <h2>Transparent Matching</h2>
+                    <p>AgriBridge provides a transparent matching score to help buyers and agents evaluate suitable supply.</p>
+                    <div class="note">
+                        {{ icon('info') }}
+                        <p>The matching score only supports decision-making. It does not automatically complete a trade.</p>
+                    </div>
+                </div>
+
+                <div class="ring" id="ring" role="img" aria-label="Example match score: 87 out of 100">
+                    <svg viewBox="0 0 120 120" aria-hidden="true">
+                        <circle class="ring-bg" cx="60" cy="60" r="52"/>
+                        <circle class="ring-fg" cx="60" cy="60" r="52" transform="rotate(-90 60 60)"/>
+                    </svg>
+                    <div class="ring-num" aria-hidden="true">
+                        <div><strong id="score-num">87</strong><span class="of"> / 100</span></div>
+                        <span class="ring-label">Match Score</span>
+                        <span class="ring-eg">Example</span>
+                    </div>
+                </div>
+
+                <div class="card factors">
+                    <h3>Matching Factors</h3>
+                    <ul>
+                        <li>{{ icon('leaf') }}<span>Crop</span><b>90%</b></li>
+                        <li>{{ icon('layers') }}<span>Quantity</span><b>85%</b></li>
+                        <li>{{ icon('check-circle') }}<span>Quality</span><b>88%</b></li>
+                        <li>{{ icon('banknote') }}<span>Price</span><b>80%</b></li>
+                        <li>{{ icon('pin') }}<span>Location</span><b>85%</b></li>
+                        <li>{{ icon('clock') }}<span>Availability</span><b>92%</b></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== Supply chain flow ===== -->
+        <section class="section section-tight" id="flow">
+            <div class="wrap">
+                <div class="section-head">
+                    <h2>Supply Chain Flow</h2>
+                </div>
+                <ol class="flow">
+                    <li><span class="ic ic-lg">{{ icon('leaf') }}</span><span>Produce Lot</span></li>
+                    <li><span class="ic ic-lg">{{ icon('user') }}</span><span>Buyer Demand</span></li>
+                    <li><span class="ic ic-lg">{{ icon('search') }}</span><span>Match Proposal</span></li>
+                    <li><span class="ic ic-lg">{{ icon('handshake') }}</span><span>Buyer Agreement + Agent Agreement</span></li>
+                    <li><span class="ic ic-lg">{{ icon('truck') }}</span><span>Transporter</span></li>
+                    <li><span class="ic ic-lg">{{ icon('clipboard-check') }}</span><span>Assigned</span></li>
+                    <li><span class="ic ic-lg">{{ icon('arrow-up-line') }}</span><span>Picked Up</span></li>
+                    <li><span class="ic ic-lg">{{ icon('pin') }}</span><span>In Transit</span></li>
+                    <li><span class="ic ic-lg">{{ icon('package') }}</span><span>Delivered</span></li>
+                    <li><span class="ic ic-lg">{{ icon('check-circle') }}</span><span>Buyer Confirmation</span></li>
+                </ol>
+            </div>
+        </section>
+
+        <!-- ===== Four roles ===== -->
+        <section class="section section-mint" id="about">
+            <div class="wrap">
+                <div class="section-head">
+                    <h2>One Platform, Four Roles</h2>
+                </div>
+                <div class="roles-grid">
+                    <article class="card role">
+                        <div class="role-top"><span class="ic ic-lg">{{ icon('users') }}</span><h3>Extension / Cooperative Agent</h3></div>
+                        <ul>
+                            <li>Register farmers</li>
+                            <li>Register produce</li>
+                            <li>Review and agree to matches</li>
+                        </ul>
+                        <a class="role-link" href="/auth?mode=signup&amp;role=agent">Create an agent account</a>
+                    </article>
+                    <article class="card role">
+                        <div class="role-top"><span class="ic ic-lg ic-blue">{{ icon('user') }}</span><h3>Buyer</h3></div>
+                        <ul>
+                            <li>Create demands</li>
+                            <li>Review matches</li>
+                            <li>Agree to matches</li>
+                            <li>Confirm delivery</li>
+                        </ul>
+                        <a class="role-link" href="/auth?mode=signup&amp;role=buyer">Create a buyer account</a>
+                    </article>
+                    <article class="card role">
+                        <div class="role-top"><span class="ic ic-lg ic-orange">{{ icon('truck') }}</span><h3>Transporter</h3></div>
+                        <ul>
+                            <li>Manage vehicles</li>
+                            <li>Handle assigned shipments</li>
+                            <li>Update shipment status</li>
+                        </ul>
+                        <a class="role-link" href="/auth?mode=signup&amp;role=transporter">Create a transporter account</a>
+                    </article>
+                    <article class="card role">
+                        <div class="role-top"><span class="ic ic-lg ic-purple">{{ icon('shield-check') }}</span><h3>Administrator</h3></div>
+                        <ul>
+                            <li>Verify users</li>
+                            <li>Monitor KPIs</li>
+                            <li>Review alerts</li>
+                            <li>Inspect audit history</li>
+                        </ul>
+                        <p class="role-note">Set up by the AgriBridge team.</p>
+                    </article>
+                </div>
+
+                <div class="future">
+                    <div class="future-text">
+                        <h3>Designed for Future Expansion</h3>
+                        <p>We plan to add more features in future versions to make AgriBridge even more powerful.</p>
+                    </div>
+                    <ul class="future-list">
+                        <li>{{ icon('credit-card') }}<span>Payments</span></li>
+                        <li>{{ icon('message') }}<span>SMS / USSD</span></li>
+                        <li>{{ icon('pin') }}<span>Live GPS</span></li>
+                        <li>{{ icon('link') }}<span>External APIs</span></li>
+                        <li>{{ icon('chart') }}<span>Advanced Analytics</span></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== Closing call to action ===== -->
+        <section class="cta on-dark">
+            <svg class="cta-leaf" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+                <path d="M3.5 19.5C3.5 12 8 6.5 15.5 4.5c.4 7.5-3 13.5-12 15Z"/>
+                <path d="M7 28C6 15 14 6 28.5 4.5 29 18.5 21 27 7 28Z"/>
+            </svg>
+            <div class="wrap cta-inner">
+                <div>
+                    <h2>Bridging Agricultural Supply and Demand</h2>
+                    <p>Coordinate produce, matching, transport, and delivery through one connected platform.</p>
+                </div>
+                <a class="btn btn-primary btn-lg" href="/auth?mode=signup">Get Started {{ icon('arrow-right') }}</a>
+            </div>
+        </section>
+    </main>
+
+    <!-- ===== Footer ===== -->
+    <footer class="site-footer" id="contact">
+        <div class="wrap footer-grid">
+            <div>
+                <a class="brand" href="/" aria-label="AgriBridge home">
+                    {% include 'partials/logo.html' %}
+                    AgriBridge
+                </a>
+                <p class="footer-tag">Farm &middot; Market &middot; Deliver</p>
+            </div>
+            <ul class="footer-contact">
+                <li>{{ icon('mail') }}<a href="mailto:info@agribridge.et">info@agribridge.et</a></li>
+                <li>{{ icon('pin') }}<span>Addis Ababa, Ethiopia</span></li>
+            </ul>
+        </div>
+        <div class="wrap footer-base">&copy; 2026 AgriBridge. All rights reserved.</div>
+    </footer>
 </body>
 </html>
