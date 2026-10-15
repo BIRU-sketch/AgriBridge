@@ -1,380 +1,656 @@
+{% macro icon(name) -%}
+<svg class="icon" aria-hidden="true" focusable="false"><use href="#i-{{ name }}"/></svg>
+{%- endmacro %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AgriBridge - Transporter Logistics Dashboard</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    
-    <style>
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: #030712; /* Tailwind gray-950 */
-            color: #f3f4f6;
-        }
+    <title>Transporter Logistics Portal | AgriBridge Ethiopia</title>
+    <meta name="description" content="AgriBridge Transporter Logistics Portal - Fleet management, route claims, and official agricultural waybills across Ethiopia.">
+    <meta name="theme-color" content="#0A3D31">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M3.5 19.5C3.5 12 8 6.5 15.5 4.5c.4 7.5-3 13.5-12 15Z' fill='%230A7A41'/%3E%3Cpath d='M7 28C6 15 14 6 28.5 4.5 29 18.5 21 27 7 28Z' fill='%2312A05B'/%3E%3Cpath d='M8 26.5C13 19 18.5 13 25 8.5' fill='none' stroke='%23fff' stroke-width='1.7' stroke-linecap='round'/%3E%3C/svg%3E">
 
-        /* Custom Keyframe Animations */
-        @keyframes float {
-            0%, 100% { transform: translateY(0px) rotate(0deg); }
-            50% { transform: translateY(-12px) rotate(1deg); }
-        }
-
-        @keyframes float-slow {
-            0%, 100% { transform: translateY(0px) scale(1); }
-            50% { transform: translateY(-20px) scale(1.05); }
-        }
-
-        .animate-float {
-            animation: float 5s ease-in-out infinite;
-        }
-
-        .animate-float-slow {
-            animation: float-slow 8s ease-in-out infinite;
-        }
-
-        /* Modal Styles */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(4px);
-            z-index: 100;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal.active {
-            display: flex;
-        }
-
-        .modal-content {
-            background: rgba(17, 24, 39, 0.95);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 1.5rem;
-            padding: 2rem;
-            max-width: 500px;
-            width: 90%;
-            backdrop-filter: blur(20px);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-        }
-
-        /* Table Styles */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th {
-            text-align: left;
-            padding: 1rem;
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: #9ca3af;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        td {
-            padding: 1rem;
-            font-size: 0.875rem;
-            color: #e5e7eb;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        tr:last-child td {
-            border-bottom: none;
-        }
-
-        /* Status Badges */
-        .badge {
-            display: inline-flex;
-            align-items: center;
-            padding: 0.25rem 0.75rem;
-            border-radius: 9999px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            letter-spacing: 0.025em;
-        }
-
-        .badge-emerald {
-            background: rgba(16, 185, 129, 0.1);
-            color: #34d399;
-            border: 1px solid rgba(16, 185, 129, 0.2);
-        }
-
-        .badge-amber {
-            background: rgba(245, 158, 11, 0.1);
-            color: #fbbf24;
-            border: 1px solid rgba(245, 158, 11, 0.2);
-        }
-
-        .badge-red {
-            background: rgba(239, 68, 68, 0.1);
-            color: #f87171;
-            border: 1px solid rgba(239, 68, 68, 0.2);
-        }
-
-        .badge-blue {
-            background: rgba(59, 130, 246, 0.1);
-            color: #60a5fa;
-            border: 1px solid rgba(59, 130, 246, 0.2);
-        }
-
-        /* Custom Scrollbar for Main Content */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-        }
-    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+Ethiopic:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/transporter_dashboard.css') }}">
 </head>
-<body class="flex h-screen overflow-hidden selection:bg-emerald-500 selection:text-white relative">
+<body class="transporter-body">
+    {% include 'partials/icons.html' %}
 
-    <!-- Ambient Gradient Blur Blobs -->
-    <div class="fixed top-[-10%] left-[-5%] w-[500px] h-[500px] bg-emerald-900/20 rounded-full blur-[150px] pointer-events-none animate-float-slow z-0"></div>
-    <div class="fixed bottom-[-10%] right-[-5%] w-[400px] h-[400px] bg-amber-900/15 rounded-full blur-[120px] pointer-events-none animate-float z-0"></div>
+    <!-- ===== Top Header ===== -->
+    <header class="site-header" id="site-header">
+        <div class="wrap header-row">
+            <div class="brand-group">
+                <a class="brand" href="/" aria-label="AgriBridge home">
+                    {% include 'partials/logo.html' %}
+                    AgriBridge
+                </a>
+                <span class="portal-tag">Transporter Logistics</span>
+            </div>
 
-    <!-- Sidebar Navigation -->
-    <aside class="w-64 bg-gray-950/80 border-r border-white/5 backdrop-blur-2xl flex flex-col z-20">
-        <div class="h-20 flex items-center px-6 border-b border-white/5">
-            <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-emerald-600 to-emerald-400 flex items-center justify-center shadow-lg shadow-emerald-500/20">
-                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <nav class="dash-nav" aria-label="Transporter navigation">
+                <a href="#active-route" aria-current="true">Active Trip</a>
+                <a href="#available-loads">Available Loads</a>
+                <a href="#fleet">Vehicle Fleet</a>
+                <a href="#completed-trips">Waybills &amp; History</a>
+            </nav>
+
+            <div class="header-user">
+                <div class="user-badge">
+                    <div class="user-avatar" title="{{ username or 'Transporter' }}">
+                        {{ (username[0] if username else 'T') | upper }}
+                    </div>
+                    <div class="user-info">
+                        <div class="user-name">{{ username or 'Licensed Carrier' }}</div>
+                        <div class="user-role">Fleet Operator</div>
+                    </div>
                 </div>
-                <span class="font-extrabold text-lg tracking-tight text-white">Agri<span class="text-emerald-400">Bridge</span></span>
+                <a href="/logout" class="btn btn-ghost btn-sm" title="Log out of terminal">
+                    {{ icon('arrow-right') }} Log out
+                </a>
             </div>
         </div>
+    </header>
 
-        <nav class="flex-1 px-4 py-6 space-y-2">
-            <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-semibold text-sm transition">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"></path></svg>
-                Active Route Log
-            </a>
-            <a href="#" class="flex items-center justify-between px-4 py-3 rounded-xl text-gray-400 hover:bg-white/5 hover:text-white font-medium text-sm transition group">
-                <div class="flex items-center gap-3">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
-                    Available Loads
-                </div>
-                <span class="bg-emerald-500/20 text-emerald-400 text-xs py-0.5 px-2 rounded-md font-bold">4</span>
-            </a>
-            <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:bg-white/5 hover:text-white font-medium text-sm transition">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                Waybills & Permits
-            </a>
-            <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:bg-white/5 hover:text-white font-medium text-sm transition">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                Trip History
-            </a>
-        </nav>
+    <!-- ===== Main Dashboard Content ===== -->
+    <main class="main-content" id="main">
 
-        <div class="p-4 border-t border-white/5">
-            <div class="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/[0.02] border border-white/5">
-                <div class="w-8 h-8 rounded-full bg-emerald-900/50 flex items-center justify-center text-sm font-bold text-emerald-400">TF</div>
-                <div class="flex-col">
-                    <div class="text-xs font-bold text-white">{{username}}</div>
-                    <div class="text-[10px] text-emerald-400">Truck: Isuzu FSR (AA-4521)</div>
+        <!-- Welcome Banner -->
+        <section class="welcome-card" aria-label="Transporter summary">
+            <div class="welcome-copy">
+                <div class="welcome-pill">
+                    {{ icon('truck') }} Certified Agricultural Logistics Partner
                 </div>
+                <h1>Logistics Command Center</h1>
+                <p>
+                    Coordinating grain, oilseed, and coffee transport from rural collection centers to regional aggregation hubs and food processing reserves.
+                </p>
             </div>
-        </div>
-    </aside>
-
-    <!-- Main Content Area -->
-    <main class="flex-1 overflow-y-auto relative z-10 scroll-smooth">
-        
-        <!-- Top Header -->
-        <header class="h-20 px-8 flex items-center justify-between border-b border-white/5 sticky top-0 bg-gray-950/80 backdrop-blur-xl z-30">
-            <h1 class="text-xl font-bold text-white tracking-tight">Logistics Command Center</h1>
-            <div class="flex items-center gap-4">
-                <span class="badge badge-blue gap-1.5 px-3 py-1.5 shadow-sm shadow-blue-500/10">
-                    <span class="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse"></span> State Buffer Fleet
-                </span>
-                <button class="p-2 text-gray-400 hover:text-white transition bg-white/5 rounded-lg border border-white/5 hover:border-white/20">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+            <div class="welcome-actions">
+                <button type="button" class="btn btn-primary btn-lg" data-open-modal="vehicle-modal">
+                    {{ icon('truck') }} Register Vehicle
                 </button>
+                <a href="#available-loads" class="btn btn-outline btn-lg">
+                    {{ icon('package') }} View Bulk Loads
+                </a>
             </div>
-        </header>
+        </section>
 
-        <div class="p-8 max-w-7xl mx-auto space-y-8">
-            
-            <!-- Active Assigned Route Card (The Driver's Focus) -->
-            <section class="bg-gradient-to-br from-gray-900/80 to-gray-900/40 border border-emerald-500/30 rounded-2xl p-6 md:p-8 backdrop-blur-md shadow-2xl shadow-emerald-500/10 relative overflow-hidden">
-                <div class="absolute -right-10 -bottom-10 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
-                
-                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 pb-6 border-b border-white/10">
-                    <div>
-                        <div class="flex items-center gap-2 mb-2">
-                            <span class="badge badge-amber">Active Transport Assignment</span>
-                            <span class="text-xs text-gray-400 font-mono">Waybill #WB-9042</span>
-                        </div>
-                        <h2 class="text-2xl font-extrabold text-white">Humera Aggregation Hub ➔ Addis Central Warehouse</h2>
-                    </div>
-                    <div class="text-right">
-                        <div class="text-xs text-gray-400 uppercase tracking-wider font-semibold">Assigned Cargo</div>
-                        <div class="text-lg font-bold text-emerald-400">120 Quintals (Sesame - Export)</div>
-                    </div>
+        <!-- KPI Metrics Grid -->
+        <section class="metrics-grid" aria-label="Key metrics">
+            <div class="metric-card">
+                <div class="metric-ic metric-ic-amber">
+                    {{ icon('truck') }}
                 </div>
+                <div class="metric-content">
+                    <span class="metric-label">Active Consignments</span>
+                    <span class="metric-val" id="metric-active-consignments">1 <small style="font-size:.9rem;font-weight:600;">Trip</small></span>
+                    <span class="metric-sub">In transit to destination</span>
+                </div>
+            </div>
 
-                <!-- Manual Journey Status Stepper (No Live GPS Required) -->
-                <div class="space-y-4">
-                    <div class="flex justify-between text-xs text-gray-400 font-semibold uppercase tracking-wider">
-                        <span>1. Assigned</span>
-                        <span>2. Loaded at Source</span>
-                        <span>3. In Transit</span>
-                        <span>4. Delivered to Hub</span>
-                    </div>
-                    
-                    <!-- Progress Bar Track -->
-                    <div class="w-full bg-gray-950 h-3 rounded-full overflow-hidden p-0.5 border border-white/10 relative">
-                        <div class="bg-gradient-to-r from-emerald-600 to-emerald-400 h-full rounded-full w-2/4 transition-all duration-500"></div>
-                    </div>
+            <div class="metric-card">
+                <div class="metric-ic metric-ic-blue">
+                    {{ icon('package') }}
+                </div>
+                <div class="metric-content">
+                    <span class="metric-label">Available Hub Loads</span>
+                    <span class="metric-val" id="metric-available-loads">4</span>
+                    <span class="metric-sub">Ready for carrier assignment</span>
+                </div>
+            </div>
 
-                    <!-- Interactive Action Box for Driver -->
-                    <div class="bg-gray-950/60 border border-white/10 rounded-xl p-4 flex flex-col md:flex-row items-center justify-between gap-4 mt-4">
+            <div class="metric-card">
+                <div class="metric-ic metric-ic-green">
+                    {{ icon('shield-check') }}
+                </div>
+                <div class="metric-content">
+                    <span class="metric-label">Registered Fleet</span>
+                    <span class="metric-val" id="metric-fleet-count">3 <small style="font-size:.9rem;font-weight:600;">Trucks</small></span>
+                    <span class="metric-sub">Roadworthy &bull; GPS verified</span>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-ic">
+                    {{ icon('check-circle') }}
+                </div>
+                <div class="metric-content">
+                    <span class="metric-label">Delivery SLA</span>
+                    <span class="metric-val">99.1%</span>
+                    <span class="metric-sub">Official offloading rating</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 1: Active Assigned Route Card & Stepper -->
+        <section id="active-route" class="dash-card">
+            <div class="dash-card-header">
+                <div>
+                    <h2>{{ icon('truck') }} Active Route Assignment</h2>
+                    <p>Driver journey tracker with multi-stage waybill confirmation (no live GPS required).</p>
+                </div>
+                <span class="badge badge-amber" id="active-route-status-badge">
+                    <span class="badge-dot"></span> In Transit
+                </span>
+            </div>
+
+            <div class="dash-card-body">
+                <div class="active-route-banner">
+                    <div class="route-header">
                         <div>
-                            <div class="text-sm font-bold text-white flex items-center gap-2">
-                                <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                Current Status: <span class="text-amber-400">In Transit to Regional Warehouse</span>
+                            <div class="meta-sub" style="margin-bottom:.3rem;">
+                                Waybill Ref: <span class="code-ref">#WB-9042</span> &bull; State Buffer Consignment
                             </div>
-                            <p class="text-xs text-gray-400 mt-0.5">Tap below once you have arrived and offloaded cargo at the destination warehouse.</p>
+                            <div class="route-title">
+                                Humera Aggregation Hub {{ icon('arrow-right') }} Addis Central Distribution Center
+                            </div>
                         </div>
-                        <button class="w-full md:w-auto bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs uppercase tracking-wider rounded-lg px-6 py-3 transition shadow-lg shadow-emerald-500/20">
-                            Mark as Delivered & Offloaded
+                        <div class="route-meta">
+                            <div>
+                                <span class="meta-sub">Assigned Cargo:</span>
+                                <div><strong>120 Quintals (Sesame - Export Quality)</strong></div>
+                            </div>
+                            <div>
+                                <span class="meta-sub">Assigned Vehicle:</span>
+                                <div><strong>Isuzu FSR (ET-3-4521)</strong></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Journey Stepper -->
+                    <div class="stepper-container">
+                        <div class="stepper-track">
+                            <div class="stepper-fill" id="stepper-fill" style="width: 75%;"></div>
+                        </div>
+
+                        <div class="stepper-steps">
+                            <div class="step-item completed">
+                                <span class="step-num">1</span>
+                                <span class="step-name">Dispatched</span>
+                            </div>
+                            <div class="step-item completed">
+                                <span class="step-num">2</span>
+                                <span class="step-name">Loaded at Hub</span>
+                            </div>
+                            <div class="step-item active">
+                                <span class="step-num">3</span>
+                                <span class="step-name">In Transit</span>
+                            </div>
+                            <div class="step-item">
+                                <span class="step-num">4</span>
+                                <span class="step-name">Delivered</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Driver Action Bar -->
+                    <div class="route-action-box">
+                        <div class="route-current-status">
+                            {{ icon('clock') }}
+                            <div>
+                                Current Status: <span style="color:#B45309;" id="current-status-text">In Transit to Regional Warehouse</span>
+                                <div class="meta-sub" style="font-weight:400;">Update the progress below once arrival or offloading is completed.</div>
+                            </div>
+                        </div>
+                        <button type="button" id="advance-status-btn" class="btn btn-primary" style="min-height:2.9rem;">
+                            {{ icon('check-circle') }} Mark as Delivered &amp; Offloaded
                         </button>
                     </div>
                 </div>
-            </section>
+            </div>
+        </section>
 
-            <!-- Available Loads Section (State Buffer Pool) -->
-            <section>
-                <div class="flex items-center justify-between mb-4">
-                    <div>
-                        <h3 class="text-sm font-bold text-white uppercase tracking-wider">Available Bulk Loads (State Acquisition)</h3>
-                        <p class="text-xs text-gray-400">Accept assignments to move bulk harvests from rural collection points to official government reserves.</p>
-                    </div>
-                    <span class="text-xs text-gray-400">4 routes ready for assignment</span>
+        <!-- Section 2: Available Bulk Loads (Direct Hub Pickup) -->
+        <section id="available-loads" class="dash-card">
+            <div class="dash-card-header">
+                <div>
+                    <h2>{{ icon('package') }} Available Bulk Loads (Hub Pickup Pool)</h2>
+                    <p>Claim official route assignments to transport bulk grain from rural collection points to regional reserves.</p>
                 </div>
+                <span class="meta-sub">4 Verified Routes Ready</span>
+            </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    
+            <div class="dash-card-body">
+                <div class="loads-grid">
                     <!-- Load Card 1 -->
-                    <div class="bg-gray-900/60 border border-white/10 hover:border-emerald-500/50 rounded-2xl p-6 backdrop-blur-sm transition-all duration-300 flex flex-col justify-between">
+                    <div class="load-card">
                         <div>
-                            <div class="flex justify-between items-start mb-3">
-                                <span class="badge badge-emerald">High Priority Route</span>
-                                <span class="text-xs font-mono text-gray-400">Distance: ~450 km</span>
+                            <div class="load-card-head">
+                                <span class="badge badge-green">High Priority</span>
+                                <span class="code-ref">~450 km</span>
                             </div>
-                            <h4 class="text-lg font-bold text-white mb-2">Bishoftu Cooperative ➔ Adama Hub</h4>
-                            <div class="space-y-2 mb-6 text-sm">
-                                <div class="flex justify-between text-gray-300">
-                                    <span class="text-gray-400">Cargo Type:</span>
-                                    <span class="font-semibold text-white">Grade 1 Magna Teff (100 Qtl)</span>
-                                </div>
-                                <div class="flex justify-between text-gray-300">
-                                    <span class="text-gray-400">Agent Contact:</span>
-                                    <span class="text-white">Dawit K. (+251 91...)</span>
-                                </div>
-                                <div class="flex justify-between text-gray-300 pt-2 border-t border-white/5">
-                                    <span class="text-gray-400">Government Tariff:</span>
-                                    <span class="font-bold text-amber-400">18,500 ETB</span>
-                                </div>
-                            </div>
+                            <h3 class="load-route-title" style="margin-top:.75rem;">
+                                Bishoftu Cooperative {{ icon('arrow-right') }} Adama Processing Hub
+                            </h3>
+                            <ul class="load-specs-list">
+                                <li>
+                                    <span>Commodity:</span>
+                                    <strong>Grade 1 Magna Teff (100 Qtl)</strong>
+                                </li>
+                                <li>
+                                    <span>Extension Agent:</span>
+                                    <span>Dawit K. (+251 91...)</span>
+                                </li>
+                                <li>
+                                    <span>Loading Point:</span>
+                                    <span>Ada'a Multi-Purpose Depot</span>
+                                </li>
+                            </ul>
                         </div>
-                        <button class="w-full bg-white/5 hover:bg-emerald-500 hover:text-gray-950 text-white border border-white/10 hover:border-emerald-500 font-bold text-sm rounded-xl py-3 transition duration-300">
-                            Accept Route Assignment
+                        <div class="load-tariff">
+                            <span class="meta-sub">Approved Tariff:</span>
+                            <span class="load-tariff-val">18,500 ETB</span>
+                        </div>
+                        <button type="button" class="btn btn-outline btn-block accept-load-btn">
+                            {{ icon('truck') }} Accept Route Assignment
                         </button>
                     </div>
 
                     <!-- Load Card 2 -->
-                    <div class="bg-gray-900/60 border border-white/10 hover:border-emerald-500/50 rounded-2xl p-6 backdrop-blur-sm transition-all duration-300 flex flex-col justify-between">
+                    <div class="load-card">
                         <div>
-                            <div class="flex justify-between items-start mb-3">
+                            <div class="load-card-head">
                                 <span class="badge badge-blue">Standard Route</span>
-                                <span class="text-xs font-mono text-gray-400">Distance: ~320 km</span>
+                                <span class="code-ref">~320 km</span>
                             </div>
-                            <h4 class="text-lg font-bold text-white mb-2">Jimma Collection Point ➔ Addis Warehouse</h4>
-                            <div class="space-y-2 mb-6 text-sm">
-                                <div class="flex justify-between text-gray-300">
-                                    <span class="text-gray-400">Cargo Type:</span>
-                                    <span class="font-semibold text-white">Wollega Coffee - Grade 1 (80 Qtl)</span>
-                                </div>
-                                <div class="flex justify-between text-gray-300">
-                                    <span class="text-gray-400">Agent Contact:</span>
-                                    <span class="text-white">Amina M. (+251 92...)</span>
-                                </div>
-                                <div class="flex justify-between text-gray-300 pt-2 border-t border-white/5">
-                                    <span class="text-gray-400">Government Tariff:</span>
-                                    <span class="font-bold text-amber-400">15,000 ETB</span>
-                                </div>
-                            </div>
+                            <h3 class="load-route-title" style="margin-top:.75rem;">
+                                Jimma Collection Point {{ icon('arrow-right') }} Addis Central Warehouse
+                            </h3>
+                            <ul class="load-specs-list">
+                                <li>
+                                    <span>Commodity:</span>
+                                    <strong>Wollega Coffee - Grade 1 (80 Qtl)</strong>
+                                </li>
+                                <li>
+                                    <span>Extension Agent:</span>
+                                    <span>Amina M. (+251 92...)</span>
+                                </li>
+                                <li>
+                                    <span>Loading Point:</span>
+                                    <span>Gomma Farmers Cooperative</span>
+                                </li>
+                            </ul>
                         </div>
-                        <button class="w-full bg-white/5 hover:bg-emerald-500 hover:text-gray-950 text-white border border-white/10 hover:border-emerald-500 font-bold text-sm rounded-xl py-3 transition duration-300">
-                            Accept Route Assignment
+                        <div class="load-tariff">
+                            <span class="meta-sub">Approved Tariff:</span>
+                            <span class="load-tariff-val">15,000 ETB</span>
+                        </div>
+                        <button type="button" class="btn btn-outline btn-block accept-load-btn">
+                            {{ icon('truck') }} Accept Route Assignment
                         </button>
                     </div>
 
-                </div>
-            </section>
+                    <!-- Load Card 3 -->
+                    <div class="load-card">
+                        <div>
+                            <div class="load-card-head">
+                                <span class="badge badge-green">High Priority</span>
+                                <span class="code-ref">~280 km</span>
+                            </div>
+                            <h3 class="load-route-title" style="margin-top:.75rem;">
+                                Asella Union Depot {{ icon('arrow-right') }} Hawassa Industrial Hub
+                            </h3>
+                            <ul class="load-specs-list">
+                                <li>
+                                    <span>Commodity:</span>
+                                    <strong>Bread Wheat Grade 1 (250 Qtl)</strong>
+                                </li>
+                                <li>
+                                    <span>Extension Agent:</span>
+                                    <span>Tolossa B. (+251 93...)</span>
+                                </li>
+                                <li>
+                                    <span>Loading Point:</span>
+                                    <span>Hitosa Silos Facility</span>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="load-tariff">
+                            <span class="meta-sub">Approved Tariff:</span>
+                            <span class="load-tariff-val">28,000 ETB</span>
+                        </div>
+                        <button type="button" class="btn btn-outline btn-block accept-load-btn">
+                            {{ icon('truck') }} Accept Route Assignment
+                        </button>
+                    </div>
 
-            <!-- Completed & Historical Trips Table -->
-            <section class="mt-8">
-                <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-4">Completed Distribution History</h3>
-                
-                <div class="bg-gray-900/60 border border-white/10 rounded-2xl backdrop-blur-md overflow-hidden shadow-lg">
-                    <table>
+                    <!-- Load Card 4 -->
+                    <div class="load-card">
+                        <div>
+                            <div class="load-card-head">
+                                <span class="badge badge-blue">Export Corridor</span>
+                                <span class="code-ref">~510 km</span>
+                            </div>
+                            <h3 class="load-route-title" style="margin-top:.75rem;">
+                                Gondar Aggregation Hub {{ icon('arrow-right') }} Metema Buffer Depot
+                            </h3>
+                            <ul class="load-specs-list">
+                                <li>
+                                    <span>Commodity:</span>
+                                    <strong>Humera White Sesame (180 Qtl)</strong>
+                                </li>
+                                <li>
+                                    <span>Extension Agent:</span>
+                                    <span>Getachew A. (+251 94...)</span>
+                                </li>
+                                <li>
+                                    <span>Loading Point:</span>
+                                    <span>North Gondar Union Silos</span>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="load-tariff">
+                            <span class="meta-sub">Approved Tariff:</span>
+                            <span class="load-tariff-val">24,500 ETB</span>
+                        </div>
+                        <button type="button" class="btn btn-outline btn-block accept-load-btn">
+                            {{ icon('truck') }} Accept Route Assignment
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Vehicle Fleet Management -->
+        <section id="fleet" class="dash-card">
+            <div class="dash-card-header">
+                <div>
+                    <h2>{{ icon('truck') }} Registered Vehicle Fleet</h2>
+                    <p>Commercial trucks registered for official grain and harvest distribution.</p>
+                </div>
+                <button type="button" class="btn btn-primary btn-sm" data-open-modal="vehicle-modal">
+                    {{ icon('truck') }} Register New Vehicle
+                </button>
+            </div>
+
+            <div class="dash-card-body">
+                <div class="fleet-grid" id="fleet-grid">
+                    <div class="vehicle-card">
+                        <div class="vehicle-head">
+                            <span class="vehicle-plate">ET-3-4521</span>
+                            <span class="badge badge-amber">
+                                <span class="badge-dot"></span> On Route (Humera)
+                            </span>
+                        </div>
+                        <div class="vehicle-meta">
+                            <div><strong>Isuzu FSR Medium Truck</strong> &bull; 120 Qtl Capacity</div>
+                            <div>Driver: Tariku F. &bull; Tel: +251 911 234 567</div>
+                        </div>
+                    </div>
+
+                    <div class="vehicle-card">
+                        <div class="vehicle-head">
+                            <span class="vehicle-plate">ET-3-8891</span>
+                            <span class="badge badge-green">
+                                <span class="badge-dot"></span> Available at Hub
+                            </span>
+                        </div>
+                        <div class="vehicle-meta">
+                            <div><strong>Sino Truck Heavy Cargo</strong> &bull; 350 Qtl Capacity</div>
+                            <div>Driver: Bekele T. &bull; Tel: +251 912 345 678</div>
+                        </div>
+                    </div>
+
+                    <div class="vehicle-card">
+                        <div class="vehicle-head">
+                            <span class="vehicle-plate">ET-3-2019</span>
+                            <span class="badge badge-green">
+                                <span class="badge-dot"></span> Available at Hub
+                            </span>
+                        </div>
+                        <div class="vehicle-meta">
+                            <div><strong>Mitsubishi Fuso Truck</strong> &bull; 180 Qtl Capacity</div>
+                            <div>Driver: Henok G. &bull; Tel: +251 913 456 789</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: Completed Distribution & Settled Waybills -->
+        <section id="completed-trips" class="dash-card">
+            <div class="dash-card-header">
+                <div>
+                    <h2>{{ icon('clipboard-check') }} Completed Distribution &amp; Settled Waybills</h2>
+                    <p>Audit trail of verified deliveries, offloading certificates, and settled transporter tariffs.</p>
+                </div>
+                <span class="meta-sub">Official Ethiopian Waybill Ledger</span>
+            </div>
+
+            <div class="table-responsive">
+                <table class="dash-table">
+                    <thead>
+                        <tr>
+                            <th>Waybill ID</th>
+                            <th>Route Details</th>
+                            <th class="text-right">Tonnage</th>
+                            <th class="text-right">Tariff Paid</th>
+                            <th>Completed Date</th>
+                            <th class="text-center">Status</th>
+                            <th class="text-right">Documentation</th>
+                        </tr>
+                    </thead>
+                    <tbody id="completed-history-tbody">
+                        <tr>
+                            <td class="code-ref">#WB-9011</td>
+                            <td>
+                                <div style="font-weight:700; color:var(--deep);">Gojjam Union Depot {{ icon('arrow-right') }} Addis Central Warehouse</div>
+                                <div class="meta-sub">Wheat (Bulk Reserve) &bull; Sino Truck Heavy</div>
+                            </td>
+                            <td class="text-right" style="font-weight:700;">200 Qtl</td>
+                            <td class="text-right" style="font-weight:800; color:var(--brand);">26,000 ETB</td>
+                            <td class="meta-sub">Oct 24, 2026</td>
+                            <td class="text-center">
+                                <span class="badge badge-green">
+                                    <span class="badge-dot"></span> Verified &amp; Settled
+                                </span>
+                            </td>
+                            <td class="text-right">
+                                <button type="button" class="action-link view-waybill-btn"
+                                    data-waybill="#WB-9011"
+                                    data-route="Gojjam Union Depot ➔ Addis Central Warehouse"
+                                    data-cargo="Wheat (Bulk Reserve)"
+                                    data-tonnage="200 Quintals (20 MT)"
+                                    data-tariff="26,000 ETB"
+                                    data-vehicle="Sino Truck Heavy (ET-3-8891)"
+                                    data-driver="Bekele T.">
+                                    Digital Waybill
+                                </button>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="code-ref">#WB-8984</td>
+                            <td>
+                                <div style="font-weight:700; color:var(--deep);">Adama Hub {{ icon('arrow-right') }} Dire Dawa Strategic Depot</div>
+                                <div class="meta-sub">White Teff &bull; Mitsubishi Fuso</div>
+                            </td>
+                            <td class="text-right" style="font-weight:700;">150 Qtl</td>
+                            <td class="text-right" style="font-weight:800; color:var(--brand);">21,500 ETB</td>
+                            <td class="meta-sub">Oct 19, 2026</td>
+                            <td class="text-center">
+                                <span class="badge badge-green">
+                                    <span class="badge-dot"></span> Verified &amp; Settled
+                                </span>
+                            </td>
+                            <td class="text-right">
+                                <button type="button" class="action-link view-waybill-btn"
+                                    data-waybill="#WB-8984"
+                                    data-route="Adama Hub ➔ Dire Dawa Strategic Depot"
+                                    data-cargo="White Teff (Standard)"
+                                    data-tonnage="150 Quintals (15 MT)"
+                                    data-tariff="21,500 ETB"
+                                    data-vehicle="Mitsubishi Fuso (ET-3-2019)"
+                                    data-driver="Henok G.">
+                                    Digital Waybill
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ===== Modal: Register Vehicle ===== -->
+    <div id="vehicle-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="vehicle-modal-title">
+        <div class="modal-box">
+            <div class="modal-head">
+                <h3 id="vehicle-modal-title">Register Commercial Vehicle to Fleet</h3>
+                <button type="button" class="modal-close" data-close-modal="vehicle-modal" aria-label="Close dialog">&times;</button>
+            </div>
+
+            <form id="vehicle-form">
+                <div class="modal-body">
+                    <p style="font-size:.875rem; color:var(--muted); margin:0;">
+                        Add a transport vehicle to your carrier profile to claim bulk consignments from rural hubs.
+                    </p>
+
+                    <div class="input-field">
+                        <label for="vehicle-plate">License Plate Number</label>
+                        <input type="text" id="vehicle-plate" name="plate_number" placeholder="e.g. ET-3-9942" required>
+                    </div>
+
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+                        <div class="input-field">
+                            <label for="vehicle-type">Vehicle Model / Type</label>
+                            <select id="vehicle-type" name="vehicle_type">
+                                <option value="Isuzu FSR Medium Truck">Isuzu FSR (100 - 150 Qtl)</option>
+                                <option value="Sino Truck Heavy Duty">Sino Truck Heavy (300 - 400 Qtl)</option>
+                                <option value="Mitsubishi Fuso">Mitsubishi Fuso (150 - 200 Qtl)</option>
+                                <option value="Pickup / Light Truck">Pickup / Light (30 - 50 Qtl)</option>
+                            </select>
+                        </div>
+                        <div class="input-field">
+                            <label for="vehicle-capacity">Capacity (Quintals)</label>
+                            <input type="number" id="vehicle-capacity" name="capacity_quintals" placeholder="e.g. 150" value="150" required>
+                        </div>
+                    </div>
+
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+                        <div class="input-field">
+                            <label for="vehicle-driver">Assigned Driver Name</label>
+                            <input type="text" id="vehicle-driver" name="driver_name" placeholder="e.g. Girma Tesfaye" required>
+                        </div>
+                        <div class="input-field">
+                            <label for="vehicle-phone">Driver Phone Number</label>
+                            <input type="tel" id="vehicle-phone" name="phone_number" placeholder="+251 9..." required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-foot">
+                    <button type="button" class="btn btn-ghost" data-close-modal="vehicle-modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        {{ icon('truck') }} Register Vehicle
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ===== Modal: Digital Waybill View ===== -->
+    <div id="waybill-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="waybill-modal-title">
+        <div class="modal-box">
+            <div class="modal-head">
+                <h3 id="waybill-modal-title">Official Agricultural Consignment Waybill</h3>
+                <button type="button" class="modal-close" data-close-modal="waybill-modal" aria-label="Close dialog">&times;</button>
+            </div>
+
+            <div class="modal-body" style="background:#fff;">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; border-bottom:1px solid var(--line); padding-bottom:1rem;">
+                    <div>
+                        <div class="brand" style="font-size:1.2rem;">
+                            {% include 'partials/logo.html' %}
+                            AgriBridge
+                        </div>
+                        <div class="meta-sub">Ministry of Agriculture &bull; Inter-Regional Waybill Certificate</div>
+                    </div>
+                    <div style="text-align:right;">
+                        <div class="code-ref" id="wb-modal-ref">#WB-9042</div>
+                        <div class="meta-sub">Official Gate Pass Authorized</div>
+                    </div>
+                </div>
+
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; font-size:.875rem;">
+                    <div>
+                        <span class="meta-sub">Carrier Account:</span>
+                        <div style="font-weight:700; color:var(--deep);">{{ username or 'Licensed Transporter' }}</div>
+                        <div class="meta-sub" id="wb-modal-vehicle">Isuzu FSR (ET-3-4521)</div>
+                    </div>
+                    <div>
+                        <span class="meta-sub">Designated Driver:</span>
+                        <div style="font-weight:700; color:var(--deep);" id="wb-modal-driver">Tariku F.</div>
+                        <div class="meta-sub">Commercial License Verified</div>
+                    </div>
+                </div>
+
+                <div style="border:1px solid var(--line); border-radius:8px; overflow:hidden;">
+                    <table class="dash-table">
                         <thead>
                             <tr>
-                                <th>Waybill ID</th>
-                                <th>Route Details</th>
-                                <th>Tonnage Moved</th>
-                                <th>Completed Date</th>
-                                <th>Status</th>
+                                <th>Assigned Route</th>
+                                <th>Cargo Description</th>
+                                <th class="text-right">Volume</th>
+                                <th class="text-right">Tariff</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr>
-                                <td class="font-mono text-xs text-gray-400">#WB-9011</td>
-                                <td>
-                                    <div class="font-semibold text-white">Gojjam Union ➔ Addis Central</div>
-                                    <div class="text-xs text-gray-500">Wheat (Bulk Reserve)</div>
-                                </td>
-                                <td class="font-semibold text-white">200 Quintals</td>
-                                <td class="text-xs text-gray-400">Oct 24, 2026</td>
-                                <td>
-                                    <span class="badge badge-emerald">Verified & Settled</span>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="font-mono text-xs text-gray-400">#WB-8984</td>
-                                <td>
-                                    <div class="font-semibold text-white">Adama Hub ➔ Dire Dawa Depot</div>
-                                    <div class="text-xs text-gray-500">White Teff</div>
-                                </td>
-                                <td class="font-semibold text-white">150 Quintals</td>
-                                <td class="text-xs text-gray-400">Oct 19, 2026</td>
-                                <td>
-                                    <span class="badge badge-emerald">Verified & Settled</span>
-                                </td>
+                                <td style="font-weight:700;" id="wb-modal-route">Humera Hub ➔ Addis Central</td>
+                                <td id="wb-modal-cargo">Sesame - Export Quality</td>
+                                <td class="text-right" id="wb-modal-tonnage">120 Qtl</td>
+                                <td class="text-right" style="font-weight:800; color:var(--brand);" id="wb-modal-tariff">22,000 ETB</td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
-            </section>
 
+                <div class="meta-sub" style="text-align:center;">
+                    Official electronic waybill generated under the Federal Agricultural Transport Authority. Valid across regional checkpoints.
+                </div>
+            </div>
+
+            <div class="modal-foot">
+                <button type="button" class="btn btn-ghost" data-close-modal="waybill-modal">Close</button>
+                <button type="button" id="print-waybill-btn" class="btn btn-primary">
+                    {{ icon('clipboard-check') }} Print Waybill
+                </button>
+            </div>
         </div>
-    </main>
+    </div>
 
+    <!-- Toast Notification -->
+    <div id="toast-msg" class="toast-msg" role="status" aria-live="polite"></div>
+
+    <!-- ===== Site Footer ===== -->
+    <footer class="site-footer">
+        <div class="wrap footer-grid">
+            <div>
+                <a class="brand" href="/" aria-label="AgriBridge home">
+                    {% include 'partials/logo.html' %}
+                    AgriBridge
+                </a>
+                <p class="footer-tag">Farm &middot; Market &middot; Deliver</p>
+            </div>
+            <ul class="footer-contact">
+                <li><a href="/logout">Switch Account</a></li>
+                <li><a href="#active-route">Active Trip</a></li>
+                <li><a href="#available-loads">Available Loads</a></li>
+                <li><a href="mailto:logistics@agribridge.et">logistics@agribridge.et</a></li>
+            </ul>
+        </div>
+        <div class="wrap footer-base">
+            <div>&copy; 2026 AgriBridge Ethiopia. Logistics &amp; Transport Coordination System.</div>
+            <div>Checkpoint Clearance &amp; Electronic Escrow Verified</div>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/transporter_dashboard.js') }}"></script>
 </body>
 </html>

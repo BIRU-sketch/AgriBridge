@@ -1,107 +1,335 @@
 document.addEventListener('DOMContentLoaded', () => {
-            let isSignUp = false;
+    const tabLogin = document.getElementById('tab-login');
+    const tabSignup = document.getElementById('tab-signup');
+    const panelLogin = document.getElementById('panel-login');
+    const panelSignup = document.getElementById('panel-signup');
+    const authTop = document.getElementById('auth-top');
+    const authTitle = document.getElementById('auth-title');
+    const authSub = document.getElementById('auth-sub');
+    const signupSuccess = document.getElementById('signup-success');
+    const successEmail = document.getElementById('success-email');
+    const goLoginBtn = document.getElementById('go-login');
 
-            const formTitle = document.getElementById('form-title');
-            const submitBtn = document.getElementById('submit-btn');
-            const fullNameGroup = document.getElementById('full-name-group');
-            const roleGroup = document.getElementById('role-group');
-            const toggleText = document.getElementById('toggle-text');
-            const toggleBtn = document.getElementById('toggle-btn');
-            const errorDiv = document.getElementById('error-msg');
+    if (!panelLogin || !panelSignup) {
+        return;
+    }
 
-            // Check if elements exist
-            if (!submitBtn) {
-                console.error('Submit button not found');
-                return;
-            }
+    // Helper: Clear error state on a form
+    function clearFormErrors(form) {
+        const alert = form.querySelector('.form-alert');
+        if (alert) {
+            alert.hidden = true;
+            alert.textContent = '';
+        }
+        form.querySelectorAll('.field-err').forEach((el) => {
+            el.hidden = true;
+            el.textContent = '';
+        });
+        form.querySelectorAll('[aria-invalid="true"]').forEach((el) => {
+            el.removeAttribute('aria-invalid');
+        });
+    }
 
-            function toggleForm() {
-                isSignUp = !isSignUp;
-                
-                formTitle.innerText = isSignUp ? 'Sign Up' : 'Login';
-                submitBtn.innerText = isSignUp ? 'Sign Up' : 'Log In';
-                
-                if (isSignUp) {
-                    fullNameGroup.classList.remove('hidden');
-                    roleGroup.classList.remove('hidden');
-                    toggleText.innerHTML = 'Already have an account? <span class="text-emerald-400 underline underline-offset-4">Log In</span>';
-                } else {
-                    fullNameGroup.classList.add('hidden');
-                    roleGroup.classList.add('hidden');
-                    toggleText.innerHTML = 'Don\'t have an account? <span class="text-emerald-400 underline underline-offset-4">Sign Up</span>';
-                }
-                
-                errorDiv.innerText = '';
-            }
-            
-            async function handleSubmit() {
-                const email = document.getElementById('email').value.trim();
-                const password = document.getElementById('password').value.trim();
-                const fullName = document.getElementById('full_name').value.trim();
-                const role = document.getElementById('role').value;
+    // Helper: Show field error
+    function setFieldError(inputEl, errEl, message) {
+        if (inputEl) {
+            inputEl.setAttribute('aria-invalid', 'true');
+        }
+        if (errEl) {
+            errEl.textContent = message;
+            errEl.hidden = false;
+        }
+    }
 
-                errorDiv.innerText = '';
+    // Helper: Show general form alert error
+    function showFormAlert(form, message) {
+        const alert = form.querySelector('.form-alert');
+        if (alert) {
+            alert.textContent = message;
+            alert.hidden = false;
+        }
+    }
 
-                if (!email || !password || (isSignUp && !fullName) || (isSignUp && !role)) {
-                    errorDiv.innerText = 'Please fill out all required fields.';
-                    return;
-                }
+    // Tab switching
+    function switchTab(mode) {
+        clearFormErrors(panelLogin);
+        clearFormErrors(panelSignup);
 
-                const endpoint = isSignUp ? '/api/signup' : '/api/login';
-                const payload = { email, password };
-                if (isSignUp) {
-                    payload.full_name = fullName;
-                    payload.role = role;
-                }
+        if (mode === 'signup') {
+            tabSignup.setAttribute('aria-selected', 'true');
+            tabSignup.removeAttribute('tabindex');
+            tabLogin.setAttribute('aria-selected', 'false');
+            tabLogin.setAttribute('tabindex', '-1');
 
-                try {
-                    submitBtn.innerText = isSignUp ? 'Creating account...' : 'Logging In...';
-                    submitBtn.disabled = true;
+            panelSignup.hidden = false;
+            panelLogin.hidden = true;
 
-                    const response = await fetch(endpoint, {
-                        method: 'POST',
-                        headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify(payload)
-                    });
+            authTitle.textContent = 'Create account';
+            authSub.textContent = 'Join AgriBridge to trade or transport produce across Ethiopia.';
+        } else {
+            tabLogin.setAttribute('aria-selected', 'true');
+            tabLogin.removeAttribute('tabindex');
+            tabSignup.setAttribute('aria-selected', 'false');
+            tabSignup.setAttribute('tabindex', '-1');
 
-                    if (response.ok) {
-                        if (isSignUp) {
-                            alert('Account created! Switching to Login...');
-                            toggleForm();
-                        } else {
-                            window.location.href = '/dashboard';
-                        }
+            panelLogin.hidden = false;
+            panelSignup.hidden = true;
+
+            authTitle.textContent = 'Log in';
+            authSub.textContent = 'Welcome back. Enter your details to continue.';
+        }
+    }
+
+    if (tabLogin && tabSignup) {
+        tabLogin.addEventListener('click', () => switchTab('login'));
+        tabSignup.addEventListener('click', () => switchTab('signup'));
+
+        // Keyboard arrow navigation on tabs
+        [tabLogin, tabSignup].forEach((tab) => {
+            tab.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+                    e.preventDefault();
+                    if (tab === tabLogin) {
+                        tabSignup.focus();
+                        switchTab('signup');
                     } else {
-                        const data = await response.json();
-                        errorDiv.innerText = data.error || 'An error occurred during authentication';
-
-                        submitBtn.innerText = isSignUp ? 'Sign Up' : 'Log In';
-                        submitBtn.disabled = false;
+                        tabLogin.focus();
+                        switchTab('login');
                     }
-                } catch (err) {
-                    errorDiv.innerText = 'Unable to connect to the server.';
-                    submitBtn.innerText = isSignUp ? 'Sign Up' : 'Log In';
-                    submitBtn.disabled = false;
-                }
-            }
-            
-            toggleBtn.addEventListener('click', toggleForm);
-            submitBtn.addEventListener('click', handleSubmit);
-            
-            // Password toggle functionality (keeping inline onclick for simplicity)
-            document.addEventListener('click', (e) => {
-                const togglePasswordBtn = e.target.closest('#toggle-password');
-
-                if (togglePasswordBtn) {
-                  e.preventDefault();
-                  
-                  const passwordInput = document.getElementById('password');
-
-                  if (passwordInput) {
-                    const isPassword = passwordInput.type === 'password';
-                    passwordInput.type = isPassword ? 'text' : 'password';
-                    togglePasswordBtn.textContent = isPassword ? '🙈' : '👁️';
-                }
                 }
             });
         });
+    }
+
+    // Handle URL parameters or hashes (e.g., /auth?mode=signup&role=agent)
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('mode') === 'signup' || window.location.hash === '#signup') {
+        switchTab('signup');
+    }
+    const roleParam = urlParams.get('role');
+    if (roleParam) {
+        const matchingRadio = panelSignup.querySelector(`input[name="role"][value="${roleParam}"]`);
+        if (matchingRadio) {
+            matchingRadio.checked = true;
+        }
+    }
+
+    // Password visibility toggle
+    document.querySelectorAll('.pw-toggle').forEach((btn) => {
+        btn.addEventListener('click', () => {
+            const targetId = btn.dataset.target;
+            const targetInput = document.getElementById(targetId);
+            if (!targetInput) return;
+
+            const isPassword = targetInput.type === 'password';
+            targetInput.type = isPassword ? 'text' : 'password';
+            btn.setAttribute('aria-pressed', isPassword ? 'true' : 'false');
+            btn.textContent = isPassword ? 'Hide' : 'Show';
+        });
+    });
+
+    // Clear field errors as user interacts with inputs
+    [panelLogin, panelSignup].forEach((form) => {
+        form.addEventListener('input', (e) => {
+            const input = e.target;
+            input.removeAttribute('aria-invalid');
+            const errId = input.getAttribute('aria-describedby')?.split(' ').find((id) => id.endsWith('-err'));
+            if (errId) {
+                const errEl = document.getElementById(errId);
+                if (errEl) {
+                    errEl.hidden = true;
+                    errEl.textContent = '';
+                }
+            }
+        });
+    });
+
+    // Login Form Submit
+    panelLogin.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        clearFormErrors(panelLogin);
+
+        const emailInput = document.getElementById('login-email');
+        const passwordInput = document.getElementById('login-password');
+        const emailErr = document.getElementById('login-email-err');
+        const passwordErr = document.getElementById('login-password-err');
+        const submitBtn = panelLogin.querySelector('button[type="submit"]');
+
+        const email = emailInput?.value.trim() || '';
+        const password = passwordInput?.value || '';
+
+        let hasError = false;
+        if (!email) {
+            setFieldError(emailInput, emailErr, 'Please enter your email.');
+            hasError = true;
+        }
+        if (!password) {
+            setFieldError(passwordInput, passwordErr, 'Please enter your password.');
+            hasError = true;
+        }
+
+        if (hasError) return;
+
+        const originalText = submitBtn?.dataset.label || submitBtn?.textContent || 'Log in';
+        const busyText = submitBtn?.dataset.busy || 'Logging in…';
+
+        try {
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.textContent = busyText;
+            }
+
+            const response = await fetch('/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Invalid email or password.');
+            }
+
+            window.location.href = '/dashboard';
+        } catch (err) {
+            showFormAlert(panelLogin, err.message);
+        } finally {
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+            }
+        }
+    });
+
+    // Signup Form Submit
+    panelSignup.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        clearFormErrors(panelSignup);
+
+        const nameInput = document.getElementById('signup-name');
+        const emailInput = document.getElementById('signup-email');
+        const passwordInput = document.getElementById('signup-password');
+        const roleInputs = panelSignup.querySelectorAll('input[name="role"]');
+
+        const nameErr = document.getElementById('signup-name-err');
+        const roleErr = document.getElementById('signup-role-err');
+        const emailErr = document.getElementById('signup-email-err');
+        const passwordErr = document.getElementById('signup-password-err');
+        const submitBtn = panelSignup.querySelector('button[type="submit"]');
+
+        const fullName = nameInput?.value.trim() || '';
+        const email = emailInput?.value.trim() || '';
+        const password = passwordInput?.value || '';
+        const selectedRole = Array.from(roleInputs).find((r) => r.checked)?.value;
+
+        let hasError = false;
+        let firstInvalidInput = null;
+
+        if (!fullName) {
+            setFieldError(nameInput, nameErr, 'Please enter your full name.');
+            hasError = true;
+            firstInvalidInput = firstInvalidInput || nameInput;
+        }
+
+        if (!selectedRole) {
+            setFieldError(null, roleErr, 'Please select how you will use AgriBridge.');
+            hasError = true;
+            firstInvalidInput = firstInvalidInput || roleInputs[0];
+        }
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!email) {
+            setFieldError(emailInput, emailErr, 'Please enter your email.');
+            hasError = true;
+            firstInvalidInput = firstInvalidInput || emailInput;
+        } else if (!emailRegex.test(email)) {
+            setFieldError(emailInput, emailErr, 'Please enter a valid email address.');
+            hasError = true;
+            firstInvalidInput = firstInvalidInput || emailInput;
+        }
+
+        if (!password) {
+            setFieldError(passwordInput, passwordErr, 'Please enter a password.');
+            hasError = true;
+            firstInvalidInput = firstInvalidInput || passwordInput;
+        } else if (password.length < 8) {
+            setFieldError(passwordInput, passwordErr, 'Password must be at least 8 characters long.');
+            hasError = true;
+            firstInvalidInput = firstInvalidInput || passwordInput;
+        }
+
+        if (hasError) {
+            if (firstInvalidInput) firstInvalidInput.focus();
+            return;
+        }
+
+        const originalText = submitBtn?.dataset.label || submitBtn?.textContent || 'Create account';
+        const busyText = submitBtn?.dataset.busy || 'Creating account…';
+
+        try {
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.textContent = busyText;
+            }
+
+            const response = await fetch('/api/signup', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    full_name: fullName,
+                    role: selectedRole,
+                    email,
+                    password
+                })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Failed to create account.');
+            }
+
+            // Success view
+            if (signupSuccess && successEmail) {
+                if (authTop) authTop.hidden = true;
+                panelSignup.hidden = true;
+                successEmail.textContent = email;
+                signupSuccess.hidden = false;
+                signupSuccess.focus();
+            } else {
+                alert('Account created successfully! Please log in.');
+                switchTab('login');
+            }
+        } catch (err) {
+            showFormAlert(panelSignup, err.message);
+        } finally {
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+            }
+        }
+    });
+
+    // "Go to log in" button from signup success card
+    if (goLoginBtn) {
+        goLoginBtn.addEventListener('click', () => {
+            if (signupSuccess) signupSuccess.hidden = true;
+            if (authTop) authTop.hidden = false;
+
+            const registeredEmail = successEmail?.textContent;
+            switchTab('login');
+
+            if (registeredEmail) {
+                const loginEmailInput = document.getElementById('login-email');
+                if (loginEmailInput) {
+                    loginEmailInput.value = registeredEmail;
+                }
+                const loginPasswordInput = document.getElementById('login-password');
+                if (loginPasswordInput) {
+                    loginPasswordInput.focus();
+                }
+            }
+        });
+    }
+});
