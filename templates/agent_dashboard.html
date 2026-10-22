@@ -34,7 +34,7 @@
             <nav class="dash-nav" aria-label="Agent navigation">
                 <a href="#farmers" aria-current="true">Registered Farmers</a>
                 <a href="#produce-lots">Produce Lots</a>
-                <a href="#matches">Buyer Matches</a>
+                <a href="#orders">Buyer Orders</a>
                 <a href="/register-farmer">+ New Farmer</a>
             </nav>
 
@@ -87,8 +87,8 @@
                 </div>
                 <div class="metric-content">
                     <span class="metric-label">Registered Farmers</span>
-                    <span class="metric-val">84 <small style="font-size:.9rem;font-weight:600;">Farmers</small></span>
-                    <span class="metric-sub">Across 8 rural Kebeles</span>
+                    <span class="metric-val" id="metric-registered-farmers">0 <small style="font-size:.9rem;font-weight:600;">Farmers</small></span>
+                    <span class="metric-sub">Across regional rural Kebeles</span>
                 </div>
             </div>
 
@@ -98,7 +98,7 @@
                 </div>
                 <div class="metric-content">
                     <span class="metric-label">Active Produce Lots</span>
-                    <span class="metric-val">12 <small style="font-size:.9rem;font-weight:600;">Lots</small></span>
+                    <span class="metric-val" id="metric-active-lots">0 <small style="font-size:.9rem;font-weight:600;">Lots</small></span>
                     <span class="metric-sub">Stored in certified hub silos</span>
                 </div>
             </div>
@@ -109,7 +109,7 @@
                 </div>
                 <div class="metric-content">
                     <span class="metric-label">Aggregated Volume</span>
-                    <span class="metric-val">4,250 <small style="font-size:.9rem;font-weight:600;">Qtl</small></span>
+                    <span class="metric-val" id="metric-aggregated-volume">0 <small style="font-size:.9rem;font-weight:600;">Qtl</small></span>
                     <span class="metric-sub">White Teff, Wheat &amp; Maize</span>
                 </div>
             </div>
@@ -256,7 +256,7 @@
                             <th class="text-right">Actions</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody id="produce-lots-tbody">
                         <tr>
                             <td class="code-ref">#LOT-TF-904</td>
                             <td class="code-ref">KBL-88204-BS</td>
@@ -324,78 +324,35 @@
             </div>
         </section>
 
-        <!-- Section 3: Buyer Matching Opportunities -->
-        <section id="matches" class="dash-card">
+        <!-- Section 3: Buyer Orders & Dispatched Lots -->
+        <section id="orders" class="dash-card">
             <div class="dash-card-header">
                 <div>
                     <h2>
-                        {{ icon('handshake') }} Buyer Matching Opportunities
-                        <span class="badge badge-amber" style="margin-left:.4rem;">2 High Match</span>
+                        {{ icon('handshake') }} Buyer Purchases &amp; Allocations
                     </h2>
-                    <p>Verified institutional buyers requesting crop lots matching your cooperative's current harvest inventory.</p>
+                    <p>Direct orders placed by verified institutional buyers against aggregated hub lots.</p>
                 </div>
-                <span class="meta-sub">Agreement Required Prior to Dispatch</span>
+                <span class="meta-sub">Automated Escrow &amp; Transporter Dispatch</span>
             </div>
 
             <div class="table-responsive">
                 <table class="dash-table">
                     <thead>
                         <tr>
-                            <th>Demand Ref</th>
-                            <th>Verified Buyer</th>
-                            <th>Required Commodity</th>
-                            <th class="text-right">Requested Volume</th>
-                            <th>Offered Floor Tariff</th>
-                            <th class="text-center">Match Quality</th>
-                            <th class="text-right">Cooperative Action</th>
+                            <th>Order Ref</th>
+                            <th>Buyer</th>
+                            <th>Commodity</th>
+                            <th class="text-right">Volume</th>
+                            <th class="text-right">Total (ETB)</th>
+                            <th class="text-center">Status</th>
+                            <th>Date</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody id="sales-orders-tbody">
                         <tr>
-                            <td class="code-ref">#DEM-8812</td>
-                            <td>
-                                <div style="font-weight:700; color:var(--deep);">Abyssinia Flour Mills PLC</div>
-                                <div class="meta-sub">Verified Institutional Buyer</div>
-                            </td>
-                            <td>White Teff (Grade 1 Magna)</td>
-                            <td class="text-right" style="font-weight:700;">800 Qtl</td>
-                            <td style="font-weight:700; color:var(--brand);">11,500 ETB / Qtl</td>
-                            <td class="text-center">
-                                <span class="badge badge-green">
-                                    <span class="badge-dot"></span> 98% Match
-                                </span>
-                            </td>
-                            <td class="text-right">
-                                <button type="button" class="btn btn-primary btn-sm propose-match-btn"
-                                    data-crop="White Teff"
-                                    data-buyer="Abyssinia Flour Mills PLC"
-                                    data-volume="120 Qtl">
-                                    Propose Lot
-                                </button>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td class="code-ref">#DEM-8809</td>
-                            <td>
-                                <div style="font-weight:700; color:var(--deep);">Kaliti Food Complex SC</div>
-                                <div class="meta-sub">Verified Government Processor</div>
-                            </td>
-                            <td>Bread Wheat (Grade 1)</td>
-                            <td class="text-right" style="font-weight:700;">1,500 Qtl</td>
-                            <td style="font-weight:700; color:var(--brand);">5,200 ETB / Qtl</td>
-                            <td class="text-center">
-                                <span class="badge badge-green">
-                                    <span class="badge-dot"></span> 95% Match
-                                </span>
-                            </td>
-                            <td class="text-right">
-                                <button type="button" class="btn btn-primary btn-sm propose-match-btn"
-                                    data-crop="Bread Wheat"
-                                    data-buyer="Kaliti Food Complex SC"
-                                    data-volume="250 Qtl">
-                                    Propose Lot
-                                </button>
+                            <td colspan="7" style="text-align:center; padding:1.5rem; color:var(--muted);">
+                                Loading orders…
                             </td>
                         </tr>
                     </tbody>

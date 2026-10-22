@@ -18,14 +18,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const quickChips = document.querySelectorAll('.chip[data-crop]');
 
-    // Demand modal elements
-    const openDemandBtns = document.querySelectorAll('[data-open-modal="post-demand-modal"]');
-    const demandModal = document.getElementById('post-demand-modal');
-    const closeDemandBtns = document.querySelectorAll('[data-close-modal="post-demand-modal"]');
-    const demandForm = document.getElementById('post-demand-form');
-    const pendingTbody = document.getElementById('pending-requests-tbody');
-    const activeDemandsCountEl = document.getElementById('metric-active-demands');
-
     // Receipt modal elements
     const receiptModal = document.getElementById('receipt-modal');
     const closeReceiptBtns = document.querySelectorAll('[data-close-modal="receipt-modal"]');
@@ -36,11 +28,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const receiptTotal = document.getElementById('receipt-total');
     const receiptHub = document.getElementById('receipt-hub');
     const receiptDate = document.getElementById('receipt-date');
+    const printReceiptBtn = document.getElementById('print-receipt-btn');
 
-    // History filters
+    // History filters & table
     const historySearchInput = document.getElementById('history-search-input');
     const historyHubSelect = document.getElementById('history-hub-select');
     const historyTbody = document.getElementById('trade-history-tbody');
+    const totalOrdersCountEl = document.getElementById('metric-total-orders');
 
     // Toast
     const toast = document.getElementById('toast-msg');
@@ -53,7 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
         clearTimeout(toastTimeout);
         toastTimeout = setTimeout(() => {
             toast.classList.remove('show');
-        }, 4000);
+        }, 4500);
     }
 
     // Benchmark rates per Quintal in ETB
@@ -81,7 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return rate;
             }
         }
-        return 4800; // default estimated rate
+        return 5000;
     }
 
     let currentSearch = null;
@@ -118,10 +112,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 searchBtn.disabled = true;
                 searchBtn.innerHTML = `
                     <svg class="icon animate-spin" style="animation: spin 1s linear infinite; width:1.15rem;height:1.15rem;" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                        <circle cx="12" cy="12" r="10" stroke-width="4" stroke="currentColor" stroke-opacity="0.25"></circle>
-                        <path d="M12 2a10 10 0 0 1 10 10" stroke-width="4" stroke="currentColor"></path>
+                        <circle cx="12" cy="12" r="10" stroke-width="3" stroke="currentColor" stroke-dasharray="32" stroke-linecap="round"/>
                     </svg>
-                    Searching Hubs…
+                    Searching Silos…
                 `;
             }
 
@@ -131,51 +124,50 @@ document.addEventListener('DOMContentLoaded', () => {
                     quality: quality
                 });
 
-                const res = await fetch(`${searchForm.action}?${params.toString()}`);
+                const res = await fetch(`/api/marketplace/search?${params.toString()}`);
                 const data = await res.json();
 
                 if (!res.ok) {
-                    throw new Error(data.error || 'Failed to search stock.');
+                    throw new Error(data.error || 'Failed to search produce inventory.');
                 }
 
                 currentSearch = {
                     crop_name: data.crop_name,
-                    quality: data.quality,
-                    quantity: Number(data.quantity) || 0,
+                    quality: data.quality || 'Grade 1 (Standard)',
+                    quantity: data.quantity || 0,
                     rate: getBenchmarkRate(data.crop_name)
                 };
 
-                // Display result card
-                resultsPanel.classList.remove('hidden');
-                resultCropTitle.textContent = currentSearch.crop_name;
-                resultQualityBadge.textContent = quality ? quality.replace(/_/g, ' ') : 'All Quality Grades';
-                resultStockNum.textContent = currentSearch.quantity.toLocaleString();
-                resultPriceRate.textContent = `${currentSearch.rate.toLocaleString()} ETB`;
+                // Display in Results Panel
+                if (resultCropTitle) resultCropTitle.textContent = currentSearch.crop_name;
+                if (resultQualityBadge) resultQualityBadge.textContent = currentSearch.quality;
+                if (resultStockNum) resultStockNum.textContent = currentSearch.quantity.toLocaleString();
+                if (resultPriceRate) resultPriceRate.textContent = `${currentSearch.rate.toLocaleString()} ETB`;
 
-                if (currentSearch.quantity > 0) {
-                    resultAlert.hidden = true;
-                    purchaseForm.classList.remove('hidden');
-                    purchaseQuantity.max = currentSearch.quantity;
-                    purchaseQuantity.value = '';
-                    updateCalculatedTotal(0);
-                    showToast(`Found ${currentSearch.quantity} Qtl of ${currentSearch.crop_name} in stock.`);
-                } else {
-                    purchaseForm.classList.add('hidden');
-                    resultAlert.hidden = false;
-                    resultAlert.className = 'dash-alert dash-alert-error';
-                    resultAlert.innerHTML = `
-                        <span>Currently 0 Qtl available for "${currentSearch.crop_name}". You can publish a Custom Demand below to have regional agents aggregate harvest for you.</span>
-                    `;
+                if (resultsPanel) {
+                    resultsPanel.classList.remove('hidden');
+                    resultsPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
                 }
 
-                // Smooth scroll to results
-                resultsPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                if (currentSearch.quantity <= 0) {
+                    purchaseForm?.classList.add('hidden');
+                    if (resultAlert) {
+                        resultAlert.textContent = `Zero inventory currently listed for ${currentSearch.crop_name}. Please check back after cooperative agent aggregation.`;
+                        resultAlert.hidden = false;
+                    }
+                } else {
+                    purchaseForm?.classList.remove('hidden');
+                    if (purchaseQuantity) {
+                        purchaseQuantity.max = currentSearch.quantity;
+                        purchaseQuantity.value = '';
+                    }
+                    if (resultAlert) resultAlert.hidden = true;
+                    updateCalculatedTotal(0);
+                }
+
+                showToast(`Search completed: ${currentSearch.quantity} Qtl of ${currentSearch.crop_name} available.`);
             } catch (err) {
-                resultsPanel.classList.remove('hidden');
-                purchaseForm.classList.add('hidden');
-                resultAlert.hidden = false;
-                resultAlert.className = 'dash-alert dash-alert-error';
-                resultAlert.textContent = err.message;
+                showToast(err.message || 'Error querying marketplace inventory.');
             } finally {
                 if (searchBtn) {
                     searchBtn.disabled = false;
@@ -185,18 +177,16 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Dynamic price calculation on purchase quantity input
-    function updateCalculatedTotal(qty) {
-        if (!currentSearch || !purchaseEstTotal) return;
-        const total = qty * currentSearch.rate;
-        purchaseEstTotal.textContent = `${total.toLocaleString()} ETB`;
-    }
+    // Purchase Quantity input update
+    purchaseQuantity?.addEventListener('input', () => {
+        const val = parseFloat(purchaseQuantity.value) || 0;
+        updateCalculatedTotal(val);
+    });
 
-    if (purchaseQuantity) {
-        purchaseQuantity.addEventListener('input', () => {
-            const val = parseFloat(purchaseQuantity.value) || 0;
-            updateCalculatedTotal(val);
-        });
+    function updateCalculatedTotal(qty) {
+        if (!purchaseEstTotal || !currentSearch) return;
+        const total = Math.max(0, qty * currentSearch.rate);
+        purchaseEstTotal.textContent = `${total.toLocaleString()} ETB`;
     }
 
     // Purchase Form Submit
@@ -232,7 +222,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     body: JSON.stringify({
                         crop_name: currentSearch.crop_name,
                         quality: currentSearch.quality,
-                        quantity: qty
+                        quantity: qty,
+                        destination_hub: locationInput?.value || 'Addis Central Terminal'
                     })
                 });
 
@@ -245,30 +236,37 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Update remaining stock locally
                 const remaining = data.remaining_stock;
                 currentSearch.quantity = remaining;
-                resultStockNum.textContent = remaining.toLocaleString();
-                purchaseQuantity.max = remaining;
-                purchaseQuantity.value = '';
+                if (resultStockNum) resultStockNum.textContent = remaining.toLocaleString();
+                if (purchaseQuantity) {
+                    purchaseQuantity.max = remaining;
+                    purchaseQuantity.value = '';
+                }
                 updateCalculatedTotal(0);
 
                 if (remaining <= 0) {
                     purchaseForm.classList.add('hidden');
                 }
 
-                showToast(`Purchase confirmed: ${qty} Qtl ${currentSearch.crop_name} reserved!`);
+                const waybill = data.shipment?.waybill_id || 'Pending';
+                showToast(`Purchase Confirmed! Waybill #${waybill} generated for transporter dispatch.`);
 
-                // Append new order to Trade History table
-                addOrderToHistory({
-                    orderId: `#TRD-${Math.floor(10000 + Math.random() * 90000)}`,
-                    crop: currentSearch.crop_name,
-                    hub: locationInput?.value || 'Bishoftu Hub',
-                    volume: `${qty} Qtl`,
-                    rate: `${currentSearch.rate.toLocaleString()} ETB`,
-                    total: `${(qty * currentSearch.rate).toLocaleString()} ETB`,
-                    date: 'Today (Just now)',
-                    status: 'Processing Dispatch'
-                });
+                // Reload real buyer orders
+                loadBuyerOrders();
+
+                // Open digital receipt for immediate review
+                if (data.order) {
+                    openReceiptModal({
+                        orderId: data.order.order_ref,
+                        crop: data.order.crop_type,
+                        hub: data.order.hub_location,
+                        volume: `${data.order.quantity} Qtl`,
+                        rate: `${data.order.unit_price.toLocaleString()} ETB`,
+                        total: `${data.order.total_price.toLocaleString()} ETB`,
+                        date: new Date(data.order.created_at).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' })
+                    });
+                }
             } catch (err) {
-                showToast(err.message);
+                showToast(err.message || 'Error processing purchase order.');
             } finally {
                 if (purchaseSubmitBtn) {
                     purchaseSubmitBtn.disabled = false;
@@ -278,212 +276,144 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Helper: Add newly executed order to trade history table
-    function addOrderToHistory(order) {
+    // Load Buyer Orders dynamically
+    async function loadBuyerOrders() {
         if (!historyTbody) return;
-        const tr = document.createElement('tr');
-        tr.className = 'history-row';
-        tr.dataset.hub = order.hub.toLowerCase();
-        tr.dataset.search = `${order.orderId} ${order.crop}`.toLowerCase();
-        tr.innerHTML = `
-            <td class="code-ref">${order.orderId}</td>
-            <td>
-                <div style="font-weight:700; color:var(--deep);">${order.crop}</div>
-                <div class="meta-sub">Direct Hub Reservation</div>
-            </td>
-            <td>${order.hub}</td>
-            <td class="text-right" style="font-weight:700;">${order.volume}</td>
-            <td class="text-right" style="color:var(--muted);">${order.rate}</td>
-            <td class="text-right" style="font-weight:800; color:var(--brand);">${order.total}</td>
-            <td class="meta-sub">${order.date}</td>
-            <td class="text-center">
-                <span class="badge badge-amber">
-                    <span class="badge-dot"></span>
-                    ${order.status}
-                </span>
-            </td>
-            <td class="text-right">
-                <button type="button" class="action-link view-receipt-btn"
-                    data-order="${order.orderId}"
-                    data-crop="${order.crop}"
-                    data-hub="${order.hub}"
-                    data-volume="${order.volume}"
-                    data-rate="${order.rate}"
-                    data-total="${order.total}"
-                    data-date="${order.date}">
-                    PDF Receipt
-                </button>
-            </td>
-        `;
-        historyTbody.prepend(tr);
-    }
 
-    // Modal controls for Demand Posting
-    openDemandBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            if (demandModal) demandModal.classList.add('active');
-        });
-    });
+        try {
+            const res = await fetch('/api/buyer/orders');
+            const data = await res.json();
+            const orders = data.orders || [];
 
-    closeDemandBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            if (demandModal) demandModal.classList.remove('active');
-        });
-    });
-
-    if (demandModal) {
-        demandModal.addEventListener('click', (e) => {
-            if (e.target === demandModal) {
-                demandModal.classList.remove('active');
+            if (totalOrdersCountEl) {
+                totalOrdersCountEl.textContent = orders.length.toString();
             }
-        });
-    }
 
-    // Demand Form Submit
-    if (demandForm) {
-        demandForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-
-            const crop = document.getElementById('demand-crop')?.value.trim();
-            const quality = document.getElementById('demand-quality')?.value;
-            const volume = parseFloat(document.getElementById('demand-volume')?.value);
-            const hub = document.getElementById('demand-hub')?.value;
-            const date = document.getElementById('demand-date')?.value;
-            const maxPrice = document.getElementById('demand-price')?.value;
-
-            if (!crop || !volume || volume <= 0) {
-                showToast('Please specify commodity and valid volume.');
+            if (orders.length === 0) {
+                historyTbody.innerHTML = `
+                    <tr>
+                        <td colspan="9" style="text-align:center; padding:2rem; color:var(--muted);">
+                            No purchase orders executed yet. Search available produce stock above to purchase.
+                        </td>
+                    </tr>
+                `;
                 return;
             }
 
-            const submitBtn = demandForm.querySelector('button[type="submit"]');
-            if (submitBtn) {
-                submitBtn.disabled = true;
-                submitBtn.textContent = 'Publishing Requirement…';
-            }
+            historyTbody.innerHTML = '';
+            orders.forEach(order => {
+                const tr = document.createElement('tr');
+                tr.className = 'history-row';
+                tr.dataset.hub = (order.hub_location || '').toLowerCase();
+                tr.dataset.search = `${order.order_ref} ${order.crop_type}`.toLowerCase();
 
-            try {
-                const res = await fetch('/api/demand', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        crop_type: crop,
-                        quality_grade: quality,
-                        quantity: volume,
-                        target_location: hub,
-                        target_date: date,
-                        max_price: maxPrice
-                    })
+                const dateStr = order.created_at
+                    ? new Date(order.created_at).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' })
+                    : 'Recent';
+
+                tr.innerHTML = `
+                    <td class="code-ref">${order.order_ref}</td>
+                    <td>
+                        <div style="font-weight:700; color:var(--deep);">${order.crop_type}</div>
+                        <div class="meta-sub">${order.quality_grade || 'Grade 1'}</div>
+                    </td>
+                    <td>${order.hub_location || 'Bishoftu Hub'}</td>
+                    <td class="text-right" style="font-weight:700;">${order.quantity} Qtl</td>
+                    <td class="text-right" style="color:var(--muted);">${Number(order.unit_price).toLocaleString()} ETB</td>
+                    <td class="text-right" style="font-weight:800; color:var(--brand);">${Number(order.total_price).toLocaleString()} ETB</td>
+                    <td class="meta-sub">${dateStr}</td>
+                    <td class="text-center">
+                        <span class="badge badge-green">
+                            <span class="badge-dot"></span>
+                            ${order.status || 'Confirmed'}
+                        </span>
+                    </td>
+                    <td class="text-right">
+                        <button type="button" class="action-link view-receipt-btn"
+                            data-order="${order.order_ref}"
+                            data-crop="${order.crop_type}"
+                            data-hub="${order.hub_location || 'Bishoftu Hub'}"
+                            data-volume="${order.quantity} Qtl"
+                            data-rate="${Number(order.unit_price).toLocaleString()} ETB"
+                            data-total="${Number(order.total_price).toLocaleString()} ETB"
+                            data-date="${dateStr}">
+                            Receipt
+                        </button>
+                    </td>
+                `;
+                historyTbody.appendChild(tr);
+            });
+
+            // Re-bind receipt buttons
+            historyTbody.querySelectorAll('.view-receipt-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    openReceiptModal({
+                        orderId: btn.dataset.order,
+                        crop: btn.dataset.crop,
+                        hub: btn.dataset.hub,
+                        volume: btn.dataset.volume,
+                        rate: btn.dataset.rate,
+                        total: btn.dataset.total,
+                        date: btn.dataset.date
+                    });
                 });
-
-                const data = await res.json();
-                if (!res.ok) {
-                    throw new Error(data.error || 'Failed to post demand.');
-                }
-
-                // Add to Pending Requests table
-                const reqId = `#REQ-2026-${Math.floor(100 + Math.random() * 900)}`;
-                if (pendingTbody) {
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `
-                        <td class="code-ref">${reqId}</td>
-                        <td>
-                            <div style="font-weight:700; color:var(--deep);">${crop} (${quality})</div>
-                            <div class="meta-sub">Institutional Buyer Requirement</div>
-                        </td>
-                        <td class="text-right" style="font-weight:700; color:var(--brand);">${volume} Qtl</td>
-                        <td>${hub}</td>
-                        <td class="meta-sub">${date || 'Flexible'}</td>
-                        <td class="text-center">
-                            <span class="badge badge-amber">
-                                <span class="badge-dot"></span>
-                                Agent Aggregating
-                            </span>
-                        </td>
-                        <td class="text-right">
-                            <button type="button" class="action-link" onclick="alert('Requirement details: ${reqId}')">Details</button>
-                        </td>
-                    `;
-                    pendingTbody.prepend(tr);
-                }
-
-                if (activeDemandsCountEl) {
-                    const current = parseInt(activeDemandsCountEl.textContent, 10) || 0;
-                    activeDemandsCountEl.textContent = (current + 1).toString();
-                }
-
-                showToast(data.message || 'Procurement requirement posted!');
-                demandForm.reset();
-                demandModal.classList.remove('active');
-            } catch (err) {
-                showToast(err.message);
-            } finally {
-                if (submitBtn) {
-                    submitBtn.disabled = false;
-                    submitBtn.textContent = 'Publish Requirement';
-                }
-            }
-        });
+            });
+        } catch (err) {
+            console.error('Failed to load buyer orders:', err);
+        }
     }
 
-    // Trade History Live Search & Filter
-    function filterHistoryTable() {
-        const query = (historySearchInput?.value || '').toLowerCase().trim();
-        const selectedHub = (historyHubSelect?.value || '').toLowerCase().trim();
+    // Receipt Modal Opening
+    function openReceiptModal(info) {
+        if (!receiptModal) return;
+        if (receiptOrderRef) receiptOrderRef.textContent = info.orderId;
+        if (receiptCrop) receiptCrop.textContent = info.crop;
+        if (receiptHub) receiptHub.textContent = info.hub;
+        if (receiptVolume) receiptVolume.textContent = info.volume;
+        if (receiptRate) receiptRate.textContent = info.rate;
+        if (receiptTotal) receiptTotal.textContent = info.total;
+        if (receiptDate) receiptDate.textContent = info.date;
 
-        const rows = historyTbody?.querySelectorAll('.history-row');
-        if (!rows) return;
+        receiptModal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    // Modal Close
+    closeReceiptBtns.forEach((btn) => {
+        btn.addEventListener('click', () => {
+            receiptModal?.classList.remove('active');
+            document.body.style.overflow = '';
+        });
+    });
+
+    receiptModal?.addEventListener('click', (e) => {
+        if (e.target === receiptModal) {
+            receiptModal.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+    });
+
+    // Print receipt
+    printReceiptBtn?.addEventListener('click', () => {
+        window.print();
+    });
+
+    // History filter & search
+    function filterHistoryTable() {
+        const query = historySearchInput?.value.toLowerCase().trim() || '';
+        const hub = historyHubSelect?.value.toLowerCase().trim() || '';
+        const rows = historyTbody?.querySelectorAll('.history-row') || [];
 
         rows.forEach((row) => {
-            const rowSearch = row.dataset.search || row.textContent.toLowerCase();
-            const rowHub = row.dataset.hub || '';
-
-            const matchesQuery = !query || rowSearch.includes(query);
-            const matchesHub = !selectedHub || rowHub.includes(selectedHub);
-
+            const matchesQuery = !query || row.dataset.search.includes(query);
+            const matchesHub = !hub || row.dataset.hub.includes(hub);
             row.style.display = matchesQuery && matchesHub ? '' : 'none';
         });
     }
 
-    if (historySearchInput) {
-        historySearchInput.addEventListener('input', filterHistoryTable);
-    }
-    if (historyHubSelect) {
-        historyHubSelect.addEventListener('change', filterHistoryTable);
-    }
+    historySearchInput?.addEventListener('input', filterHistoryTable);
+    historyHubSelect?.addEventListener('change', filterHistoryTable);
 
-    // Receipt Modal Viewer
-    document.addEventListener('click', (e) => {
-        const btn = e.target.closest('.view-receipt-btn');
-        if (!btn) return;
-
-        if (receiptOrderRef) receiptOrderRef.textContent = btn.dataset.order || '#TRD-88201';
-        if (receiptCrop) receiptCrop.textContent = btn.dataset.crop || 'Agricultural Produce';
-        if (receiptVolume) receiptVolume.textContent = btn.dataset.volume || '100 Qtl';
-        if (receiptRate) receiptRate.textContent = btn.dataset.rate || '11,500 ETB';
-        if (receiptTotal) receiptTotal.textContent = btn.dataset.total || '1,150,000 ETB';
-        if (receiptHub) receiptHub.textContent = btn.dataset.hub || 'Bishoftu Aggregation Hub';
-        if (receiptDate) receiptDate.textContent = btn.dataset.date || 'Sept 04, 2026';
-
-        if (receiptModal) receiptModal.classList.add('active');
-    });
-
-    closeReceiptBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            if (receiptModal) receiptModal.classList.remove('active');
-        });
-    });
-
-    if (receiptModal) {
-        receiptModal.addEventListener('click', (e) => {
-            if (e.target === receiptModal) receiptModal.classList.remove('active');
-        });
-    }
-
-    const printReceiptBtn = document.getElementById('print-receipt-btn');
-    if (printReceiptBtn) {
-        printReceiptBtn.addEventListener('click', () => {
-            window.print();
-        });
-    }
+    // Initial load
+    loadBuyerOrders();
 });

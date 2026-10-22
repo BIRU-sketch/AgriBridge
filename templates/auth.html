@@ -29,12 +29,12 @@
                 <p class="aside-title">Log in to list produce, review matches, or update a shipment.</p>
                 <dl class="aside-roles">
                     <div><dt>Agents</dt><dd>Register farmers and list their produce.</dd></div>
-                    <div><dt>Buyers</dt><dd>Post demand and confirm delivery.</dd></div>
-                    <div><dt>Transporters</dt><dd>Claim loads and update shipments.</dd></div>
+                    <div><dt>Buyers</dt><dd>Search hub stock and purchase produce.</dd></div>
+                    <div><dt>Transporters</dt><dd>Contracted carriers. Log in with company-issued credentials to claim loads.</dd></div>
                 </dl>
             </div>
 
-            <p class="aside-foot">Farmers don't log in. Their extension agent or cooperative works on their behalf.</p>
+            <p class="aside-foot">Farmers don't log in (their agent works on their behalf). Transporters are hired and provisioned directly by company administration.</p>
         </aside>
 
         <main class="auth-main">
@@ -105,14 +105,10 @@
                                 <span class="role-desc">I want to buy produce.</span>
                             </span>
                         </label>
-                        <label class="role-opt">
-                            <input type="radio" name="role" value="transporter">
-                            <span class="role-text">
-                                <span class="role-title">Transporter</span>
-                                <span class="role-desc">I carry loads with my vehicles.</span>
-                            </span>
-                        </label>
                         <p class="field-err" id="signup-role-err" hidden></p>
+                        <div style="margin-top: .75rem; padding: .65rem .85rem; background: var(--tint); border: 1px solid #C4D9CD; border-radius: var(--radius-s); font-size: .8125rem; color: var(--deep); line-height: 1.45;">
+                            <strong>Are you a Transporter?</strong> Fleet carriers and drivers are hired directly by partner logistics companies. Your account is provisioned by administration—please simply switch to the <strong>Log In</strong> tab.
+                        </div>
                     </fieldset>
 
                     <div class="field">

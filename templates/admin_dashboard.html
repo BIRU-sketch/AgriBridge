@@ -33,7 +33,7 @@
 
             <nav class="dash-nav" aria-label="Admin navigation">
                 <a href="#verification" aria-current="true">User Verification</a>
-                <a href="#kpis">Platform KPIs</a>
+                <a href="#vehicles">Vehicle Inspections</a>
                 <a href="#audit">Audit History</a>
                 <a href="#oracle">Price Oracle</a>
             </nav>
@@ -70,11 +70,11 @@
                 </p>
             </div>
             <div class="welcome-actions">
-                <a href="#verification" class="btn btn-primary btn-lg">
-                    {{ icon('shield-check') }} Review Pending Users
-                </a>
-                <a href="#audit" class="btn btn-outline btn-lg">
-                    {{ icon('clipboard-check') }} Live Audit Log
+                <button type="button" class="btn btn-primary btn-lg" data-open-modal="provision-modal">
+                    {{ icon('truck') }} Provision Transporter
+                </button>
+                <a href="#vehicles" class="btn btn-outline btn-lg">
+                    {{ icon('shield-check') }} Vehicle Inspections
                 </a>
             </div>
         </section>
@@ -87,7 +87,7 @@
                 </div>
                 <div class="metric-content">
                     <span class="metric-label">Total Users</span>
-                    <span class="metric-val">128</span>
+                    <span class="metric-val" id="metric-total-users">15</span>
                     <span class="metric-sub">Agents, buyers &amp; fleets</span>
                 </div>
             </div>
@@ -98,7 +98,7 @@
                 </div>
                 <div class="metric-content">
                     <span class="metric-label">Pending Verification</span>
-                    <span class="metric-val" id="metric-pending-count">4</span>
+                    <span class="metric-val" id="metric-pending-count">3</span>
                     <span class="metric-sub">Awaiting credential check</span>
                 </div>
             </div>
@@ -109,7 +109,7 @@
                 </div>
                 <div class="metric-content">
                     <span class="metric-label">Hub Buffer Stock</span>
-                    <span class="metric-val">24,500 <small style="font-size:.9rem;font-weight:600;">Qtl</small></span>
+                    <span class="metric-val" id="metric-buffer-stock">5,350 <small style="font-size:.9rem;font-weight:600;">Qtl</small></span>
                     <span class="metric-sub">Across 6 regional hubs</span>
                 </div>
             </div>
@@ -120,7 +120,7 @@
                 </div>
                 <div class="metric-content">
                     <span class="metric-label">Total Trade Settled</span>
-                    <span class="metric-val">84.5M <small style="font-size:.9rem;font-weight:600;">ETB</small></span>
+                    <span class="metric-val" id="metric-trade-settled">89.4M <small style="font-size:.9rem;font-weight:600;">ETB</small></span>
                     <span class="metric-sub">100% escrow guaranteed</span>
                 </div>
             </div>
@@ -144,7 +144,12 @@
                     <h2>{{ icon('shield-check') }} User Verification Queue</h2>
                     <p>Review and authorize newly registered cooperative agents, commercial buyers, and carrier logistics operators.</p>
                 </div>
-                <span class="meta-sub">Identity &amp; License Vetting</span>
+                <div style="display:flex; align-items:center; gap:.75rem;">
+                    <span class="meta-sub">Identity &amp; License Vetting</span>
+                    <button type="button" class="btn btn-primary btn-sm" data-open-modal="provision-modal">
+                        {{ icon('truck') }} + Provision Transporter
+                    </button>
+                </div>
             </div>
 
             <div class="table-responsive">
@@ -160,7 +165,7 @@
                             <th class="text-right">Admin Action</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody id="verification-tbody">
                         <tr>
                             <td class="code-ref">#USR-9921</td>
                             <td>
@@ -284,8 +289,39 @@
             </div>
         </section>
 
-        <!-- Section 2: Platform Live Activity & Audit Stream -->
-        <section id="audit" class="dash-card">
+        <!-- Section 2: Fleet Vehicle Inspection Queue -->
+        <section id="vehicles" class="dash-card">
+            <div class="dash-card-header">
+                <div>
+                    <h2>{{ icon('truck') }} Vehicle Roadworthiness Inspection Queue</h2>
+                    <p>Inspect newly registered commercial vehicles and authorize them for regional hub cargo distribution.</p>
+                </div>
+                <span class="badge badge-amber" id="pending-vehicles-badge">Inspection Required</span>
+            </div>
+
+            <div class="table-responsive">
+                <table class="dash-table">
+                    <thead>
+                        <tr>
+                            <th>Plate Number</th>
+                            <th>Vehicle Model</th>
+                            <th class="text-right">Payload Capacity</th>
+                            <th>Assigned Driver</th>
+                            <th>Driver Contact</th>
+                            <th class="text-center">Inspection Status</th>
+                            <th class="text-right">Roadworthiness Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="vehicle-inspection-tbody">
+                        <tr>
+                            <td colspan="7" style="text-align:center; padding:1.5rem; color:var(--muted);">
+                                Loading vehicles awaiting inspection…
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
             <div class="dash-card-header">
                 <div>
                     <h2>{{ icon('clipboard-check') }} Platform Audit Trail &amp; Transaction Ledger</h2>
@@ -417,6 +453,57 @@
         </section>
 
     </main>
+
+    <!-- ===== Modal: Provision Contracted Transporter ===== -->
+    <div id="provision-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="provision-modal-title">
+        <div class="modal-box">
+            <div class="modal-head">
+                <h3 id="provision-modal-title">Provision Contracted Transporter Account</h3>
+                <button type="button" class="modal-close" data-close-modal="provision-modal" aria-label="Close dialog">&times;</button>
+            </div>
+
+            <form id="provision-transporter-form">
+                <div class="modal-body">
+                    <p style="font-size:.875rem; color:var(--muted); margin:0;">
+                        Transporters cannot self-register. Issue official company login credentials to contracted fleet operators and vetted logistics partners.
+                    </p>
+
+                    <div class="search-field">
+                        <label for="trans-name">Operator / Primary Contact Full Name</label>
+                        <input type="text" id="trans-name" name="full_name" placeholder="e.g. Tariku Fikadu" required>
+                    </div>
+
+                    <div class="search-field">
+                        <label for="trans-company">Logistics Enterprise / Fleet Name</label>
+                        <input type="text" id="trans-company" name="company_name" placeholder="e.g. Ethio-Freight Express PLC" required>
+                    </div>
+
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+                        <div class="search-field">
+                            <label for="trans-email">Login Email Address</label>
+                            <input type="email" id="trans-email" name="email" placeholder="name@carrier.et" required>
+                        </div>
+                        <div class="search-field">
+                            <label for="trans-password">Temporary Password</label>
+                            <input type="text" id="trans-password" name="password" value="transporter123" required>
+                        </div>
+                    </div>
+
+                    <div class="search-field">
+                        <label for="trans-license">Commercial Transport Permit / License Number</label>
+                        <input type="text" id="trans-license" name="license_ref" placeholder="e.g. MoT-Permit #88204" required>
+                    </div>
+                </div>
+
+                <div class="modal-foot">
+                    <button type="button" class="btn btn-ghost" data-close-modal="provision-modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        {{ icon('truck') }} Issue Account &amp; Activate Login
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <!-- Toast Notification -->
     <div id="toast-msg" class="toast-msg" role="status" aria-live="polite"></div>

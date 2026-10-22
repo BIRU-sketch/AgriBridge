@@ -143,20 +143,20 @@
                     <div class="route-header">
                         <div>
                             <div class="meta-sub" style="margin-bottom:.3rem;">
-                                Waybill Ref: <span class="code-ref">#WB-9042</span> &bull; State Buffer Consignment
+                                Waybill Ref: <span class="code-ref" id="active-waybill-id">#WB-9042</span> &bull; State Buffer Consignment
                             </div>
-                            <div class="route-title">
+                            <div class="route-title" id="active-route-title">
                                 Humera Aggregation Hub {{ icon('arrow-right') }} Addis Central Distribution Center
                             </div>
                         </div>
                         <div class="route-meta">
                             <div>
                                 <span class="meta-sub">Assigned Cargo:</span>
-                                <div><strong>120 Quintals (Sesame - Export Quality)</strong></div>
+                                <div id="active-assigned-cargo"><strong>120 Quintals (Sesame - Export Quality)</strong></div>
                             </div>
                             <div>
                                 <span class="meta-sub">Assigned Vehicle:</span>
-                                <div><strong>Isuzu FSR (ET-3-4521)</strong></div>
+                                <div id="active-assigned-vehicle"><strong>Isuzu FSR (ET-3-4521)</strong></div>
                             </div>
                         </div>
                     </div>
@@ -215,7 +215,7 @@
             </div>
 
             <div class="dash-card-body">
-                <div class="loads-grid">
+                <div class="loads-grid" id="available-loads-grid">
                     <!-- Load Card 1 -->
                     <div class="load-card">
                         <div>
@@ -360,9 +360,9 @@
             <div class="dash-card-header">
                 <div>
                     <h2>{{ icon('truck') }} Registered Vehicle Fleet</h2>
-                    <p>Commercial trucks registered for official grain and harvest distribution.</p>
+                    <p>Commercial trucks registered for official grain and harvest distribution (Quota: Max 5 Vehicles).</p>
                 </div>
-                <button type="button" class="btn btn-primary btn-sm" data-open-modal="vehicle-modal">
+                <button type="button" class="btn btn-primary btn-sm" id="register-veh-btn" data-open-modal="vehicle-modal">
                     {{ icon('truck') }} Register New Vehicle
                 </button>
             </div>
@@ -508,7 +508,7 @@
             <form id="vehicle-form">
                 <div class="modal-body">
                     <p style="font-size:.875rem; color:var(--muted); margin:0;">
-                        Add a transport vehicle to your carrier profile to claim bulk consignments from rural hubs.
+                        Add a transport vehicle to your carrier fleet (Maximum quota: 5 vehicles). Newly registered vehicles must undergo administrative roadworthiness approval before dispatch.
                     </p>
 
                     <div class="input-field">

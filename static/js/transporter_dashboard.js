@@ -8,8 +8,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const activeConsignmentsCount = document.getElementById('metric-active-consignments');
     const historyTbody = document.getElementById('completed-history-tbody');
 
-    // Available loads buttons
-    const acceptLoadBtns = document.querySelectorAll('.accept-load-btn');
+    // Route summary elements
+    const activeWaybillId = document.getElementById('active-waybill-id');
+    const activeRouteTitle = document.getElementById('active-route-title');
+    const activeAssignedCargo = document.getElementById('active-assigned-cargo');
+    const activeAssignedVehicle = document.getElementById('active-assigned-vehicle');
+
+    // Available loads container
+    const availableLoadsGrid = document.getElementById('available-loads-grid');
     const availableLoadsCount = document.getElementById('metric-available-loads');
 
     // Vehicle modal elements
@@ -39,33 +45,38 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 4000);
     }
 
-    // Stepper State Machine
+    // Stepper Stages:
+    // 0: Ready for Carrier, 1: Dispatched, 2: Loaded & Weighed, 3: In Transit, 4: Delivered & Settled
     const STAGES = [
+        { name: 'Ready for Carrier', width: '10%', btnText: 'Awaiting Driver Claim', statusBadge: 'Ready' },
         { name: 'Dispatched', width: '25%', btnText: 'Confirm Hub Arrival & Loading', statusBadge: 'Dispatched' },
         { name: 'Loaded & Weighed', width: '50%', btnText: 'Depart on Transit', statusBadge: 'Loaded' },
         { name: 'In Transit', width: '75%', btnText: 'Mark as Delivered & Offloaded', statusBadge: 'In Transit' },
         { name: 'Delivered & Offloaded', width: '100%', btnText: 'Trip Completed & Settled', statusBadge: 'Delivered' }
     ];
 
-    let currentStageIndex = 2; // Default starting at 'In Transit'
+    let currentShipment = null;
 
-    function updateStepperUI() {
-        const stage = STAGES[currentStageIndex];
+    function updateStepperUI(stageIndex) {
+        const stage = STAGES[stageIndex] || STAGES[1];
         if (stepperFill) stepperFill.style.width = stage.width;
 
         stepItems.forEach((item, idx) => {
             item.classList.remove('active', 'completed');
-            if (idx < currentStageIndex) {
+            // Stepper HTML has 4 visual steps representing stages 1, 2, 3, 4
+            const visualStep = idx + 1;
+            if (visualStep < stageIndex) {
                 item.classList.add('completed');
-            } else if (idx === currentStageIndex) {
+            } else if (visualStep === stageIndex) {
                 item.classList.add('active');
             }
         });
 
         if (currentStatusText) currentStatusText.textContent = stage.name;
         if (activeRouteStatusBadge) activeRouteStatusBadge.textContent = stage.statusBadge;
+
         if (advanceStatusBtn) {
-            if (currentStageIndex === STAGES.length - 1) {
+            if (stageIndex >= STAGES.length - 1) {
                 advanceStatusBtn.textContent = 'Trip Completed & Settled';
                 advanceStatusBtn.disabled = true;
                 advanceStatusBtn.classList.remove('btn-primary');
@@ -73,166 +84,375 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 advanceStatusBtn.textContent = stage.btnText;
                 advanceStatusBtn.disabled = false;
+                advanceStatusBtn.classList.remove('btn-ghost');
+                advanceStatusBtn.classList.add('btn-primary');
             }
         }
     }
 
+    // 1. Load Active Shipment
+    async function loadActiveRoute() {
+        try {
+            const res = await fetch('/api/transporter/active-shipment');
+            const data = await res.json();
+            const shipment = data.shipment;
+            currentShipment = shipment;
+
+            if (!shipment) {
+                if (activeWaybillId) activeWaybillId.textContent = 'None';
+                if (activeRouteTitle) activeRouteTitle.textContent = 'No Active Transport Assignment';
+                if (activeAssignedCargo) activeAssignedCargo.innerHTML = '<strong>No cargo assigned</strong>';
+                if (activeAssignedVehicle) activeAssignedVehicle.innerHTML = '<strong>Select vehicle from fleet</strong>';
+                if (activeConsignmentsCount) activeConsignmentsCount.innerHTML = `0 <small style="font-size:.9rem;font-weight:600;">Trips</small>`;
+                if (currentStatusText) currentStatusText.textContent = 'Ready for assignment';
+                if (advanceStatusBtn) {
+                    advanceStatusBtn.textContent = 'Claim Available Load Below';
+                    advanceStatusBtn.disabled = true;
+                }
+                return;
+            }
+
+            if (activeWaybillId) activeWaybillId.textContent = `#${shipment.waybill_id}`;
+            if (activeRouteTitle) activeRouteTitle.textContent = `${shipment.origin_hub} ➔ ${shipment.destination_hub}`;
+            if (activeAssignedCargo) activeAssignedCargo.innerHTML = `<strong>${shipment.quantity} Qtl (${shipment.crop_type})</strong>`;
+            if (activeAssignedVehicle) activeAssignedVehicle.innerHTML = `<strong>${shipment.vehicle_plate || 'Assigned Truck'}</strong>`;
+            if (activeConsignmentsCount) activeConsignmentsCount.innerHTML = `1 <small style="font-size:.9rem;font-weight:600;">Trip</small>`;
+
+            const stageIdx = shipment.stage_index !== undefined ? shipment.stage_index : 3;
+            updateStepperUI(stageIdx);
+        } catch (err) {
+            console.error('Failed to load active route:', err);
+        }
+    }
+
+    // Advance Status Button Click
     if (advanceStatusBtn) {
         advanceStatusBtn.addEventListener('click', async () => {
-            if (currentStageIndex >= STAGES.length - 1) return;
+            if (!currentShipment) {
+                showToast('No active consignment to update.');
+                return;
+            }
+
+            const currentIdx = currentShipment.stage_index !== undefined ? currentShipment.stage_index : 2;
+            if (currentIdx >= STAGES.length - 1) return;
+
+            const nextIndex = currentIdx + 1;
+            const nextStage = STAGES[nextIndex];
 
             advanceStatusBtn.disabled = true;
             advanceStatusBtn.textContent = 'Updating Waybill…';
-
-            const nextIndex = currentStageIndex + 1;
-            const nextStage = STAGES[nextIndex];
 
             try {
                 const res = await fetch('/api/shipment/update-status', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        waybill_id: 'WB-9042',
-                        status: nextStage.name
+                        waybill_id: currentShipment.waybill_id,
+                        status: nextStage.name,
+                        stage_index: nextIndex
                     })
                 });
 
                 const data = await res.json();
-                currentStageIndex = nextIndex;
-                updateStepperUI();
+                if (!res.ok) throw new Error(data.error || 'Failed to update waybill status');
+
+                currentShipment.stage_index = nextIndex;
+                updateStepperUI(nextIndex);
                 showToast(data.message || `Status updated to ${nextStage.name}`);
 
-                // If completed final delivery, append to completed distribution table
-                if (currentStageIndex === STAGES.length - 1) {
-                    if (activeConsignmentsCount) {
-                        const count = parseInt(activeConsignmentsCount.textContent, 10) || 1;
-                        activeConsignmentsCount.textContent = Math.max(0, count - 1).toString();
-                    }
-
-                    if (historyTbody) {
-                        const tr = document.createElement('tr');
-                        tr.innerHTML = `
-                            <td class="code-ref">#WB-9042</td>
-                            <td>
-                                <div style="font-weight:700; color:var(--deep);">Humera Aggregation Hub ➔ Addis Central</div>
-                                <div class="meta-sub">Sesame (Export Quality) &bull; Isuzu FSR</div>
-                            </td>
-                            <td class="text-right" style="font-weight:700;">120 Qtl</td>
-                            <td class="text-right" style="font-weight:800; color:var(--brand);">22,000 ETB</td>
-                            <td class="meta-sub">Today (Just now)</td>
-                            <td class="text-center">
-                                <span class="badge badge-green">
-                                    <span class="badge-dot"></span>
-                                    Verified &amp; Settled
-                                </span>
-                            </td>
-                            <td class="text-right">
-                                <button type="button" class="action-link view-waybill-btn"
-                                    data-waybill="#WB-9042"
-                                    data-route="Humera Hub ➔ Addis Central Warehouse"
-                                    data-cargo="Sesame - Export Quality"
-                                    data-tonnage="120 Quintals (12 MT)"
-                                    data-tariff="22,000 ETB"
-                                    data-vehicle="Isuzu FSR (ET-3-4521)"
-                                    data-driver="Tariku F.">
-                                    Digital Waybill
-                                </button>
-                            </td>
-                        `;
-                        historyTbody.prepend(tr);
-                    }
+                // If final stage reached (Delivered & Settled)
+                if (nextIndex >= STAGES.length - 1) {
+                    loadCompletedHistory();
+                    setTimeout(() => {
+                        loadActiveRoute();
+                        loadAvailableLoads();
+                    }, 1200);
                 }
             } catch (err) {
                 showToast(err.message || 'Error updating status');
-                updateStepperUI();
+                updateStepperUI(currentIdx);
             }
         });
     }
 
-    // Accept Load Assignment
-    acceptLoadBtns.forEach((btn) => {
-        btn.addEventListener('click', async () => {
-            const card = btn.closest('.load-card');
-            const routeTitle = card?.querySelector('.load-route-title')?.textContent || 'Hub Consignment';
-            const waybillId = `WB-${Math.floor(9050 + Math.random() * 50)}`;
+    // 2. Load Available Loads
+    async function loadAvailableLoads() {
+        if (!availableLoadsGrid) return;
 
-            btn.disabled = true;
-            btn.textContent = 'Claiming Load…';
+        try {
+            const res = await fetch('/api/transporter/available-loads');
+            const data = await res.json();
+            const loads = data.loads || [];
 
-            try {
-                const res = await fetch('/api/shipment/claim', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        waybill_id: waybillId,
-                        route: routeTitle,
-                        vehicle_plate: 'ET-3-4521'
-                    })
-                });
-
-                const data = await res.json();
-                btn.textContent = '✓ Assigned & Active';
-                btn.classList.remove('btn-outline');
-                btn.classList.add('btn-primary');
-
-                showToast(data.message || `Route assignment for ${routeTitle} accepted!`);
-
-                if (availableLoadsCount) {
-                    const current = parseInt(availableLoadsCount.textContent, 10) || 4;
-                    availableLoadsCount.textContent = Math.max(0, current - 1).toString();
-                }
-
-                if (activeConsignmentsCount) {
-                    const current = parseInt(activeConsignmentsCount.textContent, 10) || 1;
-                    activeConsignmentsCount.textContent = (current + 1).toString();
-                }
-            } catch (err) {
-                showToast(err.message || 'Error claiming load');
-                btn.disabled = false;
-                btn.textContent = 'Accept Route Assignment';
+            if (availableLoadsCount) {
+                availableLoadsCount.textContent = loads.length.toString();
             }
-        });
-    });
 
-    // Vehicle Modal Handling
+            if (loads.length === 0) {
+                availableLoadsGrid.innerHTML = `
+                    <div style="grid-column: 1 / -1; padding: 2.5rem; text-align: center; color: var(--muted); background: var(--paper); border: 1.5px dashed var(--line); border-radius: 12px;">
+                        All available consignments have been claimed. When buyers complete purchases, new bulk loads will appear here.
+                    </div>
+                `;
+                return;
+            }
+
+            availableLoadsGrid.innerHTML = '';
+            loads.forEach(load => {
+                const card = document.createElement('div');
+                card.className = 'load-card';
+                card.innerHTML = `
+                    <div>
+                        <div class="load-card-head">
+                            <span class="badge badge-green">Ready for Dispatch</span>
+                            <span class="code-ref">#${load.waybill_id}</span>
+                        </div>
+                        <h3 class="load-route-title" style="margin-top:.75rem;">
+                            ${load.origin_hub} ➔ ${load.destination_hub}
+                        </h3>
+                        <ul class="load-specs-list">
+                            <li>
+                                <span>Commodity:</span>
+                                <strong>${load.crop_type} (${load.quantity} Qtl)</strong>
+                            </li>
+                            <li>
+                                <span>Order Ref:</span>
+                                <span>${load.order_ref || 'Hub Allocation'}</span>
+                            </li>
+                            <li>
+                                <span>Pickup Hub:</span>
+                                <span>${load.origin_hub}</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="load-tariff">
+                        <span class="meta-sub">Official Tariff:</span>
+                        <span class="load-tariff-val">${Number(load.tariff_etb || 18500).toLocaleString()} ETB</span>
+                    </div>
+                    <button type="button" class="btn btn-primary btn-block accept-load-btn" data-waybill="${load.waybill_id}">
+                        Claim &amp; Assign Truck
+                    </button>
+                `;
+                availableLoadsGrid.appendChild(card);
+            });
+
+            // Bind accept buttons
+            availableLoadsGrid.querySelectorAll('.accept-load-btn').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    const waybillId = btn.dataset.waybill;
+                    btn.disabled = true;
+                    btn.textContent = 'Claiming Load…';
+
+                    try {
+                        const res = await fetch('/api/shipment/claim', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                waybill_id: waybillId,
+                                vehicle_plate: 'ET-3-4521'
+                            })
+                        });
+
+                        const data = await res.json();
+                        if (!res.ok) throw new Error(data.error || 'Failed to claim consignment');
+
+                        showToast(data.message || `Consignment #${waybillId} successfully claimed!`);
+                        loadActiveRoute();
+                        loadAvailableLoads();
+                        loadFleet();
+                    } catch (err) {
+                        showToast(err.message || 'Error claiming consignment');
+                        btn.disabled = false;
+                        btn.textContent = 'Claim & Assign Truck';
+                    }
+                });
+            });
+        } catch (err) {
+            console.error('Failed to load available loads:', err);
+        }
+    }
+
+    // 3. Load Fleet
+    async function loadFleet() {
+        if (!fleetGrid) return;
+
+        try {
+            const res = await fetch('/api/transporter/fleet');
+            const data = await res.json();
+            const vehicles = data.vehicles || [];
+            const registerVehBtn = document.getElementById('register-veh-btn');
+
+            if (fleetCountEl) {
+                fleetCountEl.innerHTML = `${vehicles.length} / 5 <small style="font-size:.9rem;font-weight:600;">Trucks</small>`;
+            }
+
+            // Enforce limit on frontend button
+            if (registerVehBtn) {
+                if (vehicles.length >= 5) {
+                    registerVehBtn.disabled = true;
+                    registerVehBtn.textContent = 'Quota Reached (Max 5)';
+                    registerVehBtn.classList.remove('btn-primary');
+                    registerVehBtn.classList.add('btn-ghost');
+                } else {
+                    registerVehBtn.disabled = false;
+                    registerVehBtn.textContent = 'Register New Vehicle';
+                    registerVehBtn.classList.remove('btn-ghost');
+                    registerVehBtn.classList.add('btn-primary');
+                }
+            }
+
+            if (vehicles.length === 0) {
+                fleetGrid.innerHTML = `
+                    <div style="grid-column: 1 / -1; padding: 2rem; text-align: center; color: var(--muted);">
+                        No vehicles registered yet. Click "Register New Vehicle" above (Max 5).
+                    </div>
+                `;
+                return;
+            }
+
+            fleetGrid.innerHTML = '';
+            vehicles.forEach(veh => {
+                const isApproved = veh.approved !== false && !veh.status?.includes('Pending');
+                const isAvailable = isApproved && (veh.status?.includes('Available') || !veh.status);
+                const isPending = !isApproved || veh.status?.includes('Pending');
+
+                let badgeHtml = '';
+                if (isPending) {
+                    badgeHtml = `<span class="badge badge-amber"><span class="badge-dot"></span> Pending Approval</span>`;
+                } else if (isAvailable) {
+                    badgeHtml = `<span class="badge badge-green"><span class="badge-dot"></span> Available at Hub</span>`;
+                } else {
+                    badgeHtml = `<span class="badge badge-amber"><span class="badge-dot"></span> ${veh.status}</span>`;
+                }
+
+                const card = document.createElement('div');
+                card.className = 'vehicle-card';
+                card.innerHTML = `
+                    <div class="vehicle-head">
+                        <span class="vehicle-plate">${veh.plate_number}</span>
+                        ${badgeHtml}
+                    </div>
+                    <div class="vehicle-meta">
+                        <div><strong>${veh.vehicle_type}</strong> &bull; ${veh.capacity_quintals} Qtl Capacity</div>
+                        <div>Driver: ${veh.driver_name || 'Assigned Driver'} &bull; Tel: ${veh.phone_number || '+251 91...'}</div>
+                        ${isPending ? '<div style="font-size:.75rem; color:#B45309; margin-top:.25rem;">Awaiting administrative roadworthiness inspection before dispatch.</div>' : ''}
+                    </div>
+                `;
+                fleetGrid.appendChild(card);
+            });
+        } catch (err) {
+            console.error('Failed to load fleet:', err);
+        }
+    }
+
+    // 4. Load Completed Distribution History
+    async function loadCompletedHistory() {
+        if (!historyTbody) return;
+
+        try {
+            const res = await fetch('/api/transporter/completed-history');
+            const data = await res.json();
+            const completed = data.completed || [];
+
+            if (completed.length === 0) {
+                historyTbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" style="text-align:center; padding:2rem; color:var(--muted);">
+                            No trips settled yet. Completed deliveries will be logged here.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            historyTbody.innerHTML = '';
+            completed.forEach(shipment => {
+                const tr = document.createElement('tr');
+                const dateStr = shipment.delivered_at
+                    ? new Date(shipment.delivered_at).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' })
+                    : 'Recent';
+
+                tr.innerHTML = `
+                    <td class="code-ref">#${shipment.waybill_id}</td>
+                    <td>
+                        <div style="font-weight:700; color:var(--deep);">${shipment.origin_hub} ➔ ${shipment.destination_hub}</div>
+                        <div class="meta-sub">${shipment.crop_type} &bull; ${shipment.vehicle_plate || 'Freight'}</div>
+                    </td>
+                    <td class="text-right" style="font-weight:700;">${shipment.quantity} Qtl</td>
+                    <td class="text-right" style="font-weight:800; color:var(--brand);">${Number(shipment.tariff_etb || 20000).toLocaleString()} ETB</td>
+                    <td class="meta-sub">${dateStr}</td>
+                    <td class="text-center">
+                        <span class="badge badge-green">
+                            <span class="badge-dot"></span> Verified &amp; Settled
+                        </span>
+                    </td>
+                    <td class="text-right">
+                        <button type="button" class="action-link view-waybill-btn"
+                            data-waybill="#${shipment.waybill_id}"
+                            data-route="${shipment.origin_hub} ➔ ${shipment.destination_hub}"
+                            data-cargo="${shipment.crop_type}"
+                            data-tonnage="${shipment.quantity} Quintals"
+                            data-tariff="${Number(shipment.tariff_etb || 20000).toLocaleString()} ETB"
+                            data-vehicle="${shipment.vehicle_plate || 'Isuzu FSR'}"
+                            data-driver="${shipment.transporter_name || 'Assigned Driver'}">
+                            Digital Waybill
+                        </button>
+                    </td>
+                `;
+                historyTbody.appendChild(tr);
+            });
+
+            // Re-bind digital waybill modal
+            historyTbody.querySelectorAll('.view-waybill-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const modal = document.getElementById('waybill-modal');
+                    if (!modal) return;
+                    document.getElementById('waybill-ref-title').textContent = btn.dataset.waybill;
+                    document.getElementById('wb-route').textContent = btn.dataset.route;
+                    document.getElementById('wb-cargo').textContent = btn.dataset.cargo;
+                    document.getElementById('wb-tonnage').textContent = btn.dataset.tonnage;
+                    document.getElementById('wb-tariff').textContent = btn.dataset.tariff;
+                    document.getElementById('wb-vehicle').textContent = btn.dataset.vehicle;
+                    document.getElementById('wb-driver').textContent = btn.dataset.driver;
+                    modal.classList.add('active');
+                    document.body.style.overflow = 'hidden';
+                });
+            });
+        } catch (err) {
+            console.error('Failed to load completed history:', err);
+        }
+    }
+
+    // Vehicle Modal Open/Close
     openVehicleBtns.forEach(btn => {
         btn.addEventListener('click', () => {
-            if (vehicleModal) vehicleModal.classList.add('active');
+            vehicleModal?.classList.add('active');
+            document.body.style.overflow = 'hidden';
         });
     });
 
     closeVehicleBtns.forEach(btn => {
         btn.addEventListener('click', () => {
-            if (vehicleModal) vehicleModal.classList.remove('active');
+            vehicleModal?.classList.remove('active');
+            document.body.style.overflow = '';
         });
     });
 
-    if (vehicleModal) {
-        vehicleModal.addEventListener('click', (e) => {
-            if (e.target === vehicleModal) vehicleModal.classList.remove('active');
-        });
-    }
-
+    // Vehicle Form Submit
     if (vehicleForm) {
         vehicleForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-
-            const plate = document.getElementById('vehicle-plate')?.value.trim();
-            const type = document.getElementById('vehicle-type')?.value;
-            const capacity = document.getElementById('vehicle-capacity')?.value;
-            const driver = document.getElementById('vehicle-driver')?.value.trim();
-            const phone = document.getElementById('vehicle-phone')?.value.trim();
-
-            if (!plate) {
-                showToast('Please enter the vehicle plate number.');
-                return;
-            }
-
             const submitBtn = vehicleForm.querySelector('button[type="submit"]');
             if (submitBtn) {
                 submitBtn.disabled = true;
-                submitBtn.textContent = 'Registering…';
+                submitBtn.textContent = 'Registering Vehicle…';
             }
+
+            const plate = document.getElementById('veh-plate')?.value.trim();
+            const type = document.getElementById('veh-type')?.value;
+            const cap = parseFloat(document.getElementById('veh-capacity')?.value) || 100;
+            const driver = document.getElementById('veh-driver')?.value.trim() || 'Primary Driver';
+            const phone = document.getElementById('veh-phone')?.value.trim() || '';
 
             try {
                 const res = await fetch('/api/vehicle', {
@@ -241,101 +461,46 @@ document.addEventListener('DOMContentLoaded', () => {
                     body: JSON.stringify({
                         plate_number: plate,
                         vehicle_type: type,
-                        capacity_quintals: capacity,
+                        capacity_quintals: cap,
                         driver_name: driver,
                         phone_number: phone
                     })
                 });
 
                 const data = await res.json();
-                if (!res.ok) throw new Error(data.error || 'Failed to register vehicle.');
+                if (!res.ok) throw new Error(data.error || 'Failed to register vehicle');
 
-                // Append vehicle card to fleet grid
-                if (fleetGrid) {
-                    const card = document.createElement('div');
-                    card.className = 'vehicle-card';
-                    card.innerHTML = `
-                        <div class="vehicle-head">
-                            <span class="vehicle-plate">${plate}</span>
-                            <span class="badge badge-green">
-                                <span class="badge-dot"></span>
-                                Available at Hub
-                            </span>
-                        </div>
-                        <div class="vehicle-meta">
-                            <div><strong>${type}</strong> &bull; ${capacity} Qtl Capacity</div>
-                            <div>Driver: ${driver || 'Primary Driver'} &bull; ${phone || 'Verified'}</div>
-                        </div>
-                    `;
-                    fleetGrid.prepend(card);
-                }
-
-                if (fleetCountEl) {
-                    const cur = parseInt(fleetCountEl.textContent, 10) || 3;
-                    fleetCountEl.textContent = (cur + 1).toString();
-                }
-
-                showToast(data.message || 'Vehicle registered to fleet!');
+                vehicleModal?.classList.remove('active');
+                document.body.style.overflow = '';
                 vehicleForm.reset();
-                vehicleModal.classList.remove('active');
+                showToast(`Vehicle ${plate} registered successfully!`);
+                loadFleet();
             } catch (err) {
-                showToast(err.message);
+                showToast(err.message || 'Error registering vehicle');
             } finally {
                 if (submitBtn) {
                     submitBtn.disabled = false;
-                    submitBtn.textContent = 'Register Vehicle';
+                    submitBtn.textContent = 'Register Vehicle in Fleet';
                 }
             }
         });
     }
 
-    // Waybill Modal Handling
-    document.addEventListener('click', (e) => {
-        const btn = e.target.closest('.view-waybill-btn');
-        if (!btn) return;
-
-        const waybillId = btn.dataset.waybill || '#WB-9042';
-        const route = btn.dataset.route || 'Regional Route';
-        const cargo = btn.dataset.cargo || 'Agricultural Commodity';
-        const tonnage = btn.dataset.tonnage || '100 Qtl';
-        const tariff = btn.dataset.tariff || '18,500 ETB';
-        const vehicle = btn.dataset.vehicle || 'Isuzu FSR';
-        const driver = btn.dataset.driver || 'Assigned Driver';
-
-        const refEl = document.getElementById('wb-modal-ref');
-        const routeEl = document.getElementById('wb-modal-route');
-        const cargoEl = document.getElementById('wb-modal-cargo');
-        const tonnageEl = document.getElementById('wb-modal-tonnage');
-        const tariffEl = document.getElementById('wb-modal-tariff');
-        const vehicleEl = document.getElementById('wb-modal-vehicle');
-        const driverEl = document.getElementById('wb-modal-driver');
-
-        if (refEl) refEl.textContent = waybillId;
-        if (routeEl) routeEl.textContent = route;
-        if (cargoEl) cargoEl.textContent = cargo;
-        if (tonnageEl) tonnageEl.textContent = tonnage;
-        if (tariffEl) tariffEl.textContent = tariff;
-        if (vehicleEl) vehicleEl.textContent = vehicle;
-        if (driverEl) driverEl.textContent = driver;
-
-        if (waybillModal) waybillModal.classList.add('active');
-    });
-
+    // Waybill Modal Close
     closeWaybillBtns.forEach(btn => {
         btn.addEventListener('click', () => {
-            if (waybillModal) waybillModal.classList.remove('active');
+            waybillModal?.classList.remove('active');
+            document.body.style.overflow = '';
         });
     });
 
-    if (waybillModal) {
-        waybillModal.addEventListener('click', (e) => {
-            if (e.target === waybillModal) waybillModal.classList.remove('active');
-        });
-    }
+    printWaybillBtn?.addEventListener('click', () => {
+        window.print();
+    });
 
-    if (printWaybillBtn) {
-        printWaybillBtn.addEventListener('click', () => {
-            window.print();
-        });
-    }
+    // Initial Execution
+    loadActiveRoute();
+    loadAvailableLoads();
+    loadFleet();
+    loadCompletedHistory();
 });

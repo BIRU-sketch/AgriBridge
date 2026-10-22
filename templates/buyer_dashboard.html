@@ -32,9 +32,8 @@
             </div>
 
             <nav class="dash-nav" aria-label="Buyer navigation">
-                <a href="#search-stock" aria-current="true">Search Stock</a>
-                <a href="#pending-requests">Demands &amp; Offers</a>
-                <a href="#trade-history">Trade History</a>
+                <a href="#search-stock" aria-current="true">Search &amp; Buy Stock</a>
+                <a href="#trade-history">My Orders &amp; Receipts</a>
                 <a href="#market-prices">Market Benchmarks</a>
             </nav>
 
@@ -70,11 +69,11 @@
                 </p>
             </div>
             <div class="welcome-actions">
-                <button type="button" class="btn btn-primary btn-lg" data-open-modal="post-demand-modal">
-                    {{ icon('target') }} Publish Requirement
-                </button>
-                <a href="#search-stock" class="btn btn-outline btn-lg">
-                    {{ icon('search') }} Browse Stock
+                <a href="#search-stock" class="btn btn-primary btn-lg">
+                    {{ icon('search') }} Browse &amp; Buy Stock
+                </a>
+                <a href="#trade-history" class="btn btn-outline btn-lg">
+                    {{ icon('package') }} My Order Receipts
                 </a>
             </div>
         </section>
@@ -94,12 +93,12 @@
 
             <div class="metric-card">
                 <div class="metric-ic metric-ic-amber">
-                    {{ icon('clock') }}
+                    {{ icon('package') }}
                 </div>
                 <div class="metric-content">
-                    <span class="metric-label">Active Demands</span>
-                    <span class="metric-val" id="metric-active-demands">3</span>
-                    <span class="metric-sub">Extension agents aggregating</span>
+                    <span class="metric-label">My Orders</span>
+                    <span class="metric-val" id="metric-total-orders">2</span>
+                    <span class="metric-sub">Direct hub purchase lots</span>
                 </div>
             </div>
 
@@ -133,9 +132,6 @@
                     <h2>{{ icon('search') }} Search Available Produce Lots</h2>
                     <p>Live inventory gathered directly from smallholder farmers by certified cooperative agents.</p>
                 </div>
-                <button type="button" class="btn btn-outline btn-sm" data-open-modal="post-demand-modal">
-                    {{ icon('target') }} Cannot find stock? Post Demand
-                </button>
             </div>
 
             <div class="dash-card-body">
@@ -256,104 +252,7 @@
             </div>
         </section>
 
-        <!-- Section 2: Active Procurement Demands -->
-        <section id="pending-requests" class="dash-card">
-            <div class="dash-card-header">
-                <div>
-                    <h2>
-                        {{ icon('target') }} Pending Procurement Requests
-                        <span class="badge badge-amber" style="margin-left:.4rem;">3 Active</span>
-                    </h2>
-                    <p>Demands published by your procurement team currently being matched or aggregated by extension agents.</p>
-                </div>
-                <button type="button" class="btn btn-primary btn-sm" data-open-modal="post-demand-modal">
-                    {{ icon('target') }} Post New Requirement
-                </button>
-            </div>
 
-            <div class="table-responsive">
-                <table class="dash-table">
-                    <thead>
-                        <tr>
-                            <th>Reference</th>
-                            <th>Commodity Specs</th>
-                            <th class="text-right">Volume</th>
-                            <th>Target Hub Location</th>
-                            <th>Target Date</th>
-                            <th class="text-center">Matching Status</th>
-                            <th class="text-right">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="pending-requests-tbody">
-                        <tr>
-                            <td class="code-ref">#REQ-2026-091</td>
-                            <td>
-                                <div style="font-weight:700; color:var(--deep);">White Teff (Magna Grade)</div>
-                                <div class="meta-sub">Max Moisture 10% &bull; Machine Cleaned</div>
-                            </td>
-                            <td class="text-right" style="font-weight:700; color:var(--brand);">800 Qtl</td>
-                            <td>Bishoftu Hub (Oromia)</td>
-                            <td class="meta-sub">Sept 22, 2026</td>
-                            <td class="text-center">
-                                <span class="badge badge-amber">
-                                    <span class="badge-dot"></span>
-                                    Agent Aggregating
-                                </span>
-                            </td>
-                            <td class="text-right">
-                                <button type="button" class="action-link" onclick="alert('Viewing specifications for #REQ-2026-091')">
-                                    View Hub Offer
-                                </button>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td class="code-ref">#REQ-2026-088</td>
-                            <td>
-                                <div style="font-weight:700; color:var(--deep);">Bread Wheat (Grade 1)</div>
-                                <div class="meta-sub">High Gluten &bull; Min 12% Protein</div>
-                            </td>
-                            <td class="text-right" style="font-weight:700; color:var(--brand);">1,500 Qtl</td>
-                            <td>Asella Hub (Arsi)</td>
-                            <td class="meta-sub">Sept 28, 2026</td>
-                            <td class="text-center">
-                                <span class="badge badge-green">
-                                    <span class="badge-dot"></span>
-                                    Match Found (Offer Ready)
-                                </span>
-                            </td>
-                            <td class="text-right">
-                                <button type="button" class="btn btn-primary btn-sm" onclick="alert('Reviewing complete lot agreement for 1,500 Qtl Bread Wheat at Asella Hub.')">
-                                    Review Offer
-                                </button>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td class="code-ref">#REQ-2026-074</td>
-                            <td>
-                                <div style="font-weight:700; color:var(--deep);">Humera White Sesame</div>
-                                <div class="meta-sub">Export Quality Verified &bull; Cleaned</div>
-                            </td>
-                            <td class="text-right" style="font-weight:700; color:var(--brand);">300 Qtl</td>
-                            <td>Gondar Hub (Amhara)</td>
-                            <td class="meta-sub">Oct 05, 2026</td>
-                            <td class="text-center">
-                                <span class="badge badge-blue">
-                                    <span class="badge-dot"></span>
-                                    Logistics Quoting
-                                </span>
-                            </td>
-                            <td class="text-right">
-                                <button type="button" class="action-link" onclick="alert('Reviewing transport quotes for 300 Qtl Humera White Sesame.')">
-                                    Carrier Quotes
-                                </button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </section>
 
         <!-- Section 3: Trade History & Settled Invoices -->
         <section id="trade-history" class="dash-card">
@@ -555,73 +454,7 @@
 
     </main>
 
-    <!-- ===== Modal: Post Custom Requirement ===== -->
-    <div id="post-demand-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="demand-modal-title">
-        <div class="modal-box">
-            <div class="modal-head">
-                <h3 id="demand-modal-title">Publish Procurement Requirement</h3>
-                <button type="button" class="modal-close" data-close-modal="post-demand-modal" aria-label="Close dialog">&times;</button>
-            </div>
 
-            <form id="post-demand-form">
-                <div class="modal-body">
-                    <p style="font-size:.875rem; color:var(--muted); margin:0;">
-                        Publish your commodity specifications. Certified extension agents and farmer cooperatives in the selected hub will aggregate matching harvest lots.
-                    </p>
-
-                    <div class="search-field">
-                        <label for="demand-crop">Commodity Type</label>
-                        <input type="text" id="demand-crop" name="crop_type" placeholder="e.g. White Teff, Bread Wheat, Soybeans" required>
-                    </div>
-
-                    <div class="search-field">
-                        <label for="demand-quality">Desired Quality Specification</label>
-                        <select id="demand-quality" name="quality_grade">
-                            <option value="Grade 1 (Magna / Premium)">Grade 1 (Magna / Premium)</option>
-                            <option value="Grade 1 (Standard)" selected>Grade 1 (Standard)</option>
-                            <option value="Grade 2 Commercial">Grade 2 Commercial</option>
-                            <option value="Export Quality Verified">Export Quality Verified</option>
-                            <option value="Industrial / Feed Grade">Industrial / Feed Grade</option>
-                        </select>
-                    </div>
-
-                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
-                        <div class="search-field">
-                            <label for="demand-volume">Target Volume (Qtl)</label>
-                            <input type="number" id="demand-volume" name="quantity" min="1" step="any" placeholder="e.g. 500" required>
-                        </div>
-                        <div class="search-field">
-                            <label for="demand-price">Max Target Rate (ETB/Qtl)</label>
-                            <input type="number" id="demand-price" name="max_price" placeholder="Optional">
-                        </div>
-                    </div>
-
-                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
-                        <div class="search-field">
-                            <label for="demand-hub">Target Hub Location</label>
-                            <select id="demand-hub" name="location">
-                                <option value="Bishoftu Hub (Oromia)">Bishoftu Hub (Oromia)</option>
-                                <option value="Asella Hub (Arsi)">Asella Hub (Arsi)</option>
-                                <option value="Gondar Hub (Amhara)">Gondar Hub (Amhara)</option>
-                                <option value="Hawassa Hub (Sidama)">Hawassa Hub (Sidama)</option>
-                            </select>
-                        </div>
-                        <div class="search-field">
-                            <label for="demand-date">Required Fulfillment Date</label>
-                            <input type="date" id="demand-date" name="target_date" value="2026-10-15">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="modal-foot">
-                    <button type="button" class="btn btn-ghost" data-close-modal="post-demand-modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary">
-                        {{ icon('target') }} Publish Requirement
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
 
     <!-- ===== Modal: View Official Receipt ===== -->
     <div id="receipt-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="receipt-modal-title">
@@ -710,7 +543,7 @@
             <ul class="footer-contact">
                 <li><a href="/logout">Switch Account</a></li>
                 <li><a href="#search-stock">Marketplace Search</a></li>
-                <li><a href="#pending-requests">Demands</a></li>
+                <li><a href="#trade-history">My Orders</a></li>
                 <li><a href="mailto:buyer-support@agribridge.et">buyer-support@agribridge.et</a></li>
             </ul>
         </div>
