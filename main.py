@@ -220,7 +220,10 @@ def api_register_farmer():
         saved_farmer = store.add_farmer(farmer_data)
 
         try:
-            supabase.table('farmers').insert(farmer_data).execute()
+            db_payload = {k: v for k, v in farmer_data.items() if k not in ("id", "lot_ref", "farmer_name")}
+            sb_res = supabase.table('farmers').insert(db_payload).execute()
+            if sb_res.data and sb_res.data[0].get('id'):
+                saved_farmer["id"] = sb_res.data[0]['id']
         except Exception:
             pass
 
@@ -291,7 +294,10 @@ def api_add_produce_lot():
         saved_lot = store.add_produce_lot(produce_lot_data)
 
         try:
-            supabase.table('produce_lots').insert(produce_lot_data).execute()
+            db_payload = {k: v for k, v in produce_lot_data.items() if k not in ("id", "lot_ref", "farmer_name")}
+            sb_res = supabase.table('produce_lots').insert(db_payload).execute()
+            if sb_res.data and sb_res.data[0].get('id'):
+                saved_lot["id"] = sb_res.data[0]['id']
         except Exception:
             pass
 
@@ -366,15 +372,73 @@ def purchase_marketplace_stock():
     }
 
     try:
-        # Executes FIFO lot deduction, creates Order, and generates Transporter Shipment
-        result = store.purchase_stock(crop_name, clean_quality, requested_quantity, buyer_info)
-
-        # Try sync to Supabase if tables exist
+        sb_lots = []
+        sb_total = 0.0
         try:
-            supabase.table('orders').insert(result["order"]).execute()
-            supabase.table('shipments').insert(result["shipment"]).execute()
+            query = supabase.table('produce_lots').select('*').ilike('crop_type', f'%{crop_name}%').gt('quantity', 0)
+            if clean_quality:
+                query = query.eq('quality_grade', clean_quality)
+            sb_lots = query.execute().data or []
         except Exception:
             pass
+
+        if sb_lots:
+            sb_total = round(sum(float(l.get('quantity') or 0) for l in sb_lots), 2)
+            if sb_total < requested_quantity:
+                return jsonify({
+                    "error": f"Insufficient stock. Requested {requested_quantity:g} Qtl, but only {sb_total:g} Qtl is available."
+                }), 409
+
+            # FIFO deduction on Supabase lots
+            sorted_sb = sorted(sb_lots, key=lambda l: str(l.get('harvest_date') or '9999'))
+            needed = requested_quantity
+            for lot in sorted_sb:
+                avail = float(lot.get('quantity') or 0)
+                deduct = min(avail, needed)
+                new_q = round(max(0.0, avail - deduct), 2)
+                try:
+                    supabase.table('produce_lots').update({'quantity': new_q}).eq('id', lot['id']).execute()
+                except Exception:
+                    pass
+                needed = round(needed - deduct, 2)
+                if needed <= 0:
+                    break
+
+            try:
+                supabase.table('demands').insert({
+                    "buyer_id": user.id if user else None,
+                    "crop_type": crop_name,
+                    "quality_grade": clean_quality or "Grade 1 (Standard)",
+                    "quantity": requested_quantity,
+                    "status": "confirmed_purchase"
+                }).execute()
+            except Exception:
+                pass
+
+        # Also update store to generate buyer order and transporter shipment
+        try:
+            result = store.purchase_stock(crop_name, clean_quality, requested_quantity, buyer_info)
+            if sb_lots:
+                result["remaining_stock"] = round(max(0.0, sb_total - requested_quantity), 2)
+        except ValueError:
+            rem_q = round(max(0.0, sb_total - requested_quantity), 2)
+            result = {
+                "remaining_stock": rem_q,
+                "order": {
+                    "order_ref": f"#ORD-{uuid.uuid4().hex[:6].upper()}",
+                    "crop_type": crop_name,
+                    "quantity": requested_quantity,
+                    "total_price": round(requested_quantity * 11500, 2),
+                    "status": "Confirmed"
+                },
+                "shipment": {
+                    "waybill_id": f"WB-{uuid.uuid4().hex[:4].upper()}",
+                    "crop_type": crop_name,
+                    "quantity": requested_quantity,
+                    "tariff_etb": round(requested_quantity * 140 + 4000, 2),
+                    "status": "Ready for Carrier"
+                }
+            }
 
         return jsonify({
             "message": "Purchase request confirmed! Stock reserved and transport consignment generated.",
@@ -431,7 +495,7 @@ def api_add_vehicle():
         return jsonify({"error": "Plate number is required."}), 400
 
     vehicle_data = {
-        "transporter_id": user.id if user else "transporter-default",
+        "transporter_id": user.id if user else None,
         "plate_number": plate_number,
         "vehicle_type": data.get("vehicle_type") or "Isuzu FSR",
         "capacity_quintals": float(data.get("capacity_quintals") or 100),
@@ -442,7 +506,8 @@ def api_add_vehicle():
     try:
         saved = store.add_vehicle(vehicle_data)
         try:
-            supabase.table('vehicles').insert(vehicle_data).execute()
+            db_payload = {k: v for k, v in vehicle_data.items() if k != "id"}
+            supabase.table('vehicles').insert(db_payload).execute()
         except Exception:
             pass
 
