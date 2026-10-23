@@ -178,6 +178,46 @@ def api_login():
         return jsonify({"error": str(e)}), 400
 
 
+@app.route('/api/forgot-password', methods=['POST'])
+def api_forgot_password():
+    data = request.get_json() or {}
+    email = str(data.get("email", "")).strip()
+
+    if not email:
+        return jsonify({"error": "Please enter your registered email address."}), 400
+
+    try:
+        redirect_url = request.host_url.rstrip('/') + url_for('auth_page') + '?mode=reset'
+        supabase.auth.reset_password_for_email(email, {"redirect_to": redirect_url})
+    except Exception as e:
+        print("Password reset note:", e)
+
+    return jsonify({
+        "message": f"If an account exists for {email}, a password recovery link has been sent.",
+        "email": email
+    }), 200
+
+
+@app.route('/api/update-password', methods=['POST'])
+def api_update_password():
+    data = request.get_json() or {}
+    new_password = str(data.get("password", "")).strip()
+    access_token = data.get("access_token") or request.cookies.get('access_token')
+
+    if not new_password or len(new_password) < 8:
+        return jsonify({"error": "Password must be at least 8 characters long."}), 400
+
+    if not access_token:
+        return jsonify({"error": "Session expired or invalid reset link. Please request a new recovery link."}), 400
+
+    try:
+        supabase.auth.set_session(access_token, "")
+        supabase.auth.update_user({"password": new_password})
+        return jsonify({"message": "Password updated successfully! Please log in with your new password."}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
+
+
 # ----------------------------------------------------
 # Farmers & Produce Lots APIs (Agent Terminal)
 # ----------------------------------------------------

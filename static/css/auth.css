@@ -105,6 +105,41 @@
 .field-err { font-size: .875rem; font-weight: 500; color: var(--error); }
 .field-err[hidden], .form-alert[hidden] { display: none; }
 
+.field-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.link-btn {
+    background: transparent;
+    border: 0;
+    padding: 0;
+    font: inherit;
+    font-size: .875rem;
+    font-weight: 600;
+    color: var(--brand);
+    cursor: pointer;
+    text-underline-offset: 3px;
+    transition: color .15s ease;
+}
+
+.link-btn:hover {
+    text-decoration: underline;
+    color: var(--brand-2);
+}
+
+.form-success-alert {
+    padding: .8rem 1rem;
+    border-left: 4px solid var(--brand);
+    border-radius: var(--radius-s);
+    background: var(--tint);
+    color: #0A6937;
+    font-size: .9375rem;
+    font-weight: 500;
+}
+.form-success-alert[hidden] { display: none; }
+
 .pw { position: relative; }
 .pw input { padding-right: 4.75rem; }
 .pw-toggle {

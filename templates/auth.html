@@ -68,7 +68,10 @@
                     </div>
 
                     <div class="field">
-                        <label for="login-password">Password</label>
+                        <div class="field-header">
+                            <label for="login-password">Password</label>
+                            <button type="button" class="link-btn" id="btn-forgot-pw">Forgot password?</button>
+                        </div>
                         <div class="pw">
                             <input id="login-password" name="password" type="password" autocomplete="current-password" aria-describedby="login-password-err">
                             <button type="button" class="pw-toggle" data-target="login-password" aria-pressed="false">Show</button>
@@ -131,6 +134,59 @@
 
                     <button type="submit" class="btn btn-primary btn-lg btn-block" data-label="Create account" data-busy="Creating account…">Create account</button>
                 </form>
+
+                <!-- Forgot password -->
+                <form id="panel-forgot" class="auth-form" role="region" aria-labelledby="auth-title" novalidate hidden data-kind="forgot">
+                    <div class="form-alert" role="alert" hidden></div>
+
+                    <div class="field">
+                        <label for="forgot-email">Account Email</label>
+                        <input id="forgot-email" name="email" type="email" autocomplete="email" inputmode="email" autocapitalize="off" spellcheck="false" placeholder="name@example.com" aria-describedby="forgot-email-err" required>
+                        <p class="field-err" id="forgot-email-err" hidden></p>
+                    </div>
+
+                    <p class="field-hint">We will send a secure password recovery link to your registered email address.</p>
+
+                    <button type="submit" class="btn btn-primary btn-lg btn-block" data-label="Send reset link" data-busy="Sending reset link…">Send reset link</button>
+
+                    <button type="button" class="btn btn-ghost btn-block" id="btn-back-to-login">
+                        Back to log in
+                    </button>
+                </form>
+
+                <!-- Update password (after clicking reset link) -->
+                <form id="panel-reset" class="auth-form" role="region" aria-labelledby="auth-title" novalidate hidden data-kind="reset">
+                    <div class="form-alert" role="alert" hidden></div>
+
+                    <div class="field">
+                        <label for="reset-password">New Password</label>
+                        <div class="pw">
+                            <input id="reset-password" name="password" type="password" autocomplete="new-password" aria-describedby="reset-password-hint reset-password-err" required>
+                            <button type="button" class="pw-toggle" data-target="reset-password" aria-pressed="false">Show</button>
+                        </div>
+                        <p class="field-hint" id="reset-password-hint">Use at least 8 characters.</p>
+                        <p class="field-err" id="reset-password-err" hidden></p>
+                    </div>
+
+                    <div class="field">
+                        <label for="reset-password-confirm">Confirm New Password</label>
+                        <div class="pw">
+                            <input id="reset-password-confirm" name="password_confirm" type="password" autocomplete="new-password" aria-describedby="reset-password-confirm-err" required>
+                            <button type="button" class="pw-toggle" data-target="reset-password-confirm" aria-pressed="false">Show</button>
+                        </div>
+                        <p class="field-err" id="reset-password-confirm-err" hidden></p>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-lg btn-block" data-label="Update password" data-busy="Updating password…">Update password</button>
+                </form>
+
+                <!-- Shown after requesting a password reset -->
+                <div id="forgot-success" class="success" hidden tabindex="-1">
+                    <h1>Check your email</h1>
+                    <p>We've sent a password reset link to <strong id="forgot-success-email"></strong>.</p>
+                    <p>Click the link in the email to choose a new password. If you don't see it within a few minutes, check your spam folder.</p>
+                    <button type="button" class="btn btn-primary btn-lg btn-block" id="btn-forgot-to-login">Return to log in</button>
+                </div>
 
                 <!-- Shown after a successful sign-up -->
                 <div id="signup-success" class="success" hidden tabindex="-1">
