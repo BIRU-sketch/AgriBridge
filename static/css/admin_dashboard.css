@@ -74,6 +74,21 @@ body.admin-body {
     border-color: var(--brand);
 }
 
+.nav-queue-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.35rem;
+    height: 1.35rem;
+    margin-left: auto;
+    padding: 0 .35rem;
+    border-radius: 999px;
+    background: #f59e0b;
+    color: #1f2937;
+    font-size: .72rem;
+    font-weight: 800;
+}
+
 .header-user {
     display: flex;
     align-items: center;

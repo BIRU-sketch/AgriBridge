@@ -1,9 +1,34 @@
 document.addEventListener('DOMContentLoaded', () => {
     // Elements
+    const buyerViewButtons = document.querySelectorAll('[data-buyer-view]');
+    const buyerViewPanels = document.querySelectorAll('[data-buyer-panel]');
+    const buyerViewTargets = document.querySelectorAll('[data-buyer-view-target]');
+    const mainContent = document.getElementById('main');
+
+    function showBuyerView(viewName, shouldScroll = true) {
+        const targetPanel = document.querySelector(`[data-buyer-panel="${viewName}"]`);
+        if (!targetPanel) return;
+        buyerViewPanels.forEach(panel => { panel.hidden = panel !== targetPanel; });
+        buyerViewButtons.forEach(button => {
+            if (button.dataset.buyerView === viewName) button.setAttribute('aria-current', 'page');
+            else button.removeAttribute('aria-current');
+        });
+        if (shouldScroll) mainContent?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    buyerViewButtons.forEach(button => {
+        button.addEventListener('click', () => showBuyerView(button.dataset.buyerView));
+    });
+    buyerViewTargets.forEach(button => {
+        button.addEventListener('click', () => showBuyerView(button.dataset.buyerViewTarget));
+    });
+    showBuyerView('browse', false);
+
     const searchForm = document.getElementById('marketplace-search-form');
     const cropInput = document.getElementById('crop_name');
     const qualitySelect = document.getElementById('quality');
     const locationInput = document.getElementById('location');
+    const destinationHubInput = document.getElementById('destination-hub');
     const resultsPanel = document.getElementById('search-results-panel');
     const resultCropTitle = document.getElementById('result-crop-title');
     const resultQualityBadge = document.getElementById('result-quality-badge');
@@ -35,6 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const historyHubSelect = document.getElementById('history-hub-select');
     const historyTbody = document.getElementById('trade-history-tbody');
     const totalOrdersCountEl = document.getElementById('metric-total-orders');
+    const marketStockMetric = document.getElementById('metric-market-stock');
 
     // Toast
     const toast = document.getElementById('toast-msg');
@@ -50,35 +76,61 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 4500);
     }
 
-    // Benchmark rates per Quintal in ETB
-    const BENCHMARK_RATES = {
-        'white teff': 11500,
-        'teff': 11500,
-        'bread wheat': 5200,
-        'wheat': 5200,
-        'yellow maize': 3750,
-        'maize': 3750,
-        'humera sesame': 16800,
-        'sesame': 16800,
-        'red kidney beans': 6800,
-        'kidney beans': 6800,
-        'malt barley': 6200,
-        'barley': 6200,
-        'coffee': 24000
-    };
-
-    function getBenchmarkRate(cropName) {
-        if (!cropName) return 5000;
-        const normalized = cropName.toLowerCase().trim();
-        for (const [key, rate] of Object.entries(BENCHMARK_RATES)) {
-            if (normalized.includes(key)) {
-                return rate;
-            }
+    async function readApiResponse(response) {
+        const body = await response.text();
+        try {
+            return JSON.parse(body);
+        } catch {
+            throw new Error(`The server returned an unexpected response (${response.status}). Please try again.`);
         }
-        return 5000;
     }
 
     let currentSearch = null;
+
+    async function loadMarketplaceSummary() {
+        if (!marketStockMetric) return;
+        const selectedHub = locationInput?.value || '';
+        if (locationInput) {
+            locationInput.disabled = true;
+            locationInput.innerHTML = '<option value="">Loading available hubs...</option>';
+        }
+        try {
+            const response = await fetch('/api/marketplace/summary');
+            const data = await readApiResponse(response);
+            if (!response.ok) throw new Error(data.error || 'Could not load hub stock summary.');
+            marketStockMetric.innerHTML = `${Number(data.available_quantity || 0).toLocaleString()} <small style="font-size:.9rem;font-weight:600;">Qtl</small>`;
+            if (locationInput) {
+                const hubs = data.hub_locations || [];
+                locationInput.innerHTML = `<option value="">${hubs.length ? 'Choose a source hub' : 'No hubs with available stock'}</option>`;
+                hubs.forEach(hub => {
+                    const option = document.createElement('option');
+                    option.value = hub;
+                    option.textContent = hub;
+                    locationInput.appendChild(option);
+                });
+                locationInput.disabled = hubs.length === 0;
+                if ((data.hub_locations || []).includes(selectedHub)) locationInput.value = selectedHub;
+            }
+            if (historyHubSelect) {
+                const selected = historyHubSelect.value;
+                historyHubSelect.innerHTML = '<option value="">All Hubs</option>';
+                (data.hub_locations || []).forEach(hub => {
+                    const option = document.createElement('option');
+                    option.value = hub.toLowerCase();
+                    option.textContent = hub;
+                    historyHubSelect.appendChild(option);
+                });
+                if ([...historyHubSelect.options].some(option => option.value === selected)) historyHubSelect.value = selected;
+            }
+        } catch (error) {
+            marketStockMetric.textContent = 'Unavailable';
+            if (locationInput) {
+                locationInput.innerHTML = '<option value="">Could not load hubs</option>';
+                locationInput.disabled = true;
+            }
+            showToast(error.message || 'Could not load available hubs. Refresh and try again.');
+        }
+    }
 
     // Quick filter chips click
     quickChips.forEach((chip) => {
@@ -105,6 +157,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 cropInput?.focus();
                 return;
             }
+            if (!locationInput?.value) {
+                showToast('Choose a source hub to search.');
+                locationInput?.focus();
+                return;
+            }
 
             const searchBtn = searchForm.querySelector('button[type="submit"]');
             const originalBtnHtml = searchBtn?.innerHTML;
@@ -121,28 +178,32 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 const params = new URLSearchParams({
                     crop_name: cropName,
-                    quality: quality
+                    quality: quality,
+                    hub_location: locationInput.value
                 });
 
                 const res = await fetch(`/api/marketplace/search?${params.toString()}`);
-                const data = await res.json();
+                const data = await readApiResponse(res);
 
                 if (!res.ok) {
                     throw new Error(data.error || 'Failed to search produce inventory.');
                 }
 
+                const cropTypes = data.crop_types || [];
                 currentSearch = {
-                    crop_name: data.crop_name,
-                    quality: data.quality || 'Grade 1 (Standard)',
+                    crop_name: cropTypes.length === 1 ? cropTypes[0] : data.crop_name,
+                    crop_types: cropTypes,
+                    quality: data.quality || '',
+                    hub_location: data.hub_location,
                     quantity: data.quantity || 0,
-                    rate: getBenchmarkRate(data.crop_name)
+                    rate: data.indicative_price_per_qtl == null ? null : Number(data.indicative_price_per_qtl)
                 };
 
                 // Display in Results Panel
                 if (resultCropTitle) resultCropTitle.textContent = currentSearch.crop_name;
-                if (resultQualityBadge) resultQualityBadge.textContent = currentSearch.quality;
+                if (resultQualityBadge) resultQualityBadge.textContent = currentSearch.quality || 'All Quality Grades';
                 if (resultStockNum) resultStockNum.textContent = currentSearch.quantity.toLocaleString();
-                if (resultPriceRate) resultPriceRate.textContent = `${currentSearch.rate.toLocaleString()} ETB`;
+                if (resultPriceRate) resultPriceRate.textContent = currentSearch.rate == null ? 'See exact crop' : `${currentSearch.rate.toLocaleString()} ETB`;
 
                 if (resultsPanel) {
                     resultsPanel.classList.remove('hidden');
@@ -152,7 +213,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (currentSearch.quantity <= 0) {
                     purchaseForm?.classList.add('hidden');
                     if (resultAlert) {
-                        resultAlert.textContent = `Zero inventory currently listed for ${currentSearch.crop_name}. Please check back after cooperative agent aggregation.`;
+                        resultAlert.textContent = `No priced stock matched ${currentSearch.crop_name} at this hub. Try another hub or ask an agent to add a price to the available lot.`;
+                        resultAlert.hidden = false;
+                    }
+                } else if (currentSearch.crop_types.length > 1) {
+                    purchaseForm?.classList.add('hidden');
+                    if (resultAlert) {
+                        resultAlert.textContent = `This search matches ${currentSearch.crop_types.join(', ')}. Search for one exact crop before purchasing.`;
+                        resultAlert.hidden = false;
+                    }
+                } else if (!currentSearch.quality) {
+                    purchaseForm?.classList.add('hidden');
+                    if (resultAlert) {
+                        resultAlert.textContent = 'Choose a specific quality grade and search again. A single order cannot combine different grades.';
                         resultAlert.hidden = false;
                     }
                 } else {
@@ -184,7 +257,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function updateCalculatedTotal(qty) {
-        if (!purchaseEstTotal || !currentSearch) return;
+        if (!purchaseEstTotal || !currentSearch || currentSearch.rate == null) return;
         const total = Math.max(0, qty * currentSearch.rate);
         purchaseEstTotal.textContent = `${total.toLocaleString()} ETB`;
     }
@@ -198,13 +271,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const qty = parseFloat(purchaseQuantity.value);
             if (!Number.isFinite(qty) || qty <= 0 || qty > currentSearch.quantity) {
-                showToast(`Enter a purchase volume between 1 and ${currentSearch.quantity} Qtl.`);
+                showToast(`Enter a purchase volume greater than 0 and no more than ${currentSearch.quantity} Qtl.`);
                 purchaseQuantity.focus();
                 return;
             }
 
             const totalETB = (qty * currentSearch.rate).toLocaleString();
-            const confirmMsg = `Confirm purchase order:\n\n• Commodity: ${currentSearch.crop_name}\n• Volume: ${qty} Qtl\n• Estimated Settlement: ${totalETB} ETB\n\nProceed with reservation?`;
+            const confirmMsg = `Confirm purchase order:\n\n• Commodity: ${currentSearch.crop_name}\n• Volume: ${qty} Qtl\n• Estimated Order Total: ${totalETB} ETB\n\nProceed with reservation?`;
 
             if (!window.confirm(confirmMsg)) {
                 return;
@@ -222,12 +295,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     body: JSON.stringify({
                         crop_name: currentSearch.crop_name,
                         quality: currentSearch.quality,
+                        hub_location: currentSearch.hub_location,
                         quantity: qty,
-                        destination_hub: locationInput?.value || 'Addis Central Terminal'
+                        destination_hub: destinationHubInput?.value.trim()
                     })
                 });
 
-                const data = await response.json();
+                const data = await readApiResponse(response);
 
                 if (!response.ok) {
                     throw new Error(data.error || 'Failed to complete order.');
@@ -282,7 +356,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             const res = await fetch('/api/buyer/orders');
-            const data = await res.json();
+            const data = await readApiResponse(res);
             const orders = data.orders || [];
 
             if (totalOrdersCountEl) {
@@ -416,4 +490,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initial load
     loadBuyerOrders();
+    loadMarketplaceSummary();
 });

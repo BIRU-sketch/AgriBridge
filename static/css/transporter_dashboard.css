@@ -915,3 +915,19 @@ body.transporter-body {
     flex-wrap: wrap;
     gap: 1rem;
 }
+.active-trip-compact {
+    margin-bottom: 1.25rem;
+    padding: 1rem 1.15rem;
+    border: 1px solid var(--line, #dce5df);
+    border-left: 4px solid var(--brand, #16834a);
+    border-radius: 12px;
+    background: var(--paper, #f8fbf8);
+}
+.active-trip-compact[hidden] { display: none !important; }
+.active-trip-compact-head { display:flex; align-items:flex-start; justify-content:space-between; gap:1rem; }
+.active-trip-compact-head h3 { margin:.2rem 0 0; font-size:1.05rem; }
+.active-trip-compact-meta { display:flex; flex-wrap:wrap; gap:.6rem 1.5rem; margin:.75rem 0; color:var(--deep, #20382b); font-size:.875rem; }
+.active-trip-progress { margin:.5rem 0 .85rem; }
+.active-trip-progress summary { cursor:pointer; color:var(--brand, #16834a); font-size:.875rem; font-weight:700; }
+.active-trip-progress .stepper-container { margin:.75rem 0 0; }
+.active-trip-compact #advance-status-btn { min-height:2.6rem; }

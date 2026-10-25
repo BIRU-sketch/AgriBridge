@@ -6,7 +6,9 @@ load_dotenv()
 class Database:
     def __init__(self):
         url: str = os.getenv("SUPABASE_URL")
-        key: str = os.getenv("SUPABASE_KEY")
+        key: str = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
+        if not key:
+            raise RuntimeError("SUPABASE_SERVICE_ROLE_KEY is required for database access.")
         self.supabase: Client = create_client(url=url, key=key)
     def register_farmer(self, farmer_data: dict):
         return self.supabase.table('farmers').insert(farmer_data).execute()

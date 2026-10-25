@@ -16,6 +16,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+Ethiopic:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/agent_dashboard.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard-shell.css') }}">
 </head>
 <body class="agent-body">
     {% include 'partials/icons.html' %}
@@ -35,6 +36,8 @@
                 <a href="#farmers" aria-current="true">Registered Farmers</a>
                 <a href="#produce-lots">Produce Lots</a>
                 <a href="#orders">Buyer Orders</a>
+                <a href="#transfer-approvals">Delivery Approvals</a>
+                <a href="#hub-supply">Request Hub Supply</a>
                 <a href="/register-farmer">+ New Farmer</a>
             </nav>
 
@@ -45,7 +48,7 @@
                     </div>
                     <div class="user-info">
                         <div class="user-name">{{ username or 'Cooperative Agent' }}</div>
-                        <div class="user-role">Bishoftu / Ada'a Hub</div>
+                    <div class="user-role">{{ hub_location or 'Hub assignment required' }}</div>
                     </div>
                 </div>
                 <a href="/logout" class="btn btn-ghost btn-sm" title="Log out of terminal">
@@ -99,7 +102,7 @@
                 <div class="metric-content">
                     <span class="metric-label">Active Produce Lots</span>
                     <span class="metric-val" id="metric-active-lots">0 <small style="font-size:.9rem;font-weight:600;">Lots</small></span>
-                    <span class="metric-sub">Stored in certified hub silos</span>
+                    <span class="metric-sub">Recorded in hub silos</span>
                 </div>
             </div>
 
@@ -114,16 +117,6 @@
                 </div>
             </div>
 
-            <div class="metric-card">
-                <div class="metric-ic">
-                    {{ icon('banknote') }}
-                </div>
-                <div class="metric-content">
-                    <span class="metric-label">Farmer Payouts Settled</span>
-                    <span class="metric-val" id="metric-payouts-settled">0 ETB</span>
-                    <span class="metric-sub">Direct bank / Telebirr settlement</span>
-                </div>
-            </div>
         </section>
 
         <!-- Section 1: Registered Farmers Directory -->
@@ -131,7 +124,7 @@
             <div class="dash-card-header">
                 <div>
                     <h2>{{ icon('users') }} Registered Smallholder Farmers</h2>
-                    <p>Farmers onboarded under your cooperative jurisdiction with verified Kebele IDs.</p>
+                    <p>Farmers registered under your agent account.</p>
                 </div>
                 <div style="display:flex; align-items:center; gap:.75rem; flex-wrap:wrap;">
                     <input
@@ -160,13 +153,7 @@
                             <th class="text-right">Action</th>
                         </tr>
                     </thead>
-                    <tbody id="farmers-tbody">
-                        <tr>
-                            <td colspan="8" style="text-align:center; padding:2.5rem 1rem; color:var(--muted);">
-                                No smallholder farmers onboarded yet. Click <strong>"+ Onboard Farmer"</strong> to register your first farmer.
-                            </td>
-                        </tr>
-                    </tbody>
+                    <tbody id="farmers-tbody"><tr><td colspan="8">Loading live records...</td></tr></tbody>
                 </table>
             </div>
         </section>
@@ -196,13 +183,7 @@
                             <th class="text-right">Actions</th>
                         </tr>
                     </thead>
-                    <tbody id="produce-lots-tbody">
-                        <tr>
-                            <td colspan="7" style="text-align:center; padding:2.5rem 1rem; color:var(--muted);">
-                                No produce lots aggregated yet. Click <strong>"+ Add Produce Lot"</strong> to publish available crops.
-                            </td>
-                        </tr>
-                    </tbody>
+                    <tbody id="produce-lots-tbody"><tr><td colspan="7">Loading live records...</td></tr></tbody>
                 </table>
             </div>
         </section>
@@ -214,7 +195,7 @@
                     <h2>
                         {{ icon('handshake') }} Buyer Purchases &amp; Allocations
                     </h2>
-                    <p>Direct orders placed by verified institutional buyers against aggregated hub lots.</p>
+                    <p>Orders placed by buyers against available hub lots.</p>
                 </div>
                 <span class="meta-sub">Automated Escrow &amp; Transporter Dispatch</span>
             </div>
@@ -232,18 +213,63 @@
                             <th>Date</th>
                         </tr>
                     </thead>
-                    <tbody id="sales-orders-tbody">
-                        <tr>
-                            <td colspan="7" style="text-align:center; padding:2.5rem 1rem; color:var(--muted);">
-                                No buyer purchase orders placed yet. Active orders and lot allocations will appear here.
-                            </td>
-                        </tr>
-                    </tbody>
+                    <tbody id="sales-orders-tbody"><tr><td colspan="7">Loading live records...</td></tr></tbody>
                 </table>
             </div>
         </section>
 
+        <section id="transfer-approvals" class="dash-card">
+            <div class="dash-card-header">
+                <div><h2>{{ icon('shield-check') }} Hub Delivery Approval Queue</h2><p>Confirm the goods attributed to your lots arrived at the destination hub, or report the problem for admin review.</p></div>
+            </div>
+            <div class="table-responsive">
+                <table class="dash-table"><thead><tr><th>Waybill / Route</th><th>Produce</th><th>Quantity</th><th>Requested</th><th>Status / Response</th><th>Action</th></tr></thead>
+                    <tbody id="transfer-approvals-tbody"><tr><td colspan="6">Loading delivery approvals...</td></tr></tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="hub-supply" class="dash-card">
+            <div class="dash-card-header">
+                <div><h2>{{ icon('truck') }} Request Supply from Nearby Hubs</h2><p>Request stock for {{ hub_location or 'your assigned hub' }}. The system checks neighboring hubs, protects a 10-Qtl reserve, and assigns an approved available carrier.</p></div>
+            </div>
+            <div class="dash-card-body">
+                <form id="hub-supply-form" class="hub-supply-form">
+                    <div class="search-field"><label for="supply-crop">Crop</label><select id="supply-crop" required><option value="">Loading configured crops...</option></select></div>
+                    <div class="search-field"><label for="supply-quality">Quality</label><select id="supply-quality" required><option>Grade 1 (Magna / Premium)</option><option>Grade 1 (Standard)</option><option>Grade 2 Commercial</option><option>Export Quality Verified</option></select></div>
+                    <div class="search-field"><label for="supply-quantity">Quantity (Qtl)</label><input id="supply-quantity" type="number" min="0.01" step="0.01" required placeholder="Quantity needed"></div>
+                    <button class="btn btn-primary" id="supply-request-submit" type="submit">Request nearby supply</button>
+                </form>
+                <div class="table-responsive" style="margin-top:1.25rem;">
+                    <table class="dash-table"><thead><tr><th>Requested</th><th>Produce</th><th>Quantity</th><th>Source</th><th>Waybill / Carrier</th><th>Status</th></tr></thead>
+                        <tbody id="supply-requests-tbody"><tr><td colspan="6">Loading supply requests...</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
     </main>
+
+    <div id="lot-edit-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="lot-edit-title">
+        <div class="modal-box">
+            <div class="modal-head"><h3 id="lot-edit-title">Correct Produce Lot</h3><button type="button" class="modal-close" data-close-lot-modal aria-label="Close">&times;</button></div>
+            <form id="lot-edit-form">
+                <input type="hidden" id="edit-lot-id">
+                <div class="modal-body">
+                    <p class="meta-sub">Only fully available lots can be changed. Once any stock has been ordered or reserved, the lot is locked to protect the transaction record.</p>
+                    <div class="search-field"><label for="edit-lot-crop">Crop</label><select id="edit-lot-crop" required></select><small id="edit-lot-price"></small></div>
+                    <div class="search-field"><label for="edit-lot-quality">Quality grade</label><select id="edit-lot-quality" required>
+                        <option>Grade 1 (Magna / Premium)</option><option>Grade 1 (Standard)</option><option>Grade 2 Commercial</option><option>Export Quality Verified</option>
+                    </select></div>
+                    <div class="search-field"><label for="edit-lot-quantity">Quantity (Qtl)</label><input id="edit-lot-quantity" type="number" min="0.01" step="0.01" required></div>
+                    <div class="search-field"><label for="edit-lot-harvest">Harvest date</label><input id="edit-lot-harvest" type="date" required></div>
+                    <div class="search-field"><label for="edit-lot-origin">Source hub</label><select id="edit-lot-origin" required disabled>{% for hub in hubs %}<option value="{{ hub }}">{{ hub }}</option>{% endfor %}</select></div>
+                    <div class="search-field"><label for="edit-lot-target">Destination hub</label><select id="edit-lot-target"><option value="">No planned destination</option>{% for hub in hubs %}<option value="{{ hub }}">{{ hub }}</option>{% endfor %}</select></div>
+                </div>
+                <div class="modal-foot"><button type="button" class="btn btn-ghost" data-close-lot-modal>Cancel</button><button type="submit" class="btn btn-primary">Save correction</button></div>
+            </form>
+        </div>
+    </div>
 
     <!-- Toast Notification -->
     <div id="toast-msg" class="toast-msg" role="status" aria-live="polite"></div>

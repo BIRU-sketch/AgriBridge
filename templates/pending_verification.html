@@ -1,0 +1,18 @@
+{% macro icon(name) -%}<svg class="icon" aria-hidden="true" focusable="false"><use href="#i-{{ name }}"/></svg>{%- endmacro %}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Account Verification Pending | AgriBridge</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+</head>
+<body>
+    {% include 'partials/icons.html' %}
+    <main class="wrap" style="max-width:42rem;padding:5rem 1.5rem;text-align:center;">
+        <h1>Account verification pending</h1>
+        <p>Welcome{% if username %}, {{ username }}{% endif %}. An AgriBridge administrator must verify your account before you can access its tools.</p>
+        <a class="btn btn-primary" href="/logout">Log out</a>
+    </main>
+</body>
+</html>

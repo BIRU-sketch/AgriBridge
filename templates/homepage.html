@@ -69,15 +69,14 @@
         <section class="hero" id="top">
             <div class="wrap hero-inner">
                 <div class="hero-copy">
-                    <p class="hero-kicker">Digital Agricultural Market &amp; Logistics Coordination for Ethiopia</p>
-                    <h1>Connecting Agricultural <span class="accent">Supply</span> to <span class="accent">Verified Demand</span></h1>
+                    <p class="hero-kicker">A clearer way to source agricultural produce in Ethiopia</p>
+                    <h1>Find the produce your business needs with <span class="accent">AgriBridge</span></h1>
                     <p class="hero-lead">
-                        AgriBridge helps coordinate farm produce, verified buyers, and transportation
-                        &mdash; from collection point to delivery.
+                        Search available hub stock, compare crop grades and prices, place an order, and follow its transport from dispatch to delivery.
                     </p>
                     <div class="cta-row">
-                        <a class="btn btn-primary btn-lg" href="/auth?mode=signup">Get Started {{ icon('arrow-right') }}</a>
-                        <a class="btn btn-outline btn-lg" href="#how">{{ icon('play') }} How It Works</a>
+                        <a class="btn btn-primary btn-lg" href="/auth?mode=signup">Create a Buyer Account {{ icon('arrow-right') }}</a>
+                        <a class="btn btn-outline btn-lg" href="/auth?mode=login">Log in</a>
                     </div>
                 </div>
             </div>
@@ -105,34 +104,34 @@
         <section class="section" id="how">
             <div class="wrap">
                 <div class="section-head">
-                    <h2>How It Works</h2>
-                    <p>A simple and transparent process from supply to delivery.</p>
+                <h2>Buy through AgriBridge</h2>
+                    <p>Source available produce and coordinate delivery through one buyer account.</p>
                 </div>
                 <ol class="how-grid">
                     <li class="card how-card">
                         <div class="card-top"><span class="num">1</span><span class="how-icon">{{ icon('users') }}</span></div>
-                        <h3>Register Farmers</h3>
-                        <p>Extension workers or cooperative agents register farmers.</p>
+                        <h3>Search available stock</h3>
+                        <p>Browse produce lots recorded at participating aggregation hubs.</p>
                     </li>
                     <li class="card how-card">
                         <div class="card-top"><span class="num">2</span><span class="how-icon">{{ icon('leaf') }}</span></div>
-                        <h3>List Produce</h3>
-                        <p>Agents register available produce lots including crop, quantity, quality, price, location and availability.</p>
+                        <h3>Review crop details</h3>
+                        <p>Check grade, quantity, price, and hub location before placing an order.</p>
                     </li>
                     <li class="card how-card">
                         <div class="card-top"><span class="num">3</span><span class="how-icon">{{ icon('search') }}</span></div>
-                        <h3>Match Supply &amp; Demand</h3>
-                        <p>The system evaluates produce against verified buyer demands using a transparent 0&ndash;100 matching score.</p>
+                        <h3>Place your order</h3>
+                        <p>Choose a quantity from available stock and select a destination hub.</p>
                     </li>
                     <li class="card how-card">
                         <div class="card-top"><span class="num">4</span><span class="how-icon">{{ icon('truck') }}</span></div>
-                        <h3>Coordinate Transport</h3>
-                        <p>After the buyer and agent agree to a match, transportation is coordinated.</p>
+                        <h3>Follow delivery</h3>
+                        <p>Review the order and waybill status as a transporter moves the produce.</p>
                     </li>
                     <li class="card how-card">
                         <div class="card-top"><span class="num">5</span><span class="how-icon">{{ icon('check-circle') }}</span></div>
-                        <h3>Confirm Delivery</h3>
-                        <p>Shipment moves through: Assigned &rarr; Picked Up &rarr; In Transit &rarr; Delivered. The buyer confirms delivery.</p>
+                        <h3>Manage trade history</h3>
+                        <p>Return to your buyer dashboard to see your orders and receipts.</p>
                     </li>
                 </ol>
             </div>
@@ -143,7 +142,7 @@
             <div class="wrap">
                 <div class="section-head">
                     <h2>Built for Agricultural Coordination</h2>
-                    <p>Everything you need for a smooth and transparent supply chain.</p>
+                    <p>Tools to help institutional buyers source produce and arrange delivery.</p>
                 </div>
                 <div class="feature-grid">
                     <article class="card feature">
@@ -152,15 +151,15 @@
                     </article>
                     <article class="card feature">
                         <span class="ic ic-lg">{{ icon('users') }}</span>
-                        <div><h3>Verified Buyer Access</h3><p>Verified buyers search and purchase certified hub stock.</p></div>
+                        <div><h3>Buyer Access</h3><p>Verified buyers search and purchase available hub stock.</p></div>
                     </article>
                     <article class="card feature">
                         <span class="ic ic-lg">{{ icon('target') }}</span>
-                        <div><h3>Transparent Matching</h3><p>Matching considers crop, quantity, quality, price, location and availability.</p></div>
+                        <div><h3>Stock Search</h3><p>Search hub stock by crop and grade, then review listed quantity and price.</p></div>
                     </article>
                     <article class="card feature">
                         <span class="ic ic-lg">{{ icon('shield-check') }}</span>
-                        <div><h3>Agreement-Based Trading</h3><p>A match is never automatically completed. Buyer and agent must agree.</p></div>
+                        <div><h3>Purchase Orders</h3><p>Buyers select available quantities and submit purchase orders.</p></div>
                     </article>
                     <article class="card feature">
                         <span class="ic ic-lg">{{ icon('truck') }}</span>
@@ -168,68 +167,9 @@
                     </article>
                     <article class="card feature">
                         <span class="ic ic-lg">{{ icon('activity') }}</span>
-                        <div><h3>Admin Monitoring</h3><p>Administrators verify users, monitor KPIs and alerts, and inspect audit history.</p></div>
+                        <div><h3>Account Verification</h3><p>Administrators review buyer, agent, and transporter accounts and vehicle registrations.</p></div>
                     </article>
                 </div>
-            </div>
-        </section>
-
-        <!-- ===== Transparent matching ===== -->
-        <section class="section section-mint" id="matching">
-            <div class="wrap match-layout">
-                <div class="match-text">
-                    <h2>Transparent Matching</h2>
-                    <p>AgriBridge provides a transparent matching score to help buyers and agents evaluate suitable supply.</p>
-                    <div class="note">
-                        {{ icon('info') }}
-                        <p>The matching score only supports decision-making. It does not automatically complete a trade.</p>
-                    </div>
-                </div>
-
-                <div class="ring" id="ring" role="img" aria-label="Example match score: 87 out of 100">
-                    <svg viewBox="0 0 120 120" aria-hidden="true">
-                        <circle class="ring-bg" cx="60" cy="60" r="52"/>
-                        <circle class="ring-fg" cx="60" cy="60" r="52" transform="rotate(-90 60 60)"/>
-                    </svg>
-                    <div class="ring-num" aria-hidden="true">
-                        <div><strong id="score-num">87</strong><span class="of"> / 100</span></div>
-                        <span class="ring-label">Match Score</span>
-                        <span class="ring-eg">Example</span>
-                    </div>
-                </div>
-
-                <div class="card factors">
-                    <h3>Matching Factors</h3>
-                    <ul>
-                        <li>{{ icon('leaf') }}<span>Crop</span><b>90%</b></li>
-                        <li>{{ icon('layers') }}<span>Quantity</span><b>85%</b></li>
-                        <li>{{ icon('check-circle') }}<span>Quality</span><b>88%</b></li>
-                        <li>{{ icon('banknote') }}<span>Price</span><b>80%</b></li>
-                        <li>{{ icon('pin') }}<span>Location</span><b>85%</b></li>
-                        <li>{{ icon('clock') }}<span>Availability</span><b>92%</b></li>
-                    </ul>
-                </div>
-            </div>
-        </section>
-
-        <!-- ===== Supply chain flow ===== -->
-        <section class="section section-tight" id="flow">
-            <div class="wrap">
-                <div class="section-head">
-                    <h2>Supply Chain Flow</h2>
-                </div>
-                <ol class="flow">
-                    <li><span class="ic ic-lg">{{ icon('leaf') }}</span><span>Produce Lot</span></li>
-                    <li><span class="ic ic-lg">{{ icon('user') }}</span><span>Buyer Demand</span></li>
-                    <li><span class="ic ic-lg">{{ icon('search') }}</span><span>Match Proposal</span></li>
-                    <li><span class="ic ic-lg">{{ icon('handshake') }}</span><span>Buyer Agreement + Agent Agreement</span></li>
-                    <li><span class="ic ic-lg">{{ icon('truck') }}</span><span>Transporter</span></li>
-                    <li><span class="ic ic-lg">{{ icon('clipboard-check') }}</span><span>Assigned</span></li>
-                    <li><span class="ic ic-lg">{{ icon('arrow-up-line') }}</span><span>Picked Up</span></li>
-                    <li><span class="ic ic-lg">{{ icon('pin') }}</span><span>In Transit</span></li>
-                    <li><span class="ic ic-lg">{{ icon('package') }}</span><span>Delivered</span></li>
-                    <li><span class="ic ic-lg">{{ icon('check-circle') }}</span><span>Buyer Confirmation</span></li>
-                </ol>
             </div>
         </section>
 
@@ -237,7 +177,7 @@
         <section class="section section-mint" id="about">
             <div class="wrap">
                 <div class="section-head">
-                    <h2>One Platform, Four Roles</h2>
+                        <h2>Designed for Buyers, Connected to Supply Teams</h2>
                 </div>
                 <div class="roles-grid">
                     <article class="card role">
@@ -245,38 +185,35 @@
                         <ul>
                             <li>Register farmers</li>
                             <li>Register produce</li>
-                            <li>Review and agree to matches</li>
+                            <li>Manage farmer and produce records</li>
                         </ul>
-                        <a class="role-link" href="/auth?mode=signup&amp;role=agent">Create an agent account</a>
+                        <a class="role-link" href="/staff/login">Staff login</a>
                     </article>
                     <article class="card role">
                         <div class="role-top"><span class="ic ic-lg ic-blue">{{ icon('user') }}</span><h3>Buyer</h3></div>
                         <ul>
-                            <li>Create demands</li>
-                            <li>Review matches</li>
-                            <li>Agree to matches</li>
-                            <li>Confirm delivery</li>
+                            <li>Search live hub inventory</li>
+                            <li>Place produce orders</li>
+                            <li>Review order history</li>
                         </ul>
-                        <a class="role-link" href="/auth?mode=signup&amp;role=buyer">Create a buyer account</a>
+                        <a class="role-link" href="/auth?mode=signup">Create a buyer account</a>
                     </article>
                     <article class="card role">
                         <div class="role-top"><span class="ic ic-lg ic-orange">{{ icon('truck') }}</span><h3>Transporter</h3></div>
                         <ul>
                             <li>Manage vehicles</li>
-                            <li>Handle assigned shipments</li>
+                            <li>Claim available shipments</li>
                             <li>Update shipment status</li>
                         </ul>
-                        <a class="role-link" href="/auth?mode=signup&amp;role=transporter">Create a transporter account</a>
+                        <a class="role-link" href="/staff/login">Staff login</a>
                     </article>
                     <article class="card role">
                         <div class="role-top"><span class="ic ic-lg ic-purple">{{ icon('shield-check') }}</span><h3>Administrator</h3></div>
                         <ul>
                             <li>Verify users</li>
                             <li>Monitor KPIs</li>
-                            <li>Review alerts</li>
-                            <li>Inspect audit history</li>
                         </ul>
-                        <p class="role-note">Set up by the AgriBridge team.</p>
+                        <a class="role-link" href="/staff/login">Staff login</a>
                     </article>
                 </div>
 

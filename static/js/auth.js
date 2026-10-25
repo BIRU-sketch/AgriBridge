@@ -121,7 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (panelReset) panelReset.hidden = true;
 
             authTitle.textContent = 'Create account';
-            authSub.textContent = 'Join AgriBridge to trade or transport produce across Ethiopia.';
+            authSub.textContent = 'Create a buyer account to source produce from participating hubs.';
         } else {
             // Default: 'login'
             if (segTabs) segTabs.hidden = false;
@@ -136,7 +136,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (panelReset) panelReset.hidden = true;
 
             authTitle.textContent = 'Log in';
-            authSub.textContent = 'Welcome back. Enter your details to continue.';
+            authSub.textContent = 'Buyers sign in here. Staff members use the company-issued staff sign-in page.';
         }
     }
 
@@ -184,14 +184,6 @@ document.addEventListener('DOMContentLoaded', () => {
         switchMode('forgot');
     } else if (urlParams.get('mode') === 'signup' || window.location.hash === '#signup') {
         switchMode('signup');
-    }
-
-    const roleParam = urlParams.get('role');
-    if (roleParam) {
-        const matchingRadio = panelSignup.querySelector(`input[name="role"][value="${roleParam}"]`);
-        if (matchingRadio) {
-            matchingRadio.checked = true;
-        }
     }
 
     // Password visibility toggle
@@ -290,10 +282,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const nameInput = document.getElementById('signup-name');
         const emailInput = document.getElementById('signup-email');
         const passwordInput = document.getElementById('signup-password');
-        const roleInputs = panelSignup.querySelectorAll('input[name="role"]');
-
         const nameErr = document.getElementById('signup-name-err');
-        const roleErr = document.getElementById('signup-role-err');
         const emailErr = document.getElementById('signup-email-err');
         const passwordErr = document.getElementById('signup-password-err');
         const submitBtn = panelSignup.querySelector('button[type="submit"]');
@@ -301,7 +290,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const fullName = nameInput?.value.trim() || '';
         const email = emailInput?.value.trim() || '';
         const password = passwordInput?.value || '';
-        const selectedRole = Array.from(roleInputs).find((r) => r.checked)?.value;
 
         let hasError = false;
         let firstInvalidInput = null;
@@ -310,12 +298,6 @@ document.addEventListener('DOMContentLoaded', () => {
             setFieldError(nameInput, nameErr, 'Please enter your full name.');
             hasError = true;
             firstInvalidInput = firstInvalidInput || nameInput;
-        }
-
-        if (!selectedRole) {
-            setFieldError(null, roleErr, 'Please select how you will use AgriBridge.');
-            hasError = true;
-            firstInvalidInput = firstInvalidInput || roleInputs[0];
         }
 
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -358,7 +340,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     full_name: fullName,
-                    role: selectedRole,
                     email,
                     password
                 })

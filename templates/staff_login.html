@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Staff Sign In | AgriBridge</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+</head>
+<body>
+    <main class="auth" style="min-height:100vh; display:grid; place-items:center; padding:1.25rem;">
+        <section class="auth-card" style="margin:0;" aria-labelledby="staff-login-title">
+            <a class="brand" href="/" aria-label="AgriBridge home">{% include 'partials/logo.html' %} AgriBridge</a>
+            <div class="auth-head">
+                <h1 id="staff-login-title">Staff sign in</h1>
+                <p>Agents, transporters, and administrators use their company-issued name and password.</p>
+            </div>
+            <form id="staff-login-form" class="auth-form">
+                <div class="form-alert" role="alert" hidden></div>
+                <div class="field">
+                    <label for="staff-username">Staff name</label>
+                    <input id="staff-username" name="username" type="text" autocomplete="username" required>
+                </div>
+                <div class="field">
+                    <label for="staff-password">Password</label>
+                    <input id="staff-password" name="password" type="password" autocomplete="current-password" required>
+                </div>
+                <button class="btn btn-primary btn-lg btn-block" type="submit">Sign in</button>
+            </form>
+            <p class="auth-back"><a href="/auth">Buyer sign in</a> · <a href="/">Back to home</a></p>
+        </section>
+    </main>
+    <script>
+        document.getElementById('staff-login-form').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const form = event.currentTarget;
+            const alert = form.querySelector('.form-alert');
+            const button = form.querySelector('button[type="submit"]');
+            alert.hidden = true;
+            button.disabled = true;
+            button.textContent = 'Signing in…';
+            try {
+                const response = await fetch('/api/staff/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username: form.elements.namedItem('username').value,
+                        password: form.elements.namedItem('password').value
+                    })
+                });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || 'Sign in failed.');
+                window.location.assign('/dashboard');
+            } catch (error) {
+                alert.textContent = error.message;
+                alert.hidden = false;
+            } finally {
+                button.disabled = false;
+                button.textContent = 'Sign in';
+            }
+        });
+    </script>
+</body>
+</html>

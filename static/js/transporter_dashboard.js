@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const activeRouteTitle = document.getElementById('active-route-title');
     const activeAssignedCargo = document.getElementById('active-assigned-cargo');
     const activeAssignedVehicle = document.getElementById('active-assigned-vehicle');
+    const activeRoutePanel = document.getElementById('active-route');
 
     // Available loads container
     const availableLoadsGrid = document.getElementById('available-loads-grid');
@@ -56,8 +57,9 @@ document.addEventListener('DOMContentLoaded', () => {
     ];
 
     let currentShipment = null;
+    let availableVehicles = [];
 
-    function updateStepperUI(stageIndex) {
+    function updateStepperUI(stageIndex, shipment = currentShipment) {
         const stage = STAGES[stageIndex] || STAGES[1];
         if (stepperFill) stepperFill.style.width = stage.width;
 
@@ -72,12 +74,14 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        if (currentStatusText) currentStatusText.textContent = stage.name;
-        if (activeRouteStatusBadge) activeRouteStatusBadge.textContent = stage.statusBadge;
+        const transferPending = stageIndex >= STAGES.length - 1 && ['hub_transfer', 'hub_supply'].includes(shipment?.shipment_type) && !['Agent Approved - Complete', 'Admin Resolved - Complete'].includes(shipment?.status);
+        if (currentStatusText) currentStatusText.textContent = transferPending ? (shipment.status === 'Delivery Issue - Admin Review' ? 'Delivery issue reported to admin' : 'Awaiting agent approval') : stage.name;
+        if (activeRouteStatusBadge) activeRouteStatusBadge.textContent = transferPending ? 'Approval Pending' : stage.statusBadge;
 
         if (advanceStatusBtn) {
             if (stageIndex >= STAGES.length - 1) {
-                advanceStatusBtn.textContent = 'Trip Completed & Settled';
+                const waiting = ['hub_transfer', 'hub_supply'].includes(shipment?.shipment_type) && !['Agent Approved - Complete', 'Admin Resolved - Complete'].includes(shipment?.status);
+                advanceStatusBtn.textContent = waiting ? (shipment.status === 'Delivery Issue - Admin Review' ? 'Delivery issue reported to admin' : 'Waiting for agent approvals') : (['hub_transfer', 'hub_supply'].includes(shipment?.shipment_type) ? 'Approved · Trip Complete' : 'Trip Completed & Settled');
                 advanceStatusBtn.disabled = true;
                 advanceStatusBtn.classList.remove('btn-primary');
                 advanceStatusBtn.classList.add('btn-ghost');
@@ -96,9 +100,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const res = await fetch('/api/transporter/active-shipment');
             const data = await res.json();
             const shipment = data.shipment;
+            const previousShipment = currentShipment;
             currentShipment = shipment;
 
             if (!shipment) {
+                if (previousShipment) { loadCompletedHistory(); loadFleet(); }
+                if (activeRoutePanel) activeRoutePanel.hidden = true;
                 if (activeWaybillId) activeWaybillId.textContent = 'None';
                 if (activeRouteTitle) activeRouteTitle.textContent = 'No Active Transport Assignment';
                 if (activeAssignedCargo) activeAssignedCargo.innerHTML = '<strong>No cargo assigned</strong>';
@@ -112,14 +119,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
+            if (activeRoutePanel) activeRoutePanel.hidden = false;
+            if (!previousShipment || previousShipment.waybill_id !== shipment.waybill_id) loadFleet();
             if (activeWaybillId) activeWaybillId.textContent = `#${shipment.waybill_id}`;
             if (activeRouteTitle) activeRouteTitle.textContent = `${shipment.origin_hub} ➔ ${shipment.destination_hub}`;
             if (activeAssignedCargo) activeAssignedCargo.innerHTML = `<strong>${shipment.quantity} Qtl (${shipment.crop_type})</strong>`;
             if (activeAssignedVehicle) activeAssignedVehicle.innerHTML = `<strong>${shipment.vehicle_plate || 'Assigned Truck'}</strong>`;
             if (activeConsignmentsCount) activeConsignmentsCount.innerHTML = `1 <small style="font-size:.9rem;font-weight:600;">Trip</small>`;
 
-            const stageIdx = shipment.stage_index !== undefined ? shipment.stage_index : 3;
-            updateStepperUI(stageIdx);
+            const stageIdx = Number(shipment.stage_index || 0);
+            updateStepperUI(stageIdx, shipment);
         } catch (err) {
             console.error('Failed to load active route:', err);
         }
@@ -157,16 +166,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!res.ok) throw new Error(data.error || 'Failed to update waybill status');
 
                 currentShipment.stage_index = nextIndex;
-                updateStepperUI(nextIndex);
+                currentShipment.status = data.shipment?.status || nextStage.name;
+                updateStepperUI(nextIndex, currentShipment);
                 showToast(data.message || `Status updated to ${nextStage.name}`);
 
                 // If final stage reached (Delivered & Settled)
-                if (nextIndex >= STAGES.length - 1) {
+                if (nextIndex >= STAGES.length - 1 && !['hub_transfer', 'hub_supply'].includes(currentShipment.shipment_type)) {
                     loadCompletedHistory();
                     setTimeout(() => {
                         loadActiveRoute();
                         loadAvailableLoads();
                     }, 1200);
+                }
+                if (nextIndex >= STAGES.length - 1 && ['hub_transfer', 'hub_supply'].includes(currentShipment.shipment_type)) {
+                    loadActiveRoute();
                 }
             } catch (err) {
                 showToast(err.message || 'Error updating status');
@@ -191,7 +204,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (loads.length === 0) {
                 availableLoadsGrid.innerHTML = `
                     <div style="grid-column: 1 / -1; padding: 2.5rem; text-align: center; color: var(--muted); background: var(--paper); border: 1.5px dashed var(--line); border-radius: 12px;">
-                        All available consignments have been claimed. When buyers complete purchases, new bulk loads will appear here.
+                        No buyer loads are currently waiting for a carrier. Hub replenishment duties are assigned to your account automatically when an approved vehicle is available.
                     </div>
                 `;
                 return;
@@ -204,7 +217,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 card.innerHTML = `
                     <div>
                         <div class="load-card-head">
-                            <span class="badge badge-green">Ready for Dispatch</span>
+                        <span class="badge badge-green">${load.shipment_type === 'hub_transfer' ? 'Hub Transfer Offer' : 'Ready for Dispatch'}</span>
                             <span class="code-ref">#${load.waybill_id}</span>
                         </div>
                         <h3 class="load-route-title" style="margin-top:.75rem;">
@@ -217,7 +230,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             </li>
                             <li>
                                 <span>Order Ref:</span>
-                                <span>${load.order_ref || 'Hub Allocation'}</span>
+                                <span>${load.shipment_type === 'hub_transfer' ? '100-Qtl Hub Transfer' : (load.order_ref || 'Buyer Order')}</span>
                             </li>
                             <li>
                                 <span>Pickup Hub:</span>
@@ -227,7 +240,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                     <div class="load-tariff">
                         <span class="meta-sub">Official Tariff:</span>
-                        <span class="load-tariff-val">${Number(load.tariff_etb || 18500).toLocaleString()} ETB</span>
+                        <span class="load-tariff-val">${load.tariff_etb == null ? 'Not set' : `${Number(load.tariff_etb).toLocaleString()} ETB`}</span>
                     </div>
                     <button type="button" class="btn btn-primary btn-block accept-load-btn" data-waybill="${load.waybill_id}">
                         Claim &amp; Assign Truck
@@ -240,6 +253,11 @@ document.addEventListener('DOMContentLoaded', () => {
             availableLoadsGrid.querySelectorAll('.accept-load-btn').forEach(btn => {
                 btn.addEventListener('click', async () => {
                     const waybillId = btn.dataset.waybill;
+                    const selectedVehicle = availableVehicles.find(v => v.status === 'Approved for Hub Dispatch');
+                    if (!selectedVehicle) {
+                        showToast('Register a vehicle and wait for admin approval before claiming a load.');
+                        return;
+                    }
                     btn.disabled = true;
                     btn.textContent = 'Claiming Load…';
 
@@ -249,7 +267,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
                                 waybill_id: waybillId,
-                                vehicle_plate: 'ET-3-4521'
+                                vehicle_plate: selectedVehicle.plate_number
                             })
                         });
 
@@ -280,6 +298,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const res = await fetch('/api/transporter/fleet');
             const data = await res.json();
             const vehicles = data.vehicles || [];
+            availableVehicles = vehicles;
             const registerVehBtn = document.getElementById('register-veh-btn');
 
             if (fleetCountEl) {
@@ -379,11 +398,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         <div class="meta-sub">${shipment.crop_type} &bull; ${shipment.vehicle_plate || 'Freight'}</div>
                     </td>
                     <td class="text-right" style="font-weight:700;">${shipment.quantity} Qtl</td>
-                    <td class="text-right" style="font-weight:800; color:var(--brand);">${Number(shipment.tariff_etb || 20000).toLocaleString()} ETB</td>
+                    <td class="text-right" style="font-weight:800; color:var(--brand);">${shipment.tariff_etb == null ? 'Not set' : `${Number(shipment.tariff_etb).toLocaleString()} ETB`}</td>
                     <td class="meta-sub">${dateStr}</td>
                     <td class="text-center">
                         <span class="badge badge-green">
-                            <span class="badge-dot"></span> Verified &amp; Settled
+                            <span class="badge-dot"></span> ${shipment.status || 'Delivered & Offloaded'}
                         </span>
                     </td>
                     <td class="text-right">
@@ -392,9 +411,9 @@ document.addEventListener('DOMContentLoaded', () => {
                             data-route="${shipment.origin_hub} ➔ ${shipment.destination_hub}"
                             data-cargo="${shipment.crop_type}"
                             data-tonnage="${shipment.quantity} Quintals"
-                            data-tariff="${Number(shipment.tariff_etb || 20000).toLocaleString()} ETB"
-                            data-vehicle="${shipment.vehicle_plate || 'Isuzu FSR'}"
-                            data-driver="${shipment.transporter_name || 'Assigned Driver'}">
+                            data-tariff="${shipment.tariff_etb == null ? 'Not set' : `${Number(shipment.tariff_etb).toLocaleString()} ETB`}"
+                            data-vehicle="${shipment.vehicle_plate || ''}"
+                            data-driver="${shipment.transporter_name || ''}">
                             Digital Waybill
                         </button>
                     </td>
@@ -407,13 +426,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 btn.addEventListener('click', () => {
                     const modal = document.getElementById('waybill-modal');
                     if (!modal) return;
-                    document.getElementById('waybill-ref-title').textContent = btn.dataset.waybill;
-                    document.getElementById('wb-route').textContent = btn.dataset.route;
-                    document.getElementById('wb-cargo').textContent = btn.dataset.cargo;
-                    document.getElementById('wb-tonnage').textContent = btn.dataset.tonnage;
-                    document.getElementById('wb-tariff').textContent = btn.dataset.tariff;
-                    document.getElementById('wb-vehicle').textContent = btn.dataset.vehicle;
-                    document.getElementById('wb-driver').textContent = btn.dataset.driver;
+                    document.getElementById('wb-modal-ref').textContent = btn.dataset.waybill;
+                    document.getElementById('wb-modal-route').textContent = btn.dataset.route;
+                    document.getElementById('wb-modal-cargo').textContent = btn.dataset.cargo;
+                    document.getElementById('wb-modal-tonnage').textContent = btn.dataset.tonnage;
+                    document.getElementById('wb-modal-tariff').textContent = btn.dataset.tariff;
+                    document.getElementById('wb-modal-vehicle').textContent = btn.dataset.vehicle;
+                    document.getElementById('wb-modal-driver').textContent = btn.dataset.driver;
                     modal.classList.add('active');
                     document.body.style.overflow = 'hidden';
                 });
@@ -448,11 +467,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 submitBtn.textContent = 'Registering Vehicle…';
             }
 
-            const plate = document.getElementById('veh-plate')?.value.trim();
-            const type = document.getElementById('veh-type')?.value;
-            const cap = parseFloat(document.getElementById('veh-capacity')?.value) || 100;
-            const driver = document.getElementById('veh-driver')?.value.trim() || 'Primary Driver';
-            const phone = document.getElementById('veh-phone')?.value.trim() || '';
+            const plate = vehicleForm.elements.namedItem('plate_number')?.value.trim();
+            const type = vehicleForm.elements.namedItem('vehicle_type')?.value.trim();
+            const cap = Number(vehicleForm.elements.namedItem('capacity_quintals')?.value);
+            const driver = vehicleForm.elements.namedItem('driver_name')?.value.trim();
+            const phone = vehicleForm.elements.namedItem('phone_number')?.value.trim();
+
+            if (!plate || !type || !Number.isFinite(cap) || cap <= 0 || !driver || !phone) {
+                showToast('Enter the plate, vehicle type, positive capacity, driver name, and phone number.');
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Register Vehicle';
+                }
+                return;
+            }
 
             try {
                 const res = await fetch('/api/vehicle', {
@@ -503,4 +531,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadAvailableLoads();
     loadFleet();
     loadCompletedHistory();
+    // Keep system-assigned replenishment duties visible while the dashboard is open.
+    setInterval(loadActiveRoute, 15000);
+    setInterval(loadAvailableLoads, 30000);
 });

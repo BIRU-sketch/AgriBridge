@@ -879,3 +879,111 @@ body.buyer-body {
     flex-wrap: wrap;
     gap: 1rem;
 }
+
+/* ---------- Buyer workspace views ---------- */
+.buyer-view {
+    display: grid;
+    align-content: start;
+    gap: 1.15rem;
+}
+
+.buyer-view[hidden] { display: none !important; }
+
+.buyer-page-heading {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1.5rem;
+    padding: 2px 2px 4px;
+}
+
+.buyer-page-heading h1 {
+    margin: .2rem 0 .35rem;
+    color: var(--dash-ink, #142b25);
+    font-size: clamp(1.65rem, 2.5vw, 2.15rem);
+    font-weight: 800;
+    letter-spacing: -.045em;
+    line-height: 1.15;
+}
+
+.buyer-page-heading p {
+    max-width: 680px;
+    color: var(--dash-muted, #64756e);
+    font-size: .92rem;
+}
+
+.buyer-eyebrow {
+    color: #278457;
+    font-size: .68rem;
+    font-weight: 800;
+    letter-spacing: .14em;
+}
+
+.buyer-metrics { grid-template-columns: minmax(250px, 360px); }
+.buyer-metrics .metric-card { min-height: 104px; }
+
+.buyer-order-count {
+    display: grid;
+    min-width: 128px;
+    gap: .1rem;
+    padding: .75rem 1rem;
+    border: 1px solid var(--dash-border, #e2e9e5);
+    border-radius: 12px;
+    background: #fff;
+}
+
+.buyer-order-count strong {
+    color: var(--dash-ink, #142b25);
+    font-size: 1.35rem;
+    font-weight: 800;
+}
+
+.receipt-filters {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: .55rem;
+    flex-wrap: wrap;
+}
+
+.receipt-filters input,
+.receipt-filters select {
+    width: min(100%, 220px);
+    min-height: 40px;
+    padding: .5rem .72rem;
+    border: 1px solid #dce5df;
+    border-radius: 9px;
+    color: var(--dash-ink, #142b25);
+    background: #fff;
+    font: inherit;
+    font-size: .82rem;
+}
+
+.site-footer .footer-contact button[data-buyer-view-target] {
+    padding: 0;
+    border: 0;
+    color: inherit;
+    background: transparent;
+    font: inherit;
+    cursor: pointer;
+}
+
+.site-footer .footer-contact button[data-buyer-view-target]:hover {
+    color: var(--brand);
+    text-decoration: underline;
+}
+
+@media (max-width: 700px) {
+    .buyer-page-heading { align-items: flex-start; }
+    .buyer-receipts-heading { flex-direction: column; gap: .9rem; }
+    .buyer-order-count { grid-template-columns: 1fr auto; align-items: center; width: 100%; }
+}
+
+@media (max-width: 560px) {
+    .buyer-page-heading h1 { font-size: 1.55rem; }
+    .buyer-page-heading p { font-size: .84rem; }
+    .buyer-metrics { grid-template-columns: 1fr; }
+    .receipt-filters { width: 100%; justify-content: stretch; }
+    .receipt-filters input,
+    .receipt-filters select { flex: 1 1 100%; width: 100%; }
+}

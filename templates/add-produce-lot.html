@@ -143,7 +143,7 @@
                     <div class="field-group">
                         <label for="kebele_id_search">Registered Kebele ID</label>
                         <div style="display:flex; gap:.75rem;">
-                            <input type="text" id="kebele_id_search" placeholder="e.g. KBL-88204-BS" value="KBL-88204-BS" style="flex:1;">
+                            <input type="text" id="kebele_id_search" placeholder="e.g. KBL-88204-BS" value="" style="flex:1;">
                             <button type="button" id="lookup-btn" class="btn btn-primary">
                                 {{ icon('search') }} Verify Farmer
                             </button>
@@ -152,18 +152,18 @@
 
                     <div id="farmer-info-box" class="farmer-card-found">
                         <div style="display:flex; justify-content:space-between; align-items:center;">
-                            <strong style="color:var(--deep); font-size:1.05rem;" id="f-name">Ketema Bekele Tolossa</strong>
+                            <strong style="color:var(--deep); font-size:1.05rem;" id="f-name">No farmer selected</strong>
                             <span class="badge badge-green">Verified Smallholder</span>
                         </div>
                         <div class="meta-sub" id="f-meta">
-                            Kebele ID: KBL-88204-BS &bull; Location: Bishoftu / Ada'a &bull; Coop: Ada'a Multi-Purpose
+                            Farmer details will appear here after a successful lookup.
                         </div>
                     </div>
                 </div>
 
                 <!-- Section 2: Produce Lot Details -->
                 <form id="lot-form" style="margin-top:1.5rem;">
-                    <input type="hidden" name="farmer_kebele_id" id="farmer_kebele_id" value="KBL-88204-BS">
+                    <input type="hidden" name="farmer_kebele_id" id="farmer_kebele_id" value="">
 
                     <div class="form-section">
                         <div class="section-head">
@@ -174,18 +174,13 @@
                         <div class="form-grid-2">
                             <div class="field-group">
                                 <label for="crop_type">Commodity Crop Type</label>
-                                <select id="crop_type" name="crop_type">
-                                    <option value="White Teff">White Teff (Grade 1 Magna)</option>
-                                    <option value="Bread Wheat">Bread Wheat (Bulk Grain)</option>
-                                    <option value="Yellow Maize">Yellow Maize</option>
-                                    <option value="Humera Sesame">Humera Sesame</option>
-                                    <option value="Arabica Coffee">Arabica Coffee</option>
-                                    <option value="Malt Barley">Malt Barley</option>
+                                <select id="crop_type" name="crop_type" required>
+                                    <option value="">Loading configured crops...</option>
                                 </select>
                             </div>
 
                             <div class="field-group">
-                                <label for="quality_grade">Certified Quality Grade</label>
+                                <label for="quality_grade">Quality Grade</label>
                                 <select id="quality_grade" name="quality_grade">
                                     <option value="Grade 1 (Magna / Premium)">Grade 1 (Magna / Premium)</option>
                                     <option value="Grade 1 (Standard)">Grade 1 (Standard)</option>
@@ -197,13 +192,38 @@
 
                         <div class="form-grid-2">
                             <div class="field-group">
+                                <label for="hub_location">Current / Source Hub</label>
+                                <select id="hub_location" name="hub_location" required {% if assigned_hub %}disabled{% endif %}>
+                                    {% if assigned_hub %}<option value="{{ assigned_hub }}" selected>{{ assigned_hub }}</option>{% else %}<option value="" disabled selected>Select source hub</option>{% for hub in hubs %}<option value="{{ hub }}">{{ hub }}</option>{% endfor %}{% endif %}
+                                </select>
+                                {% if assigned_hub %}<input type="hidden" name="hub_location" value="{{ assigned_hub }}">{% endif %}
+                            </div>
+                            <div class="field-group">
+                                <label for="target_hub">Planned Destination Hub <span style="font-weight:500;text-transform:none;">(optional)</span></label>
+                                <select id="target_hub" name="target_hub">
+                                    <option value="" selected>No destination planned</option>
+                                    {% for hub in hubs %}<option value="{{ hub }}">{{ hub }}</option>{% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-grid-2">
+                            <div class="field-group">
                                 <label for="quantity">Harvest Quantity (Quintals)</label>
                                 <input type="number" id="quantity" name="quantity" step="0.1" placeholder="e.g. 50" required>
                             </div>
 
                             <div class="field-group">
+                                <label for="price_per_qtl">Fixed Crop Price (ETB per Quintal)</label>
+                                <input type="number" id="price_per_qtl" name="price_per_qtl" readonly placeholder="Select a crop" aria-describedby="fixed-price-hint">
+                                <small id="fixed-price-hint">This rate is set by the administrator and applies to every lot of this crop.</small>
+                            </div>
+                        </div>
+
+                        <div class="form-grid-2">
+                            <div class="field-group">
                                 <label for="harvest_date">Harvest Date</label>
-                                <input type="date" id="harvest_date" name="harvest_date" value="2026-09-18" required>
+                                <input type="date" id="harvest_date" name="harvest_date" required>
                             </div>
                         </div>
                     </div>
@@ -226,87 +246,122 @@
     <script>
         const lookupBtn = document.getElementById('lookup-btn');
         const searchInput = document.getElementById('kebele_id_search');
-        const farmerBox = document.getElementById('farmer-info-box');
         const fName = document.getElementById('f-name');
         const fMeta = document.getElementById('f-meta');
         const hiddenKebele = document.getElementById('farmer_kebele_id');
         const lotForm = document.getElementById('lot-form');
+        const sourceHub = document.getElementById('hub_location');
+        const destinationHub = document.getElementById('target_hub');
+        destinationHub?.addEventListener('change', () => {
+            if (sourceHub?.value && destinationHub.value === sourceHub.value) {
+                showToast('Choose a destination different from the source hub.');
+                destinationHub.value = '';
+            }
+        });
         const submitBtn = document.getElementById('submit-btn');
         const toast = document.getElementById('toast-msg');
+        const cropSelect = document.getElementById('crop_type');
+        const cropPriceInput = document.getElementById('price_per_qtl');
+        let cropPrices = [];
 
-        function showToast(msg) {
+        function showToast(message) {
             if (!toast) return;
-            toast.textContent = msg;
+            toast.textContent = message;
             toast.classList.add('show');
             setTimeout(() => toast.classList.remove('show'), 4000);
         }
 
-        // URL param check for kebele_id
-        const urlParams = new URLSearchParams(window.location.search);
-        const paramId = urlParams.get('kebele_id');
-        if (paramId && searchInput) {
-            searchInput.value = paramId;
-            hiddenKebele.value = paramId;
+        async function loadCropPrices() {
+            try {
+                const response = await fetch('/api/agent/crop-prices');
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || 'Crop prices could not be loaded.');
+                cropPrices = data.crop_prices || [];
+                cropSelect.innerHTML = `<option value="">${cropPrices.length ? 'Select a crop' : 'No crop prices configured'}</option>`;
+                cropPrices.forEach(price => {
+                    const option = document.createElement('option');
+                    option.value = price.crop_type;
+                    option.textContent = price.crop_type;
+                    option.dataset.rate = price.fixed_price_per_qtl;
+                    cropSelect.appendChild(option);
+                });
+                submitBtn.disabled = cropPrices.length === 0;
+                if (!cropPrices.length) showToast('Ask an administrator to set crop prices before adding lots.');
+            } catch (error) {
+                cropSelect.innerHTML = '<option value="">Crop prices unavailable</option>';
+                submitBtn.disabled = true;
+                showToast(error.message);
+            }
         }
+        cropSelect?.addEventListener('change', () => {
+            const rate = cropSelect.selectedOptions[0]?.dataset.rate;
+            cropPriceInput.value = rate ? Number(rate).toFixed(2) : '';
+        });
+        loadCropPrices();
 
         lookupBtn?.addEventListener('click', async () => {
             const id = searchInput?.value.trim();
-            if (!id) return;
+            if (!id) {
+                showToast('Enter a farmer kebele ID.');
+                return;
+            }
             lookupBtn.disabled = true;
-            lookupBtn.textContent = 'Verifying…';
-
+            lookupBtn.textContent = 'Verifying...';
+            hiddenKebele.value = '';
             try {
-                const res = await fetch(`/api/farmer/${encodeURIComponent(id)}`);
-                const data = await res.json();
-                if (data.farmer) {
-                    fName.textContent = data.farmer.full_name || 'Verified Farmer';
-                    fMeta.textContent = `Kebele ID: ${data.farmer.kebele_id} • Location: ${data.farmer.woreda || 'District'} • Crop: ${data.farmer.primary_crop || 'Grain'}`;
-                    hiddenKebele.value = data.farmer.kebele_id;
-                    showToast('Farmer profile verified!');
-                } else {
-                    fName.textContent = 'Farmer Profile Found (Local Database)';
-                    fMeta.textContent = `Kebele ID: ${id} • Status: Registered & Inspected`;
-                    hiddenKebele.value = id;
-                    showToast('Farmer verified via local cooperative roll.');
-                }
-            } catch (err) {
-                fName.textContent = 'Smallholder Farmer Verified';
-                fMeta.textContent = `Kebele ID: ${id} • Cooperative Hub: Bishoftu`;
-                hiddenKebele.value = id;
+                const response = await fetch(`/api/farmer/${encodeURIComponent(id)}`);
+                const data = await response.json();
+                if (!response.ok || !data.farmer) throw new Error(data.error || 'Farmer record not found.');
+                fName.textContent = data.farmer.full_name || 'Registered farmer';
+                fMeta.textContent = `Kebele ID: ${data.farmer.kebele_id} | Location: ${data.farmer.woreda || ''} | Crop: ${data.farmer.primary_crop || ''}`;
+                hiddenKebele.value = data.farmer.kebele_id;
+                showToast('Farmer record loaded.');
+            } catch (error) {
+                fName.textContent = 'Farmer not found';
+                fMeta.textContent = 'Check the kebele ID and try again.';
+                showToast(error.message || 'Farmer lookup failed.');
             } finally {
                 lookupBtn.disabled = false;
                 lookupBtn.textContent = 'Verify Farmer';
             }
         });
 
-        lotForm?.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Adding Lot to Stock…';
+        const queryFarmerId = new URLSearchParams(window.location.search).get('kebele_id');
+        if (queryFarmerId && searchInput) {
+            searchInput.value = queryFarmerId;
+            lookupBtn?.click();
+        }
 
+        lotForm?.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            if (!hiddenKebele.value) {
+                showToast('Verify a farmer before adding a produce lot.');
+                return;
+            }
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Adding lot...';
             const payload = {
-                farmer_kebele_id: hiddenKebele.value || searchInput.value,
+                farmer_kebele_id: hiddenKebele.value,
                 crop_type: document.getElementById('crop_type').value,
                 quality_grade: document.getElementById('quality_grade').value,
                 quantity: parseFloat(document.getElementById('quantity').value),
-                harvest_date: document.getElementById('harvest_date').value
+                price_per_qtl: parseFloat(document.getElementById('price_per_qtl').value),
+                harvest_date: document.getElementById('harvest_date').value,
+                hub_location: sourceHub.value,
+                target_hub: destinationHub.value
             };
-
             try {
-                const res = await fetch('/api/add-produce-lot', {
+                const response = await fetch('/api/add-produce-lot', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
-                const data = await res.json();
-                if (!res.ok) throw new Error(data.error || 'Failed to add produce lot.');
-
-                showToast('Produce lot added successfully to hub silo!');
-                setTimeout(() => {
-                    window.location.href = '/dashboard#produce-lots';
-                }, 1200);
-            } catch (err) {
-                showToast(err.message);
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || 'Failed to add produce lot.');
+                showToast(data.message || 'Produce lot added to the hub silo.');
+                setTimeout(() => { window.location.href = '/dashboard#produce-lots'; }, 1200);
+            } catch (error) {
+                showToast(error.message || 'Could not save the produce lot.');
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Add Produce Lot to Silo';
             }

@@ -61,48 +61,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // ------------------------------------------------------------------------
-    // Match Score Ring Animation
-    // ------------------------------------------------------------------------
-    const ringEl = document.getElementById('ring');
-    const scoreNumEl = document.getElementById('score-num');
-
-    if (ringEl && scoreNumEl) {
-        let hasAnimatedRing = false;
-
-        const ringObserver = new IntersectionObserver((entries) => {
-            entries.forEach((entry) => {
-                if (entry.isIntersecting && !hasAnimatedRing) {
-                    hasAnimatedRing = true;
-                    ringEl.classList.add('in-view');
-
-                    // Animate score number from 0 to 87
-                    const targetScore = 87;
-                    const duration = 1200; // ms
-                    const startTime = performance.now();
-
-                    function updateCounter(currentTime) {
-                        const elapsed = currentTime - startTime;
-                        const progress = Math.min(elapsed / duration, 1);
-                        const easeOut = 1 - Math.pow(1 - progress, 3);
-                        const currentVal = Math.round(easeOut * targetScore);
-                        scoreNumEl.textContent = currentVal;
-
-                        if (progress < 1) {
-                            requestAnimationFrame(updateCounter);
-                        } else {
-                            scoreNumEl.textContent = targetScore;
-                        }
-                    }
-
-                    requestAnimationFrame(updateCounter);
-                }
-            });
-        }, { threshold: 0.3 });
-
-        ringObserver.observe(ringEl);
-    }
-
-    // ------------------------------------------------------------------------
     // ScrollSpy for Nav Links
     // ------------------------------------------------------------------------
     const spyLinks = document.querySelectorAll('[data-spy]');

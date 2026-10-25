@@ -517,6 +517,16 @@ body.agent-body {
     gap: 1.15rem;
 }
 
+.modal-body .search-field { display: grid; gap: .35rem; }
+.modal-body .search-field label { color: var(--deep); font-size: .82rem; font-weight: 700; }
+.modal-body .search-field input,
+.modal-body .search-field select {
+    width: 100%; min-height: 2.7rem; padding: .6rem .75rem;
+    border: 1px solid var(--line); border-radius: 8px; background: #fff;
+    color: var(--deep); font: inherit;
+}
+.modal-body .search-field small { color: var(--muted); font-size: .75rem; }
+
 .modal-foot {
     padding: 1rem 1.5rem;
     border-top: 1px solid var(--line);
@@ -604,3 +614,11 @@ body.agent-body {
     flex-wrap: wrap;
     gap: 1rem;
 }
+
+
+.hub-supply-form { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); align-items: end; gap: 1rem; }
+.hub-supply-form .search-field { display: grid; gap: .4rem; }
+.hub-supply-form label { color: var(--deep); font-size: .8rem; font-weight: 700; }
+.hub-supply-form input, .hub-supply-form select { min-height: 2.7rem; padding: .55rem .7rem; border: 1px solid var(--line); border-radius: 8px; font: inherit; }
+@media (max-width: 860px) { .hub-supply-form { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 520px) { .hub-supply-form { grid-template-columns: 1fr; } }
