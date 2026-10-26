@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Log in or create an account | AgriBridge</title>
+    <meta name="theme-color" content="#0A3D31">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M3.5 19.5C3.5 12 8 6.5 15.5 4.5c.4 7.5-3 13.5-12 15Z' fill='%230A7A41'/%3E%3Cpath d='M7 28C6 15 14 6 28.5 4.5 29 18.5 21 27 7 28Z' fill='%2312A05B'/%3E%3Cpath d='M8 26.5C13 19 18.5 13 25 8.5' fill='none' stroke='%23fff' stroke-width='1.7' stroke-linecap='round'/%3E%3C/svg%3E">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+Ethiopic:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+    <script src="{{ url_for('static', filename='js/auth.js') }}" defer></script>
+</head>
+<body>
+    <a class="skip-link" href="#auth-card">Skip to form</a>
+
+    <div class="auth">
+
+        <aside class="auth-aside on-dark">
+            <a class="brand" href="/" aria-label="AgriBridge home">
+                {% include 'partials/logo.html' %}
+                AgriBridge
+            </a>
+
+            <div class="aside-body">
+                <p class="aside-title">Log in to list produce, review matches, or update a shipment.</p>
+                <dl class="aside-roles">
+                    <div><dt>Agents</dt><dd>Register farmers and list their produce.</dd></div>
+                    <div><dt>Buyers</dt><dd>Post demand and confirm delivery.</dd></div>
+                    <div><dt>Transporters</dt><dd>Claim loads and update shipments.</dd></div>
+                </dl>
+            </div>
+
+            <p class="aside-foot">Farmers don't log in. Their extension agent or cooperative works on their behalf.</p>
+        </aside>
+
+        <main class="auth-main">
+            <a class="brand auth-mbrand" href="/" aria-label="AgriBridge home">
+                {% include 'partials/logo.html' %}
+                AgriBridge
+            </a>
+
+            <div class="auth-card" id="auth-card" tabindex="-1">
+
+                <div id="auth-top">
+                    <div class="seg" role="tablist" aria-label="Log in or create an account">
+                        <button type="button" role="tab" id="tab-login" aria-controls="panel-login" aria-selected="true">Log in</button>
+                        <button type="button" role="tab" id="tab-signup" aria-controls="panel-signup" aria-selected="false" tabindex="-1">Create account</button>
+                    </div>
+
+                    <div class="auth-head">
+                        <h1 id="auth-title">Log in</h1>
+                        <p id="auth-sub">Welcome back. Enter your details to continue.</p>
+                    </div>
+                </div>
+
+                <!-- Log in -->
+                <form id="panel-login" class="auth-form" role="tabpanel" aria-labelledby="tab-login" novalidate data-kind="login">
+                    <div class="form-alert" role="alert" hidden></div>
+
+                    <div class="field">
+                        <label for="login-email">Email</label>
+                        <input id="login-email" name="email" type="email" autocomplete="email" inputmode="email" autocapitalize="off" spellcheck="false" placeholder="name@example.com" aria-describedby="login-email-err">
+                        <p class="field-err" id="login-email-err" hidden></p>
+                    </div>
+
+                    <div class="field">
+                        <label for="login-password">Password</label>
+                        <div class="pw">
+                            <input id="login-password" name="password" type="password" autocomplete="current-password" aria-describedby="login-password-err">
+                            <button type="button" class="pw-toggle" data-target="login-password" aria-pressed="false">Show</button>
+                        </div>
+                        <p class="field-err" id="login-password-err" hidden></p>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-lg btn-block" data-label="Log in" data-busy="Logging in…">Log in</button>
+                </form>
+
+                <!-- Create account -->
+                <form id="panel-signup" class="auth-form" role="tabpanel" aria-labelledby="tab-signup" novalidate hidden data-kind="signup">
+                    <div class="form-alert" role="alert" hidden></div>
+
+                    <div class="field">
+                        <label for="signup-name">Full name</label>
+                        <input id="signup-name" name="full_name" type="text" autocomplete="name" aria-describedby="signup-name-err">
+                        <p class="field-err" id="signup-name-err" hidden></p>
+                    </div>
+
+                    <fieldset class="field role-set" aria-describedby="signup-role-err">
+                        <legend>How will you use AgriBridge?</legend>
+                        <label class="role-opt">
+                            <input type="radio" name="role" value="agent">
+                            <span class="role-text">
+                                <span class="role-title">Extension or cooperative agent</span>
+                                <span class="role-desc">I register farmers and list their produce.</span>
+                            </span>
+                        </label>
+                        <label class="role-opt">
+                            <input type="radio" name="role" value="buyer">
+                            <span class="role-text">
+                                <span class="role-title">Buyer</span>
+                                <span class="role-desc">I want to buy produce.</span>
+                            </span>
+                        </label>
+                        <label class="role-opt">
+                            <input type="radio" name="role" value="transporter">
+                            <span class="role-text">
+                                <span class="role-title">Transporter</span>
+                                <span class="role-desc">I carry loads with my vehicles.</span>
+                            </span>
+                        </label>
+                        <p class="field-err" id="signup-role-err" hidden></p>
+                    </fieldset>
+
+                    <div class="field">
+                        <label for="signup-email">Email</label>
+                        <input id="signup-email" name="email" type="email" autocomplete="email" inputmode="email" autocapitalize="off" spellcheck="false" placeholder="name@example.com" aria-describedby="signup-email-err">
+                        <p class="field-err" id="signup-email-err" hidden></p>
+                    </div>
+
+                    <div class="field">
+                        <label for="signup-password">Password</label>
+                        <div class="pw">
+                            <input id="signup-password" name="password" type="password" autocomplete="new-password" aria-describedby="signup-password-hint signup-password-err">
+                            <button type="button" class="pw-toggle" data-target="signup-password" aria-pressed="false">Show</button>
+                        </div>
+                        <p class="field-hint" id="signup-password-hint">Use at least 8 characters.</p>
+                        <p class="field-err" id="signup-password-err" hidden></p>
+                    </div>
+
+                    <p class="verify-note">An administrator verifies new accounts. Some actions stay locked until yours is verified.</p>
+
+                    <button type="submit" class="btn btn-primary btn-lg btn-block" data-label="Create account" data-busy="Creating account…">Create account</button>
+                </form>
+
+                <!-- Shown after a successful sign-up -->
+                <div id="signup-success" class="success" hidden tabindex="-1">
+                    <h1>Account created</h1>
+                    <p>We created an account for <strong id="success-email"></strong>.</p>
+                    <p>If you receive a confirmation email, open it first. Then log in.</p>
+                    <button type="button" class="btn btn-primary btn-lg btn-block" id="go-login">Go to log in</button>
+                </div>
+
+                <p class="auth-back"><a href="/">Back to home</a></p>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

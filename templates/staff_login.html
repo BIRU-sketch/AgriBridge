@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Staff sign in | AgriBridge</title>
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="theme-color" content="#0A3D31">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M3.5 19.5C3.5 12 8 6.5 15.5 4.5c.4 7.5-3 13.5-12 15Z' fill='%230A7A41'/%3E%3Cpath d='M7 28C6 15 14 6 28.5 4.5 29 18.5 21 27 7 28Z' fill='%2312A05B'/%3E%3Cpath d='M8 26.5C13 19 18.5 13 25 8.5' fill='none' stroke='%23fff' stroke-width='1.7' stroke-linecap='round'/%3E%3C/svg%3E">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+Ethiopic:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../static/css/base.css">
+    <link rel="stylesheet" href="../static/css/auth.css">
+    <script src="../static/js/staff_login.js" defer></script>
+</head>
+<body>
+    <a class="skip-link" href="#staff-auth-card">Skip to form</a>
+
+    <div class="auth">
+        <aside class="auth-aside on-dark">
+            <a class="brand" href="/" aria-label="AgriBridge home">
+                <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+                    <path class="lm-back" d="M3.5 19.5C3.5 12 8 6.5 15.5 4.5c.4 7.5-3 13.5-12 15Z"/>
+                    <path class="lm-front" d="M7 28C6 15 14 6 28.5 4.5 29 18.5 21 27 7 28Z"/>
+                    <path class="lm-vein" d="M8 26.5C13 19 18.5 13 25 8.5" fill="none" stroke-width="1.7" stroke-linecap="round"/>
+                </svg>
+                AgriBridge
+            </a>
+
+            <div class="aside-body">
+                <p class="aside-title">Staff access to the AgriBridge control center.</p>
+                <dl class="aside-roles">
+                    <div><dt>User verification</dt><dd>Review and authorize new market participants.</dd></div>
+                    <div><dt>Platform oversight</dt><dd>Monitor KPIs, reserves, and active alerts.</dd></div>
+                    <div><dt>Audit history</dt><dd>Inspect platform activity and transaction records.</dd></div>
+                </dl>
+            </div>
+
+            <p class="aside-foot">Authorized AgriBridge staff only.</p>
+        </aside>
+
+        <main class="auth-main">
+            <a class="brand auth-mbrand" href="/" aria-label="AgriBridge home">
+                <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+                    <path class="lm-back" d="M3.5 19.5C3.5 12 8 6.5 15.5 4.5c.4 7.5-3 13.5-12 15Z"/>
+                    <path class="lm-front" d="M7 28C6 15 14 6 28.5 4.5 29 18.5 21 27 7 28Z"/>
+                    <path class="lm-vein" d="M8 26.5C13 19 18.5 13 25 8.5" fill="none" stroke-width="1.7" stroke-linecap="round"/>
+                </svg>
+                AgriBridge
+            </a>
+
+            <div class="auth-card" id="staff-auth-card" tabindex="-1">
+                <span class="staff-badge">Staff access</span>
+
+                <div class="auth-head">
+                    <h1>Staff sign in</h1>
+                    <p>Use the administrator credentials issued to you.</p>
+                </div>
+
+                <form id="staff-login-form" class="auth-form" novalidate>
+                    <div class="form-alert" role="alert" hidden></div>
+
+                    <div class="field">
+                        <label for="staff-username">Staff username</label>
+                        <input id="staff-username" name="username" type="text" autocomplete="username" autocapitalize="off" spellcheck="false" placeholder="Administrator username" aria-describedby="staff-username-err">
+                        <p class="field-err" id="staff-username-err" hidden></p>
+                    </div>
+
+                    <div class="field">
+                        <label for="staff-password">Password</label>
+                        <div class="pw">
+                            <input id="staff-password" name="password" type="password" autocomplete="current-password" aria-describedby="staff-password-err">
+                            <button type="button" class="pw-toggle" data-target="staff-password" aria-pressed="false">Show</button>
+                        </div>
+                        <p class="field-err" id="staff-password-err" hidden></p>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-lg btn-block" data-label="Sign in" data-busy="Signing in…">Sign in</button>
+                </form>
+
+                <p class="auth-back"><a href="/">Back to AgriBridge home</a></p>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

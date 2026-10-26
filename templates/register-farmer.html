@@ -1,0 +1,346 @@
+{% macro icon(name) -%}
+<svg class="icon" aria-hidden="true" focusable="false"><use href="#i-{{ name }}"/></svg>
+{%- endmacro %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Onboard Farmer | AgriBridge Extension Portal</title>
+    <meta name="theme-color" content="#0A3D31">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M3.5 19.5C3.5 12 8 6.5 15.5 4.5c.4 7.5-3 13.5-12 15Z' fill='%230A7A41'/%3E%3Cpath d='M7 28C6 15 14 6 28.5 4.5 29 18.5 21 27 7 28Z' fill='%2312A05B'/%3E%3Cpath d='M8 26.5C13 19 18.5 13 25 8.5' fill='none' stroke='%23fff' stroke-width='1.7' stroke-linecap='round'/%3E%3C/svg%3E">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+Ethiopic:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/agent_dashboard.css') }}">
+    <style>
+        .form-wrap {
+            width: min(100% - 2.5rem, 46rem);
+            margin: 2.5rem auto 4rem;
+        }
+        .form-section {
+            padding: 1.5rem 0;
+            border-bottom: 1px solid var(--line);
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+        .form-section:last-of-type {
+            border-bottom: none;
+        }
+        .section-head {
+            display: flex;
+            align-items: center;
+            gap: .75rem;
+            margin-bottom: .25rem;
+        }
+        .step-circle {
+            width: 1.75rem;
+            height: 1.75rem;
+            border-radius: 50%;
+            background: var(--tint);
+            color: var(--deep);
+            font-size: .8125rem;
+            font-weight: 800;
+            display: grid;
+            place-items: center;
+        }
+        .section-title {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--deep);
+            text-transform: uppercase;
+            letter-spacing: .03em;
+        }
+        .form-grid-2 {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr);
+            gap: 1.15rem;
+        }
+        @media (min-width: 640px) {
+            .form-grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
+        .form-grid-3 {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr);
+            gap: 1.15rem;
+        }
+        @media (min-width: 640px) {
+            .form-grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        }
+        .field-group {
+            display: flex;
+            flex-direction: column;
+            gap: .4rem;
+            min-width: 0;
+        }
+        .field-group label {
+            font-size: .8125rem;
+            font-weight: 700;
+            color: var(--ink-soft);
+            text-transform: uppercase;
+            letter-spacing: .04em;
+        }
+        .field-group input,
+        .field-group select {
+            width: 100%;
+            min-width: 0;
+            min-height: 2.9rem;
+            padding: .65rem .9rem;
+            border: 1.5px solid #C4D9CD;
+            border-radius: 10px;
+            background: var(--paper);
+            font: inherit;
+            font-size: .9375rem;
+            color: var(--ink);
+            transition: border-color .15s ease, box-shadow .15s ease;
+        }
+        .field-group input:focus,
+        .field-group select:focus {
+            outline: none;
+            border-color: var(--brand);
+            box-shadow: 0 0 0 3px rgba(8, 128, 63, .16);
+        }
+        .phone-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        .phone-prefix {
+            position: absolute;
+            left: .9rem;
+            font-size: .9375rem;
+            font-weight: 600;
+            color: var(--muted);
+            pointer-events: none;
+        }
+        .phone-input {
+            width: 100%;
+            padding-left: 4.2rem !important;
+        }
+    </style>
+</head>
+<body class="agent-body">
+    {% include 'partials/icons.html' %}
+
+    <header class="site-header">
+        <div class="wrap header-row">
+            <div class="brand-group">
+                <a class="brand" href="/dashboard" aria-label="Agent dashboard">
+                    {% include 'partials/logo.html' %}
+                    AgriBridge
+                </a>
+                <span class="portal-tag">Farmer Onboarding</span>
+            </div>
+            <a href="/dashboard" class="btn btn-ghost btn-sm">
+                {{ icon('arrow-right') }} Back to Agent Portal
+            </a>
+        </div>
+    </header>
+
+    <main class="form-wrap" id="main">
+        <div style="margin-bottom: 2rem;">
+            <a href="/dashboard" class="action-link" style="margin-bottom:.5rem;">&larr; Return to Dashboard</a>
+            <h1 style="font-size:2rem; font-weight:800; color:var(--deep); letter-spacing:-0.02em;">Register Smallholder Farmer</h1>
+            <p style="color:var(--muted); font-size:.9375rem; margin-top:.35rem;">
+                Onboard a smallholder farmer under your cooperative jurisdiction using local Kebele identification.
+            </p>
+        </div>
+
+        <div class="dash-card">
+            <div class="dash-card-body form-card-body">
+                <form id="farmer-reg-form" action="/api/register-farmer" method="POST">
+                    
+                    <!-- Section 1: Personal Details -->
+                    <div class="form-section">
+                        <div class="section-head">
+                            <span class="step-circle">1</span>
+                            <span class="section-title">Personal Identification</span>
+                        </div>
+                        <div class="form-grid-2">
+                            <div class="field-group">
+                                <label for="full_name">Full Name (with Grandfather's Name)</label>
+                                <input type="text" id="full_name" name="full_name" placeholder="e.g. Ketema Bekele Tolossa" required>
+                            </div>
+                            <div class="field-group">
+                                <label for="phone_number">Primary Contact Phone</label>
+                                <div class="phone-wrapper">
+                                    <span class="phone-prefix">+251</span>
+                                    <input type="tel" id="phone_number" name="phone_number" class="phone-input" placeholder="912 345 678" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-grid-2">
+                            <div class="field-group">
+                                <label for="kebele_id">Kebele ID / Fayda National ID</label>
+                                <input type="text" id="kebele_id" name="kebele_id" placeholder="e.g. KBL-88204-BS" required>
+                            </div>
+                            <div class="field-group">
+                                <label for="gender">Gender</label>
+                                <select id="gender" name="gender">
+                                    <option value="male">Male</option>
+                                    <option value="female">Female</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 2: Administrative Location -->
+                    <div class="form-section">
+                        <div class="section-head">
+                            <span class="step-circle">2</span>
+                            <span class="section-title">Administrative Location</span>
+                        </div>
+                        <div class="form-grid-3">
+                            <div class="field-group">
+                                <label for="region">Regional State</label>
+                                <select id="region" name="region">
+                                    <option value="oromia">Oromia</option>
+                                    <option value="amhara">Amhara</option>
+                                    <option value="sidama">Sidama</option>
+                                    <option value="south_ethiopia">South Ethiopia</option>
+                                    <option value="tigray">Tigray</option>
+                                </select>
+                            </div>
+                            <div class="field-group">
+                                <label for="woreda">Woreda (District)</label>
+                                <input type="text" id="woreda" name="woreda" value="Bishoftu / Ada'a" required>
+                            </div>
+                            <div class="field-group">
+                                <label for="kebele">Kebele (Local Area)</label>
+                                <input type="text" id="kebele" name="kebele" placeholder="e.g. Kebele 04 Rural" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 3: Farm Capabilities -->
+                    <div class="form-section">
+                        <div class="section-head">
+                            <span class="step-circle">3</span>
+                            <span class="section-title">Farm &amp; Cultivation Capabilities</span>
+                        </div>
+                        <div class="form-grid-3">
+                            <div class="field-group">
+                                <label for="land_size">Land Size (Hectares)</label>
+                                <input type="number" id="land_size" name="land_size_hectares" step="0.1" placeholder="e.g. 4.5" required>
+                            </div>
+                            <div class="field-group">
+                                <label for="water_source">Water Source</label>
+                                <select id="water_source" name="water_source">
+                                    <option value="rain_fed">Rain-Fed (Seasonal)</option>
+                                    <option value="irrigated">Irrigated (Canal / Pump)</option>
+                                    <option value="mixed">Mixed Irrigation</option>
+                                </select>
+                            </div>
+                            <div class="field-group">
+                                <label for="harvests_per_year">Harvests Per Year</label>
+                                <select id="harvests_per_year" name="harvests_per_year">
+                                    <option value="1">1 Harvest / Year</option>
+                                    <option value="2">2 Harvests / Year (Dual)</option>
+                                    <option value="3">3 Harvests / Year</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-grid-2">
+                            <div class="field-group">
+                                <label for="primary_crop">Primary Crop Focus</label>
+                                <select id="primary_crop" name="primary_crop">
+                                    <option value="White Teff">White Teff (Grade 1 Magna)</option>
+                                    <option value="Bread Wheat">Bread Wheat (Bulk Grain)</option>
+                                    <option value="Yellow Maize">Yellow Maize</option>
+                                    <option value="Humera Sesame">Humera Sesame</option>
+                                    <option value="Arabica Coffee">Arabica Coffee</option>
+                                    <option value="Red Kidney Beans">Red Kidney Beans</option>
+                                </select>
+                            </div>
+                            <div class="field-group">
+                                <label for="cooperative">Farmer Cooperative / Union</label>
+                                <input type="text" id="cooperative" name="cooperative" value="Ada'a Multi-Purpose Farmers Cooperative">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 4: Settlement Payout Account -->
+                    <div class="form-section">
+                        <div class="section-head">
+                            <span class="step-circle">4</span>
+                            <span class="section-title">Farmer Payout Account</span>
+                        </div>
+                        <div class="form-grid-2">
+                            <div class="field-group">
+                                <label for="payout_method">Payout Method</label>
+                                <select id="payout_method" name="payout_method">
+                                    <option value="cbe_bank">Commercial Bank of Ethiopia (CBE)</option>
+                                    <option value="telebirr">Telebirr Wallet</option>
+                                    <option value="coop_bank">Cooperative Bank of Oromia</option>
+                                    <option value="cbe_birr">CBE Birr</option>
+                                </select>
+                            </div>
+                            <div class="field-group">
+                                <label for="account_number">Bank Account / Telebirr Number</label>
+                                <input type="text" id="account_number" name="account_number" placeholder="e.g. 1000293849201" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="display:flex; flex-wrap:wrap; justify-content:flex-end; gap:1rem; margin-top:2rem; padding-top:1.5rem; border-top:1px solid var(--line);">
+                        <a href="/dashboard" class="btn btn-ghost">Cancel</a>
+                        <button type="submit" id="submit-btn" class="btn btn-primary btn-lg">
+                            {{ icon('check-circle') }} Complete Farmer Registration
+                        </button>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <!-- Toast Notification -->
+    <div id="toast-msg" class="toast-msg" role="status" aria-live="polite"></div>
+
+    <script>
+        const form = document.getElementById('farmer-reg-form');
+        const toast = document.getElementById('toast-msg');
+
+        function showToast(msg) {
+            if (!toast) return;
+            toast.textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 4000);
+        }
+
+        if (form) {
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const btn = document.getElementById('submit-btn');
+                btn.disabled = true;
+                btn.textContent = 'Registering Farmer…';
+
+                try {
+                    const formData = new FormData(form);
+                    const res = await fetch('/api/register-farmer', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const data = await res.json();
+                    if (!res.ok) throw new Error(data.error || 'Failed to register farmer.');
+
+                    showToast(data.message || 'Farmer registered successfully!');
+                    setTimeout(() => {
+                        window.location.href = '/dashboard#farmers';
+                    }, 1200);
+                } catch (err) {
+                    showToast(err.message);
+                    btn.disabled = false;
+                    btn.textContent = 'Complete Farmer Registration';
+                }
+            });
+        }
+    </script>
+</body>
+</html>

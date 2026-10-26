@@ -1,0 +1,725 @@
+{% macro icon(name) -%}
+<svg class="icon" aria-hidden="true" focusable="false"><use href="#i-{{ name }}"/></svg>
+{%- endmacro %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buyer Terminal | AgriBridge Ethiopia</title>
+    <meta name="description" content="AgriBridge Buyer Terminal - Direct institutional access to verified smallholder produce, aggregation hubs, and logistics coordination.">
+    <meta name="theme-color" content="#0A3D31">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M3.5 19.5C3.5 12 8 6.5 15.5 4.5c.4 7.5-3 13.5-12 15Z' fill='%230A7A41'/%3E%3Cpath d='M7 28C6 15 14 6 28.5 4.5 29 18.5 21 27 7 28Z' fill='%2312A05B'/%3E%3Cpath d='M8 26.5C13 19 18.5 13 25 8.5' fill='none' stroke='%23fff' stroke-width='1.7' stroke-linecap='round'/%3E%3C/svg%3E">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+Ethiopic:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/buyer_dashboard.css') }}">
+</head>
+<body class="buyer-body">
+    {% include 'partials/icons.html' %}
+
+    <!-- ===== Top Header ===== -->
+    <header class="site-header" id="site-header">
+        <div class="wrap header-row">
+            <div class="brand-group">
+                <a class="brand" href="/" aria-label="AgriBridge home">
+                    {% include 'partials/logo.html' %}
+                    AgriBridge
+                </a>
+                <span class="portal-tag">Buyer Terminal</span>
+            </div>
+
+            <nav class="dash-nav" aria-label="Buyer navigation">
+                <a href="#search-stock" aria-current="true">Search Stock</a>
+                <a href="#pending-requests">Demands &amp; Offers</a>
+                <a href="#trade-history">Trade History</a>
+                <a href="#market-prices">Market Benchmarks</a>
+            </nav>
+
+            <div class="header-user">
+                <div class="user-badge">
+                    <div class="user-avatar" title="{{ username or 'Buyer' }}">
+                        {{ (username[0] if username else 'B') | upper }}
+                    </div>
+                    <div class="user-info">
+                        <div class="user-name">{{ username or 'Commercial Buyer' }}</div>
+                        <div class="user-role">Verified Buyer</div>
+                    </div>
+                </div>
+                <a href="/logout" class="btn btn-ghost btn-sm" title="Log out of terminal">
+                    {{ icon('arrow-right') }} Log out
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- ===== Main Dashboard Content ===== -->
+    <main class="main-content" id="main">
+
+        <!-- Welcome Banner -->
+        <section class="welcome-card" aria-label="Buyer summary">
+            <div class="welcome-copy">
+                <div class="welcome-pill">
+                    {{ icon('shield-check') }} Verified Institutional Buyer
+                </div>
+                <h1>Welcome back, {{ username or 'Procurement Partner' }}</h1>
+                <p>
+                    Direct access to certified smallholder farmer supply across regional collection points and aggregation hubs in Oromia, Amhara, and Sidama.
+                </p>
+            </div>
+            <div class="welcome-actions">
+                <button type="button" class="btn btn-primary btn-lg" data-open-modal="post-demand-modal">
+                    {{ icon('target') }} Publish Requirement
+                </button>
+                <a href="#search-stock" class="btn btn-outline btn-lg">
+                    {{ icon('search') }} Browse Stock
+                </a>
+            </div>
+        </section>
+
+        <!-- KPI Metrics Grid -->
+        <section class="metrics-grid" aria-label="Key metrics">
+            <div class="metric-card">
+                <div class="metric-ic metric-ic-green">
+                    {{ icon('package') }}
+                </div>
+                <div class="metric-content">
+                    <span class="metric-label">Available Hub Stock</span>
+                    <span class="metric-val">14,850 <small style="font-size:.9rem;font-weight:600;">Qtl</small></span>
+                    <span class="metric-sub">Across 6 aggregation centers</span>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-ic metric-ic-amber">
+                    {{ icon('clock') }}
+                </div>
+                <div class="metric-content">
+                    <span class="metric-label">Active Demands</span>
+                    <span class="metric-val" id="metric-active-demands">3</span>
+                    <span class="metric-sub">Extension agents aggregating</span>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-ic metric-ic-blue">
+                    {{ icon('check-circle') }}
+                </div>
+                <div class="metric-content">
+                    <span class="metric-label">Settled Orders</span>
+                    <span class="metric-val">18 <small style="font-size:.9rem;font-weight:600;">Lots</small></span>
+                    <span class="metric-sub">100% verified fulfillment</span>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-ic">
+                    {{ icon('truck') }}
+                </div>
+                <div class="metric-content">
+                    <span class="metric-label">Logistics Network</span>
+                    <span class="metric-val">98.4%</span>
+                    <span class="metric-sub">On-time dispatch SLA</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 1: Marketplace Stock Search -->
+        <section id="search-stock" class="dash-card">
+            <div class="dash-card-header">
+                <div>
+                    <h2>{{ icon('search') }} Search Available Produce Lots</h2>
+                    <p>Live inventory gathered directly from smallholder farmers by certified cooperative agents.</p>
+                </div>
+                <button type="button" class="btn btn-outline btn-sm" data-open-modal="post-demand-modal">
+                    {{ icon('target') }} Cannot find stock? Post Demand
+                </button>
+            </div>
+
+            <div class="dash-card-body">
+                <form id="marketplace-search-form" action="/api/marketplace/search" method="GET" class="market-search-box">
+                    <!-- Commodity -->
+                    <div class="search-field">
+                        <label for="crop_name">Commodity / Crop Type</label>
+                        <input
+                            type="text"
+                            id="crop_name"
+                            name="crop_name"
+                            placeholder="e.g. White Teff, Bread Wheat, Sesame..."
+                            list="crops-list"
+                            required
+                        >
+                        <datalist id="crops-list">
+                            <option value="White Teff">
+                            <option value="Bread Wheat">
+                            <option value="Yellow Maize">
+                            <option value="Humera Sesame">
+                            <option value="Red Kidney Beans">
+                            <option value="Malt Barley">
+                            <option value="Coffee Arabica">
+                        </datalist>
+                    </div>
+
+                    <!-- Quality -->
+                    <div class="search-field">
+                        <label for="quality">Quality Grade</label>
+                        <select id="quality" name="quality">
+                            <option value="">All Quality Grades</option>
+                            <option value="Grade 1 (Magna / Premium)">Grade 1 (Magna / Premium)</option>
+                            <option value="Grade 1 (Standard)">Grade 1 (Standard)</option>
+                            <option value="Grade 2 Commercial">Grade 2 Commercial</option>
+                            <option value="Export Quality Verified">Export Quality Verified</option>
+                            <option value="Industrial / Feed Grade">Industrial / Feed Grade</option>
+                        </select>
+                    </div>
+
+                    <!-- Hub Location -->
+                    <div class="search-field">
+                        <label for="location">Dispatch Hub</label>
+                        <select id="location" name="location">
+                            <option value="">All Regional Hubs</option>
+                            <option value="Bishoftu Hub (Oromia)">Bishoftu Hub (Oromia)</option>
+                            <option value="Asella Hub (Arsi)">Asella Hub (Arsi)</option>
+                            <option value="Gondar Hub (Amhara)">Gondar Hub (Amhara)</option>
+                            <option value="Hawassa Hub (Sidama)">Hawassa Hub (Sidama)</option>
+                        </select>
+                    </div>
+
+                    <!-- Action -->
+                    <div>
+                        <button type="submit" class="btn btn-primary btn-block" style="min-height:3rem;">
+                            {{ icon('search') }} Search Stock
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Quick Filter Chips -->
+                <div class="quick-chips">
+                    <span class="chips-label">Popular Commodities:</span>
+                    <button type="button" class="chip" data-crop="White Teff">White Teff</button>
+                    <button type="button" class="chip" data-crop="Bread Wheat">Bread Wheat</button>
+                    <button type="button" class="chip" data-crop="Yellow Maize">Yellow Maize</button>
+                    <button type="button" class="chip" data-crop="Humera Sesame">Humera Sesame</button>
+                    <button type="button" class="chip" data-crop="Malt Barley">Malt Barley</button>
+                    <button type="button" class="chip" data-crop="Red Kidney Beans">Red Kidney Beans</button>
+                </div>
+
+                <!-- Live Results Panel -->
+                <div id="search-results-panel" class="search-results-panel hidden" role="region" aria-live="polite">
+                    <div class="result-header">
+                        <div>
+                            <div class="result-title">
+                                <span id="result-crop-title">White Teff</span>
+                                <span class="badge badge-green" id="result-quality-badge">Grade 1</span>
+                            </div>
+                            <div class="meta-sub">Verified lots aggregated and inspected by certified agents</div>
+                        </div>
+
+                        <div class="result-stock-stat">
+                            <span class="result-stock-num" id="result-stock-num">0</span>
+                            <span class="result-stock-unit">Qtl in stock</span>
+                        </div>
+                    </div>
+
+                    <!-- Reservation / Purchase Form -->
+                    <form id="purchase-form" class="purchase-calculator">
+                        <div class="search-field">
+                            <label for="purchase-quantity">Volume to Reserve (Quintals)</label>
+                            <input
+                                type="number"
+                                id="purchase-quantity"
+                                name="quantity"
+                                min="1"
+                                step="any"
+                                required
+                                placeholder="Enter desired Qtl"
+                            >
+                        </div>
+
+                        <div class="calc-estimate">
+                            <span class="calc-est-label">Indicative Hub Rate: <strong id="result-price-rate">11,500 ETB</strong> / Qtl</span>
+                            <span class="calc-est-val" id="purchase-est-total">0 ETB</span>
+                        </div>
+
+                        <div>
+                            <button type="submit" id="purchase-submit-btn" class="btn btn-primary btn-block" style="min-height:3rem;">
+                                {{ icon('handshake') }} Confirm Purchase Order
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Alert / Status message -->
+                    <div id="result-alert" class="dash-alert dash-alert-error" hidden></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: Active Procurement Demands -->
+        <section id="pending-requests" class="dash-card">
+            <div class="dash-card-header">
+                <div>
+                    <h2>
+                        {{ icon('target') }} Pending Procurement Requests
+                        <span class="badge badge-amber" style="margin-left:.4rem;">3 Active</span>
+                    </h2>
+                    <p>Demands published by your procurement team currently being matched or aggregated by extension agents.</p>
+                </div>
+                <button type="button" class="btn btn-primary btn-sm" data-open-modal="post-demand-modal">
+                    {{ icon('target') }} Post New Requirement
+                </button>
+            </div>
+
+            <div class="table-responsive">
+                <table class="dash-table">
+                    <thead>
+                        <tr>
+                            <th>Reference</th>
+                            <th>Commodity Specs</th>
+                            <th class="text-right">Volume</th>
+                            <th>Target Hub Location</th>
+                            <th>Target Date</th>
+                            <th class="text-center">Matching Status</th>
+                            <th class="text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pending-requests-tbody">
+                        <tr>
+                            <td class="code-ref">#REQ-2026-091</td>
+                            <td>
+                                <div style="font-weight:700; color:var(--deep);">White Teff (Magna Grade)</div>
+                                <div class="meta-sub">Max Moisture 10% &bull; Machine Cleaned</div>
+                            </td>
+                            <td class="text-right" style="font-weight:700; color:var(--brand);">800 Qtl</td>
+                            <td>Bishoftu Hub (Oromia)</td>
+                            <td class="meta-sub">Sept 22, 2026</td>
+                            <td class="text-center">
+                                <span class="badge badge-amber">
+                                    <span class="badge-dot"></span>
+                                    Agent Aggregating
+                                </span>
+                            </td>
+                            <td class="text-right">
+                                <button type="button" class="action-link" onclick="alert('Viewing specifications for #REQ-2026-091')">
+                                    View Hub Offer
+                                </button>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="code-ref">#REQ-2026-088</td>
+                            <td>
+                                <div style="font-weight:700; color:var(--deep);">Bread Wheat (Grade 1)</div>
+                                <div class="meta-sub">High Gluten &bull; Min 12% Protein</div>
+                            </td>
+                            <td class="text-right" style="font-weight:700; color:var(--brand);">1,500 Qtl</td>
+                            <td>Asella Hub (Arsi)</td>
+                            <td class="meta-sub">Sept 28, 2026</td>
+                            <td class="text-center">
+                                <span class="badge badge-green">
+                                    <span class="badge-dot"></span>
+                                    Match Found (Offer Ready)
+                                </span>
+                            </td>
+                            <td class="text-right">
+                                <button type="button" class="btn btn-primary btn-sm" onclick="alert('Reviewing complete lot agreement for 1,500 Qtl Bread Wheat at Asella Hub.')">
+                                    Review Offer
+                                </button>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="code-ref">#REQ-2026-074</td>
+                            <td>
+                                <div style="font-weight:700; color:var(--deep);">Humera White Sesame</div>
+                                <div class="meta-sub">Export Quality Verified &bull; Cleaned</div>
+                            </td>
+                            <td class="text-right" style="font-weight:700; color:var(--brand);">300 Qtl</td>
+                            <td>Gondar Hub (Amhara)</td>
+                            <td class="meta-sub">Oct 05, 2026</td>
+                            <td class="text-center">
+                                <span class="badge badge-blue">
+                                    <span class="badge-dot"></span>
+                                    Logistics Quoting
+                                </span>
+                            </td>
+                            <td class="text-right">
+                                <button type="button" class="action-link" onclick="alert('Reviewing transport quotes for 300 Qtl Humera White Sesame.')">
+                                    Carrier Quotes
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Section 3: Trade History & Settled Invoices -->
+        <section id="trade-history" class="dash-card">
+            <div class="dash-card-header">
+                <div>
+                    <h2>{{ icon('clipboard-check') }} Trade History &amp; Settled Invoices</h2>
+                    <p>Complete audit ledger of verified purchases, dispatched consignments, and bank settlements.</p>
+                </div>
+                <div style="display:flex; align-items:center; gap:.6rem; flex-wrap:wrap;">
+                    <input
+                        type="text"
+                        id="history-search-input"
+                        placeholder="Search by Order # or Crop..."
+                        style="padding:.45rem .8rem; font-size:.8125rem; border:1px solid var(--line); border-radius:8px; min-height:2.25rem;"
+                    >
+                    <select
+                        id="history-hub-select"
+                        style="padding:.45rem .8rem; font-size:.8125rem; border:1px solid var(--line); border-radius:8px; min-height:2.25rem;"
+                    >
+                        <option value="">All Hubs</option>
+                        <option value="bishoftu">Bishoftu</option>
+                        <option value="asella">Asella</option>
+                        <option value="hawassa">Hawassa</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="dash-table">
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Commodity Executed</th>
+                            <th>Dispatch Hub</th>
+                            <th class="text-right">Volume</th>
+                            <th class="text-right">Rate / Qtl</th>
+                            <th class="text-right">Settled Total</th>
+                            <th>Delivered Date</th>
+                            <th class="text-center">Status</th>
+                            <th class="text-right">Documentation</th>
+                        </tr>
+                    </thead>
+                    <tbody id="trade-history-tbody">
+                        <tr class="history-row" data-hub="bishoftu" data-search="#trd-88201 white teff sergegna">
+                            <td class="code-ref">#TRD-88201</td>
+                            <td>
+                                <div style="font-weight:700; color:var(--deep);">White Teff (Sergegna)</div>
+                                <div class="meta-sub">Lot #TF-9021 &bull; Farmer Coop Ada'a</div>
+                            </td>
+                            <td>Bishoftu Hub</td>
+                            <td class="text-right" style="font-weight:700;">450 Qtl</td>
+                            <td class="text-right" style="color:var(--muted);">11,500 ETB</td>
+                            <td class="text-right" style="font-weight:800; color:var(--brand);">5,175,000 ETB</td>
+                            <td class="meta-sub">Sept 04, 2026</td>
+                            <td class="text-center">
+                                <span class="badge badge-green">
+                                    <span class="badge-dot"></span>
+                                    Delivered
+                                </span>
+                            </td>
+                            <td class="text-right">
+                                <button type="button" class="action-link view-receipt-btn"
+                                    data-order="#TRD-88201"
+                                    data-crop="White Teff (Sergegna)"
+                                    data-hub="Bishoftu Aggregation Hub"
+                                    data-volume="450 Qtl"
+                                    data-rate="11,500 ETB"
+                                    data-total="5,175,000 ETB"
+                                    data-date="Sept 04, 2026">
+                                    {{ icon('package') }} PDF Receipt
+                                </button>
+                            </td>
+                        </tr>
+
+                        <tr class="history-row" data-hub="asella" data-search="#trd-87940 bread wheat">
+                            <td class="code-ref">#TRD-87940</td>
+                            <td>
+                                <div style="font-weight:700; color:var(--deep);">Bread Wheat (Grade 1)</div>
+                                <div class="meta-sub">Lot #WH-4410 &bull; Hitosa Cooperative</div>
+                            </td>
+                            <td>Asella Hub</td>
+                            <td class="text-right" style="font-weight:700;">1,200 Qtl</td>
+                            <td class="text-right" style="color:var(--muted);">5,200 ETB</td>
+                            <td class="text-right" style="font-weight:800; color:var(--brand);">6,240,000 ETB</td>
+                            <td class="meta-sub">Aug 18, 2026</td>
+                            <td class="text-center">
+                                <span class="badge badge-green">
+                                    <span class="badge-dot"></span>
+                                    Delivered
+                                </span>
+                            </td>
+                            <td class="text-right">
+                                <button type="button" class="action-link view-receipt-btn"
+                                    data-order="#TRD-87940"
+                                    data-crop="Bread Wheat (Grade 1)"
+                                    data-hub="Asella Aggregation Hub"
+                                    data-volume="1,200 Qtl"
+                                    data-rate="5,200 ETB"
+                                    data-total="6,240,000 ETB"
+                                    data-date="Aug 18, 2026">
+                                    {{ icon('package') }} PDF Receipt
+                                </button>
+                            </td>
+                        </tr>
+
+                        <tr class="history-row" data-hub="hawassa" data-search="#trd-86102 yellow maize">
+                            <td class="code-ref">#TRD-86102</td>
+                            <td>
+                                <div style="font-weight:700; color:var(--deep);">Yellow Maize (Commercial)</div>
+                                <div class="meta-sub">Lot #MZ-3312 &bull; Sidama Union</div>
+                            </td>
+                            <td>Hawassa Hub</td>
+                            <td class="text-right" style="font-weight:700;">2,000 Qtl</td>
+                            <td class="text-right" style="color:var(--muted);">3,750 ETB</td>
+                            <td class="text-right" style="font-weight:800; color:var(--brand);">7,500,000 ETB</td>
+                            <td class="meta-sub">Jul 29, 2026</td>
+                            <td class="text-center">
+                                <span class="badge badge-green">
+                                    <span class="badge-dot"></span>
+                                    Delivered
+                                </span>
+                            </td>
+                            <td class="text-right">
+                                <button type="button" class="action-link view-receipt-btn"
+                                    data-order="#TRD-86102"
+                                    data-crop="Yellow Maize (Commercial)"
+                                    data-hub="Hawassa Aggregation Hub"
+                                    data-volume="2,000 Qtl"
+                                    data-rate="3,750 ETB"
+                                    data-total="7,500,000 ETB"
+                                    data-date="Jul 29, 2026">
+                                    {{ icon('package') }} PDF Receipt
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Section 4: Regional Market Price Benchmarks -->
+        <section id="market-prices" class="dash-card">
+            <div class="dash-card-header">
+                <div>
+                    <h2>{{ icon('activity') }} Regional Hub Price Benchmarks</h2>
+                    <p>Current indicative farm-gate &amp; hub floor prices verified by the AgriBridge price oracle.</p>
+                </div>
+                <span class="meta-sub">Updated Daily (ETB / Quintal)</span>
+            </div>
+
+            <div class="dash-card-body">
+                <div class="price-cards-grid">
+                    <div class="price-card">
+                        <div class="price-card-head">
+                            <span class="price-crop">White Teff (Magna)</span>
+                            <span class="price-hub">Bishoftu Hub</span>
+                        </div>
+                        <div class="price-amount">11,500 ETB</div>
+                        <div class="price-trend trend-up">
+                            {{ icon('arrow-up-line') }} +2.4% vs last week
+                        </div>
+                    </div>
+
+                    <div class="price-card">
+                        <div class="price-card-head">
+                            <span class="price-crop">Bread Wheat (Grade 1)</span>
+                            <span class="price-hub">Asella Hub</span>
+                        </div>
+                        <div class="price-amount">5,200 ETB</div>
+                        <div class="price-trend trend-flat">
+                            &bull; Stable market pricing
+                        </div>
+                    </div>
+
+                    <div class="price-card">
+                        <div class="price-card-head">
+                            <span class="price-crop">Yellow Maize</span>
+                            <span class="price-hub">Hawassa Hub</span>
+                        </div>
+                        <div class="price-amount">3,750 ETB</div>
+                        <div class="price-trend trend-down">
+                            &darr; -1.2% seasonal harvest
+                        </div>
+                    </div>
+
+                    <div class="price-card">
+                        <div class="price-card-head">
+                            <span class="price-crop">Humera Sesame</span>
+                            <span class="price-hub">Gondar Hub</span>
+                        </div>
+                        <div class="price-amount">16,800 ETB</div>
+                        <div class="price-trend trend-up">
+                            {{ icon('arrow-up-line') }} +3.5% export demand
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ===== Modal: Post Custom Requirement ===== -->
+    <div id="post-demand-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="demand-modal-title">
+        <div class="modal-box">
+            <div class="modal-head">
+                <h3 id="demand-modal-title">Publish Procurement Requirement</h3>
+                <button type="button" class="modal-close" data-close-modal="post-demand-modal" aria-label="Close dialog">&times;</button>
+            </div>
+
+            <form id="post-demand-form">
+                <div class="modal-body">
+                    <p style="font-size:.875rem; color:var(--muted); margin:0;">
+                        Publish your commodity specifications. Certified extension agents and farmer cooperatives in the selected hub will aggregate matching harvest lots.
+                    </p>
+
+                    <div class="search-field">
+                        <label for="demand-crop">Commodity Type</label>
+                        <input type="text" id="demand-crop" name="crop_type" placeholder="e.g. White Teff, Bread Wheat, Soybeans" required>
+                    </div>
+
+                    <div class="search-field">
+                        <label for="demand-quality">Desired Quality Specification</label>
+                        <select id="demand-quality" name="quality_grade">
+                            <option value="Grade 1 (Magna / Premium)">Grade 1 (Magna / Premium)</option>
+                            <option value="Grade 1 (Standard)" selected>Grade 1 (Standard)</option>
+                            <option value="Grade 2 Commercial">Grade 2 Commercial</option>
+                            <option value="Export Quality Verified">Export Quality Verified</option>
+                            <option value="Industrial / Feed Grade">Industrial / Feed Grade</option>
+                        </select>
+                    </div>
+
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+                        <div class="search-field">
+                            <label for="demand-volume">Target Volume (Qtl)</label>
+                            <input type="number" id="demand-volume" name="quantity" min="1" step="any" placeholder="e.g. 500" required>
+                        </div>
+                        <div class="search-field">
+                            <label for="demand-price">Max Target Rate (ETB/Qtl)</label>
+                            <input type="number" id="demand-price" name="max_price" placeholder="Optional">
+                        </div>
+                    </div>
+
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+                        <div class="search-field">
+                            <label for="demand-hub">Target Hub Location</label>
+                            <select id="demand-hub" name="location">
+                                <option value="Bishoftu Hub (Oromia)">Bishoftu Hub (Oromia)</option>
+                                <option value="Asella Hub (Arsi)">Asella Hub (Arsi)</option>
+                                <option value="Gondar Hub (Amhara)">Gondar Hub (Amhara)</option>
+                                <option value="Hawassa Hub (Sidama)">Hawassa Hub (Sidama)</option>
+                            </select>
+                        </div>
+                        <div class="search-field">
+                            <label for="demand-date">Required Fulfillment Date</label>
+                            <input type="date" id="demand-date" name="target_date" value="2026-10-15">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-foot">
+                    <button type="button" class="btn btn-ghost" data-close-modal="post-demand-modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        {{ icon('target') }} Publish Requirement
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ===== Modal: View Official Receipt ===== -->
+    <div id="receipt-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="receipt-modal-title">
+        <div class="modal-box">
+            <div class="modal-head">
+                <h3 id="receipt-modal-title">Settlement Certificate &amp; Dispatch Receipt</h3>
+                <button type="button" class="modal-close" data-close-modal="receipt-modal" aria-label="Close receipt">&times;</button>
+            </div>
+
+            <div class="modal-body" style="background:#fff;">
+                <div style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:flex-start; gap:.75rem; border-bottom:1px solid var(--line); padding-bottom:1rem;">
+                    <div>
+                        <div class="brand" style="font-size:1.2rem;">
+                            {% include 'partials/logo.html' %}
+                            AgriBridge
+                        </div>
+                        <div class="meta-sub">Agricultural Commodity Logistics &bull; Addis Ababa, Ethiopia</div>
+                    </div>
+                    <div style="text-align:right;">
+                        <div class="code-ref" id="receipt-order-ref">#TRD-88201</div>
+                        <div class="meta-sub" id="receipt-date">Sept 04, 2026</div>
+                    </div>
+                </div>
+
+                <div class="receipt-grid">
+                    <div>
+                        <span class="calc-est-label">Settled Buyer:</span>
+                        <div style="font-weight:700; color:var(--deep);">{{ username or 'Commercial Buyer' }}</div>
+                        <div class="meta-sub">Institutional Account Verified</div>
+                    </div>
+                    <div>
+                        <span class="calc-est-label">Dispatch Origin:</span>
+                        <div style="font-weight:700; color:var(--deep);" id="receipt-hub">Bishoftu Hub</div>
+                        <div class="meta-sub">Inspected &amp; Weighed via Certified Scales</div>
+                    </div>
+                </div>
+
+                <div class="receipt-table-wrap">
+                    <table class="dash-table">
+                        <thead>
+                            <tr>
+                                <th>Item Specification</th>
+                                <th class="text-right">Quantity</th>
+                                <th class="text-right">Unit Rate</th>
+                                <th class="text-right">Total (ETB)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style="font-weight:700;" id="receipt-crop">White Teff (Sergegna)</td>
+                                <td class="text-right" id="receipt-volume">450 Qtl</td>
+                                <td class="text-right" id="receipt-rate">11,500 ETB</td>
+                                <td class="text-right" style="font-weight:800; color:var(--brand);" id="receipt-total">5,175,000 ETB</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="meta-sub" style="text-align:center;">
+                    Escrow secured via National Agricultural Clearing System. Quality standards aligned with ECX specifications.
+                </div>
+            </div>
+
+            <div class="modal-foot">
+                <button type="button" class="btn btn-ghost" data-close-modal="receipt-modal">Close</button>
+                <button type="button" id="print-receipt-btn" class="btn btn-primary">
+                    {{ icon('clipboard-check') }} Print Receipt
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast-msg" class="toast-msg" role="status" aria-live="polite"></div>
+
+    <!-- ===== Site Footer ===== -->
+    <footer class="site-footer">
+        <div class="wrap footer-grid">
+            <div>
+                <a class="brand" href="/" aria-label="AgriBridge home">
+                    {% include 'partials/logo.html' %}
+                    AgriBridge
+                </a>
+                <p class="footer-tag">Farm &middot; Market &middot; Deliver</p>
+            </div>
+            <ul class="footer-contact">
+                <li><a href="/logout">Switch Account</a></li>
+                <li><a href="#search-stock">Marketplace Search</a></li>
+                <li><a href="#pending-requests">Demands</a></li>
+                <li><a href="mailto:buyer-support@agribridge.et">buyer-support@agribridge.et</a></li>
+            </ul>
+        </div>
+        <div class="wrap footer-base">
+            <div>&copy; 2026 AgriBridge Ethiopia. Institutional Buyer Portal.</div>
+            <div>Protected by End-to-End Escrow Verification</div>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/buyer_dashboard.js') }}"></script>
+</body>
+</html>

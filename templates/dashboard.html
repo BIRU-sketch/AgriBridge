@@ -1,0 +1,195 @@
+{% macro icon(name) -%}
+<svg class="icon" aria-hidden="true" focusable="false"><use href="#i-{{ name }}"/></svg>
+{%- endmacro %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Platform Workspace | AgriBridge Ethiopia</title>
+    <meta name="description" content="AgriBridge Central Workspace Portal - Select your role terminal or view platform activity.">
+    <meta name="theme-color" content="#0A3D31">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M3.5 19.5C3.5 12 8 6.5 15.5 4.5c.4 7.5-3 13.5-12 15Z' fill='%230A7A41'/%3E%3Cpath d='M7 28C6 15 14 6 28.5 4.5 29 18.5 21 27 7 28Z' fill='%2312A05B'/%3E%3Cpath d='M8 26.5C13 19 18.5 13 25 8.5' fill='none' stroke='%23fff' stroke-width='1.7' stroke-linecap='round'/%3E%3C/svg%3E">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+Ethiopic:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/buyer_dashboard.css') }}">
+    <style>
+        .role-portal-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+        .portal-card {
+            background: var(--paper);
+            border: 1.5px solid var(--line);
+            border-radius: var(--radius-l);
+            padding: clamp(1.25rem, 4vw, 2rem);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 1.5rem;
+            transition: all .2s ease;
+            text-decoration: none;
+            color: inherit;
+        }
+        .portal-card:hover {
+            border-color: var(--brand);
+            transform: translateY(-3px);
+            box-shadow: 0 12px 28px -10px rgba(10, 61, 49, 0.15);
+        }
+        .portal-card-top {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .portal-ic {
+            width: 3.25rem;
+            height: 3.25rem;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            background: var(--tint);
+            color: var(--deep);
+            flex: none;
+        }
+        .portal-title {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--deep);
+        }
+        .portal-desc {
+            font-size: .875rem;
+            color: var(--muted);
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body class="buyer-body">
+    {% include 'partials/icons.html' %}
+
+    <header class="site-header">
+        <div class="wrap header-row">
+            <div class="brand-group">
+                <a class="brand" href="/" aria-label="AgriBridge home">
+                    {% include 'partials/logo.html' %}
+                    AgriBridge
+                </a>
+                <span class="portal-tag">Workspace Terminal</span>
+            </div>
+
+            <div class="header-user">
+                <div class="user-badge">
+                    <div class="user-avatar" title="{{ username or 'User' }}">
+                        {{ (username[0] if username else 'U') | upper }}
+                    </div>
+                    <div class="user-info">
+                        <div class="user-name">{{ username or 'AgriBridge Member' }}</div>
+                        <div class="user-role">Platform Account</div>
+                    </div>
+                </div>
+                <a href="/logout" class="btn btn-ghost btn-sm">
+                    {{ icon('arrow-right') }} Log out
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content" id="main">
+        <section class="welcome-card">
+            <div class="welcome-copy">
+                <div class="welcome-pill">
+                    {{ icon('layers') }} Platform Role Workspaces
+                </div>
+                <h1>Welcome to AgriBridge, {{ username or 'Partner' }}</h1>
+                <p>
+                    Select your operational role terminal below to access smallholder registration, live grain marketplace inventory, or carrier waybills.
+                </p>
+            </div>
+        </section>
+
+        <section>
+            <h2 style="font-size:1.4rem; color:var(--deep); margin-bottom:.5rem;">Select Role Workspace</h2>
+            <p style="color:var(--muted); font-size:.9375rem; margin-bottom:1.5rem;">Access the specific tools designed for each participant in the agricultural supply chain.</p>
+
+            <div class="role-portal-grid">
+                <!-- Extension Agent -->
+                <a href="/agent/dashboard" class="portal-card">
+                    <div>
+                        <div class="portal-card-top">
+                            <div class="portal-ic">
+                                {{ icon('users') }}
+                            </div>
+                            <div class="portal-title">Extension Agent</div>
+                        </div>
+                        <p class="portal-desc" style="margin-top:1rem;">
+                            Onboard smallholder farmers using Kebele IDs, record harvested crops into hub silos, and negotiate lot agreements on behalf of your farming cooperative.
+                        </p>
+                    </div>
+                    <span class="action-link" style="font-weight:700;">
+                        Open Agent Terminal {{ icon('arrow-right') }}
+                    </span>
+                </a>
+
+                <!-- Buyer Terminal -->
+                <a href="/buyer/dashboard" class="portal-card">
+                    <div>
+                        <div class="portal-card-top">
+                            <div class="portal-ic" style="background:#E0F2FE; color:#0369A1;">
+                                {{ icon('user') }}
+                            </div>
+                            <div class="portal-title">Buyer Terminal</div>
+                        </div>
+                        <p class="portal-desc" style="margin-top:1rem;">
+                            Search verified commodity stock (Teff, Wheat, Maize, Sesame), submit custom volume demands, and place direct purchase reservations with automatic stock deductions.
+                        </p>
+                    </div>
+                    <span class="action-link" style="font-weight:700;">
+                        Open Buyer Terminal {{ icon('arrow-right') }}
+                    </span>
+                </a>
+
+                <!-- Transporter -->
+                <a href="/transporter/dashboard" class="portal-card">
+                    <div>
+                        <div class="portal-card-top">
+                            <div class="portal-ic" style="background:#FEF3C7; color:#B45309;">
+                                {{ icon('truck') }}
+                            </div>
+                            <div class="portal-title">Transporter</div>
+                        </div>
+                        <p class="portal-desc" style="margin-top:1rem;">
+                            Register commercial trucks, claim bulk grain extraction loads from rural collection points, and update multi-stage waybill journey milestones.
+                        </p>
+                    </div>
+                    <span class="action-link" style="font-weight:700;">
+                        Open Transporter Terminal {{ icon('arrow-right') }}
+                    </span>
+                </a>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="wrap footer-grid">
+            <div>
+                <a class="brand" href="/" aria-label="AgriBridge home">
+                    {% include 'partials/logo.html' %}
+                    AgriBridge
+                </a>
+                <p class="footer-tag">Farm &middot; Market &middot; Deliver</p>
+            </div>
+            <ul class="footer-contact">
+                <li><a href="/logout">Log out</a></li>
+                <li><a href="mailto:support@agribridge.et">support@agribridge.et</a></li>
+            </ul>
+        </div>
+        <div class="wrap footer-base">
+            <div>&copy; 2026 AgriBridge Ethiopia. Platform Unified Workspace.</div>
+        </div>
+    </footer>
+</body>
+</html>
