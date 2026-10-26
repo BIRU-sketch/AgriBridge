@@ -1,9 +1,6 @@
 .env
-*.txt
-*.sql
-__pycache__/
-*.pyc
-.env
-.env.local
 .env.*
 !.env.example
+__pycache__/
+*.pyc
+.venv/

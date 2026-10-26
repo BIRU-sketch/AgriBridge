@@ -225,7 +225,7 @@ body.buyer-body {
 /* ---------- KPI Metrics Grid ---------- */
 .metrics-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr));
     gap: 1.25rem;
 }
 
@@ -257,13 +257,14 @@ body.buyer-body {
     flex: none;
 }
 
-.metric-ic.ic-amber { background: #FEF3C7; color: #B45309; }
-.metric-ic.ic-blue  { background: #E0F2FE; color: #0369A1; }
-.metric-ic.ic-green { background: #DCFCE7; color: #15803D; }
+.metric-ic.metric-ic-amber { background: #FEF3C7; color: #B45309; }
+.metric-ic.metric-ic-blue  { background: #E0F2FE; color: #0369A1; }
+.metric-ic.metric-ic-green { background: #DCFCE7; color: #15803D; }
 
 .metric-content {
     display: flex;
     flex-direction: column;
+    min-width: 0;
 }
 
 .metric-label {
@@ -280,6 +281,7 @@ body.buyer-body {
     color: var(--deep);
     letter-spacing: -0.02em;
     margin-top: .15rem;
+    overflow-wrap: anywhere;
 }
 
 .metric-sub {
@@ -347,7 +349,7 @@ body.buyer-body {
 
 @media (min-width: 680px) {
     .market-search-box {
-        grid-template-columns: 2fr 1.6fr 1.4fr auto;
+        grid-template-columns: minmax(0, 2fr) minmax(0, 1.6fr) minmax(0, 1.4fr) auto;
         align-items: flex-end;
     }
 }
@@ -356,6 +358,7 @@ body.buyer-body {
     display: flex;
     flex-direction: column;
     gap: .4rem;
+    min-width: 0;
 }
 
 .search-field label {
@@ -368,6 +371,8 @@ body.buyer-body {
 
 .search-field input,
 .search-field select {
+    width: 100%;
+    min-width: 0;
     min-height: 3rem;
     padding: .65rem .9rem;
     border: 1.5px solid #C4D9CD;
@@ -671,7 +676,7 @@ body.buyer-body {
 /* ---------- Market Prices Grid ---------- */
 .price-cards-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
     gap: 1.15rem;
 }
 
@@ -880,110 +885,192 @@ body.buyer-body {
     gap: 1rem;
 }
 
-/* ---------- Buyer workspace views ---------- */
-.buyer-view {
+/* ---------- Receipt modal layout ---------- */
+.receipt-grid {
     display: grid;
-    align-content: start;
-    gap: 1.15rem;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    font-size: .875rem;
 }
 
-.buyer-view[hidden] { display: none !important; }
-
-.buyer-page-heading {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    gap: 1.5rem;
-    padding: 2px 2px 4px;
+.receipt-table-wrap {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
-.buyer-page-heading h1 {
-    margin: .2rem 0 .35rem;
-    color: var(--dash-ink, #142b25);
-    font-size: clamp(1.65rem, 2.5vw, 2.15rem);
-    font-weight: 800;
-    letter-spacing: -.045em;
-    line-height: 1.15;
+.receipt-table-wrap .dash-table {
+    min-width: 430px;
 }
 
-.buyer-page-heading p {
-    max-width: 680px;
-    color: var(--dash-muted, #64756e);
-    font-size: .92rem;
+/* ---------- Responsive behaviour ---------- */
+.table-responsive .dash-table {
+    min-width: 760px;
 }
 
-.buyer-eyebrow {
-    color: #278457;
-    font-size: .68rem;
-    font-weight: 800;
-    letter-spacing: .14em;
+/* In-page navigation clearance comes from html scroll-padding-top. */
+
+@media (max-width: 1199px) {
+    .portal-tag { display: none; }
 }
 
-.buyer-metrics { grid-template-columns: minmax(250px, 360px); }
-.buyer-metrics .metric-card { min-height: 104px; }
+@media (max-width: 1079px) {
+    html { scroll-padding-top: 8.5rem; }
 
-.buyer-order-count {
-    display: grid;
-    min-width: 128px;
-    gap: .1rem;
-    padding: .75rem 1rem;
-    border: 1px solid var(--dash-border, #e2e9e5);
-    border-radius: 12px;
-    background: #fff;
+    .header-row {
+        flex-wrap: wrap;
+        padding-block: .65rem;
+        row-gap: .55rem;
+        gap: .75rem;
+    }
+
+    .dash-nav {
+        display: flex;
+        order: 3;
+        flex-basis: 100%;
+        max-width: 100%;
+        gap: .5rem;
+        overflow-x: auto;
+        padding-bottom: .15rem;
+        scrollbar-width: none;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .dash-nav::-webkit-scrollbar { display: none; }
+
+    .dash-nav a {
+        flex: none;
+        white-space: nowrap;
+        padding: .35rem .75rem;
+        border: 1px solid var(--line);
+        border-radius: 9999px;
+        background: var(--mint);
+    }
+
+    .dash-nav a:hover,
+    .dash-nav a[aria-current="true"] {
+        border-color: var(--brand);
+        background: var(--tint);
+    }
 }
 
-.buyer-order-count strong {
-    color: var(--dash-ink, #142b25);
-    font-size: 1.35rem;
-    font-weight: 800;
+@media (max-width: 759px) {
+    .user-info { display: none; }
+
+    .user-badge {
+        padding: .2rem;
+        border-radius: 50%;
+    }
+
+    .brand { font-size: 1.2rem; }
+    .brand-mark { width: 1.85rem; height: 1.85rem; }
 }
 
-.receipt-filters {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: .55rem;
-    flex-wrap: wrap;
+@media (max-width: 640px) {
+    .main-content {
+        padding-block: 1.6rem 3rem;
+        gap: 1.75rem;
+    }
+
+    .welcome-card { padding: 1.5rem 1.25rem; }
+
+    .dash-card-header,
+    .dash-card-body {
+        padding: 1.15rem;
+    }
+
+    .metrics-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .metric-card { padding: 1rem 1.1rem; }
+
+    .search-results-panel { padding: 1.15rem; }
+
+    .purchase-calculator { padding: 1.15rem; }
+
+    .footer-contact { gap: 1rem; }
+
+    .modal-overlay {
+        padding: .75rem;
+        align-items: flex-end;
+    }
+
+    .modal-box {
+        width: 100%;
+        max-height: calc(100vh - 1.5rem);
+        max-height: calc(100dvh - 1.5rem);
+        border-radius: var(--radius-m);
+    }
+
+    .modal-head,
+    .modal-body {
+        padding: 1.15rem;
+    }
+
+    .modal-foot {
+        padding: .9rem 1.15rem;
+        flex-wrap: wrap;
+    }
+
+    .modal-foot .btn {
+        flex: 1 1 auto;
+    }
 }
 
-.receipt-filters input,
-.receipt-filters select {
-    width: min(100%, 220px);
-    min-height: 40px;
-    padding: .5rem .72rem;
-    border: 1px solid #dce5df;
-    border-radius: 9px;
-    color: var(--dash-ink, #142b25);
-    background: #fff;
-    font: inherit;
-    font-size: .82rem;
+@media (max-width: 519px) {
+    .logout-label { display: none; }
+
+    .header-row { gap: .55rem; }
+
+    .header-user { gap: .5rem; }
+
+    .header-user .btn-sm {
+        min-width: 2.6rem;
+        padding-inline: .55rem;
+    }
+
+    .brand {
+        font-size: 1.05rem;
+        gap: .45rem;
+    }
+
+    .brand-mark { width: 1.7rem; height: 1.7rem; }
+
+    .welcome-card { padding: 1.35rem 1.15rem; }
+
+    .welcome-actions .btn,
+    .welcome-actions .btn-lg {
+        width: 100%;
+    }
+
+    .toast-msg {
+        left: 1rem;
+        right: 1rem;
+        bottom: 1rem;
+        max-width: none;
+    }
 }
 
-.site-footer .footer-contact button[data-buyer-view-target] {
-    padding: 0;
-    border: 0;
-    color: inherit;
-    background: transparent;
-    font: inherit;
-    cursor: pointer;
-}
+@media (max-width: 479px) {
+    .brand-group { min-width: 0; }
 
-.site-footer .footer-contact button[data-buyer-view-target]:hover {
-    color: var(--brand);
-    text-decoration: underline;
-}
+    .brand {
+        font-size: 1rem;
+        min-width: 0;
+        white-space: nowrap;
+    }
 
-@media (max-width: 700px) {
-    .buyer-page-heading { align-items: flex-start; }
-    .buyer-receipts-heading { flex-direction: column; gap: .9rem; }
-    .buyer-order-count { grid-template-columns: 1fr auto; align-items: center; width: 100%; }
-}
+    .dash-card-header,
+    .dash-card-body { padding: 1rem; }
 
-@media (max-width: 560px) {
-    .buyer-page-heading h1 { font-size: 1.55rem; }
-    .buyer-page-heading p { font-size: .84rem; }
-    .buyer-metrics { grid-template-columns: 1fr; }
-    .receipt-filters { width: 100%; justify-content: stretch; }
-    .receipt-filters input,
-    .receipt-filters select { flex: 1 1 100%; width: 100%; }
+    .receipt-grid { grid-template-columns: 1fr; }
+
+    .metric-card { gap: .8rem; }
+
+    .quick-chips { gap: .4rem; }
+
+    .chip { padding: .3rem .7rem; }
 }

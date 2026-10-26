@@ -16,7 +16,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+Ethiopic:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/agent_dashboard.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard-shell.css') }}">
 </head>
 <body class="agent-body">
     {% include 'partials/icons.html' %}
@@ -35,9 +34,7 @@
             <nav class="dash-nav" aria-label="Agent navigation">
                 <a href="#farmers" aria-current="true">Registered Farmers</a>
                 <a href="#produce-lots">Produce Lots</a>
-                <a href="#orders">Buyer Orders</a>
-                <a href="#transfer-approvals">Delivery Approvals</a>
-                <a href="#hub-supply">Request Hub Supply</a>
+                <a href="#matches">Buyer Matches</a>
                 <a href="/register-farmer">+ New Farmer</a>
             </nav>
 
@@ -48,7 +45,7 @@
                     </div>
                     <div class="user-info">
                         <div class="user-name">{{ username or 'Cooperative Agent' }}</div>
-                    <div class="user-role">{{ hub_location or 'Hub assignment required' }}</div>
+                        <div class="user-role">Bishoftu / Ada'a Hub</div>
                     </div>
                 </div>
                 <a href="/logout" class="btn btn-ghost btn-sm" title="Log out of terminal">
@@ -90,8 +87,8 @@
                 </div>
                 <div class="metric-content">
                     <span class="metric-label">Registered Farmers</span>
-                    <span class="metric-val" id="metric-registered-farmers">0 <small style="font-size:.9rem;font-weight:600;">Farmers</small></span>
-                    <span class="metric-sub">Across regional rural Kebeles</span>
+                    <span class="metric-val">84 <small style="font-size:.9rem;font-weight:600;">Farmers</small></span>
+                    <span class="metric-sub">Across 8 rural Kebeles</span>
                 </div>
             </div>
 
@@ -101,8 +98,8 @@
                 </div>
                 <div class="metric-content">
                     <span class="metric-label">Active Produce Lots</span>
-                    <span class="metric-val" id="metric-active-lots">0 <small style="font-size:.9rem;font-weight:600;">Lots</small></span>
-                    <span class="metric-sub">Recorded in hub silos</span>
+                    <span class="metric-val">12 <small style="font-size:.9rem;font-weight:600;">Lots</small></span>
+                    <span class="metric-sub">Stored in certified hub silos</span>
                 </div>
             </div>
 
@@ -112,11 +109,21 @@
                 </div>
                 <div class="metric-content">
                     <span class="metric-label">Aggregated Volume</span>
-                    <span class="metric-val" id="metric-aggregated-volume">0 <small style="font-size:.9rem;font-weight:600;">Qtl</small></span>
+                    <span class="metric-val">4,250 <small style="font-size:.9rem;font-weight:600;">Qtl</small></span>
                     <span class="metric-sub">White Teff, Wheat &amp; Maize</span>
                 </div>
             </div>
 
+            <div class="metric-card">
+                <div class="metric-ic">
+                    {{ icon('banknote') }}
+                </div>
+                <div class="metric-content">
+                    <span class="metric-label">Farmer Payouts Settled</span>
+                    <span class="metric-val">100%</span>
+                    <span class="metric-sub">CBE &bull; Telebirr direct transfer</span>
+                </div>
+            </div>
         </section>
 
         <!-- Section 1: Registered Farmers Directory -->
@@ -124,7 +131,7 @@
             <div class="dash-card-header">
                 <div>
                     <h2>{{ icon('users') }} Registered Smallholder Farmers</h2>
-                    <p>Farmers registered under your agent account.</p>
+                    <p>Farmers onboarded under your cooperative jurisdiction with verified Kebele IDs.</p>
                 </div>
                 <div style="display:flex; align-items:center; gap:.75rem; flex-wrap:wrap;">
                     <input
@@ -153,7 +160,73 @@
                             <th class="text-right">Action</th>
                         </tr>
                     </thead>
-                    <tbody id="farmers-tbody"><tr><td colspan="8">Loading live records...</td></tr></tbody>
+                    <tbody id="farmers-tbody">
+                        <tr>
+                            <td class="code-ref">KBL-88204-BS</td>
+                            <td>
+                                <div style="font-weight:700; color:var(--deep);">Ketema Bekele Tolossa</div>
+                                <div class="meta-sub">Ada'a Multi-Purpose Cooperative</div>
+                            </td>
+                            <td>Bishoftu &bull; Kebele 04 Rural</td>
+                            <td class="text-right" style="font-weight:700;">4.5 Ha</td>
+                            <td>White Teff (Magna)</td>
+                            <td>CBE: 1000293849201</td>
+                            <td class="text-center">
+                                <span class="badge badge-green">
+                                    <span class="badge-dot"></span> Verified
+                                </span>
+                            </td>
+                            <td class="text-right">
+                                <a href="/add-produce-lot?kebele_id=KBL-88204-BS" class="action-link">
+                                    + Add Harvest
+                                </a>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="code-ref">KBL-77192-HT</td>
+                            <td>
+                                <div style="font-weight:700; color:var(--deep);">Derartu Tadesse Geda</div>
+                                <div class="meta-sub">Hitosa Grain Union</div>
+                            </td>
+                            <td>Asella &bull; Kebele 02 Rural</td>
+                            <td class="text-right" style="font-weight:700;">6.0 Ha</td>
+                            <td>Bread Wheat (Grade 1)</td>
+                            <td>Telebirr: 0912345678</td>
+                            <td class="text-center">
+                                <span class="badge badge-green">
+                                    <span class="badge-dot"></span> Verified
+                                </span>
+                            </td>
+                            <td class="text-right">
+                                <a href="/add-produce-lot?kebele_id=KBL-77192-HT" class="action-link">
+                                    + Add Harvest
+                                </a>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="code-ref">KBL-64019-GM</td>
+                            <td>
+                                <div style="font-weight:700; color:var(--deep);">Abebech Megersa Hunde</div>
+                                <div class="meta-sub">Gomma Coffee Union</div>
+                            </td>
+                            <td>Jimma &bull; Kebele 07</td>
+                            <td class="text-right" style="font-weight:700;">3.2 Ha</td>
+                            <td>Specialty Arabica Coffee</td>
+                            <td>Coop Bank: 1029384756</td>
+                            <td class="text-center">
+                                <span class="badge badge-green">
+                                    <span class="badge-dot"></span> Verified
+                                </span>
+                            </td>
+                            <td class="text-right">
+                                <a href="/add-produce-lot?kebele_id=KBL-64019-GM" class="action-link">
+                                    + Add Harvest
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
                 </table>
             </div>
         </section>
@@ -183,93 +256,154 @@
                             <th class="text-right">Actions</th>
                         </tr>
                     </thead>
-                    <tbody id="produce-lots-tbody"><tr><td colspan="7">Loading live records...</td></tr></tbody>
+                    <tbody>
+                        <tr>
+                            <td class="code-ref">#LOT-TF-904</td>
+                            <td class="code-ref">KBL-88204-BS</td>
+                            <td>
+                                <div style="font-weight:700; color:var(--deep);">White Teff (Magna Grade)</div>
+                                <div class="meta-sub">Cleaned &bull; Moisture &lt; 10%</div>
+                            </td>
+                            <td class="text-right" style="font-weight:800; color:var(--brand);">120 Qtl</td>
+                            <td class="meta-sub">Sept 12, 2026</td>
+                            <td class="text-center">
+                                <span class="badge badge-green">
+                                    <span class="badge-dot"></span> In Hub Silo
+                                </span>
+                            </td>
+                            <td class="text-right">
+                                <button type="button" class="action-link" onclick="alert('Viewing Lab Certification for #LOT-TF-904')">
+                                    Lab Certificate
+                                </button>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="code-ref">#LOT-WH-410</td>
+                            <td class="code-ref">KBL-77192-HT</td>
+                            <td>
+                                <div style="font-weight:700; color:var(--deep);">Bread Wheat (Grade 1 Standard)</div>
+                                <div class="meta-sub">High Gluten &bull; Min 12% Protein</div>
+                            </td>
+                            <td class="text-right" style="font-weight:800; color:var(--brand);">250 Qtl</td>
+                            <td class="meta-sub">Sept 05, 2026</td>
+                            <td class="text-center">
+                                <span class="badge badge-amber">
+                                    <span class="badge-dot"></span> Reserved (Match Found)
+                                </span>
+                            </td>
+                            <td class="text-right">
+                                <button type="button" class="action-link" onclick="alert('Viewing Purchase Agreement for #LOT-WH-410')">
+                                    View Agreement
+                                </button>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="code-ref">#LOT-CF-102</td>
+                            <td class="code-ref">KBL-64019-GM</td>
+                            <td>
+                                <div style="font-weight:700; color:var(--deep);">Wollega Arabica Coffee</div>
+                                <div class="meta-sub">Washed &bull; Grade 1 Export Spec</div>
+                            </td>
+                            <td class="text-right" style="font-weight:800; color:var(--brand);">80 Qtl</td>
+                            <td class="meta-sub">Aug 28, 2026</td>
+                            <td class="text-center">
+                                <span class="badge badge-green">
+                                    <span class="badge-dot"></span> In Hub Silo
+                                </span>
+                            </td>
+                            <td class="text-right">
+                                <button type="button" class="action-link" onclick="alert('Viewing ECX Grading Certificate for #LOT-CF-102')">
+                                    ECX Grading
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
                 </table>
             </div>
         </section>
 
-        <!-- Section 3: Buyer Orders & Dispatched Lots -->
-        <section id="orders" class="dash-card">
+        <!-- Section 3: Buyer Matching Opportunities -->
+        <section id="matches" class="dash-card">
             <div class="dash-card-header">
                 <div>
                     <h2>
-                        {{ icon('handshake') }} Buyer Purchases &amp; Allocations
+                        {{ icon('handshake') }} Buyer Matching Opportunities
+                        <span class="badge badge-amber" style="margin-left:.4rem;">2 High Match</span>
                     </h2>
-                    <p>Orders placed by buyers against available hub lots.</p>
+                    <p>Verified institutional buyers requesting crop lots matching your cooperative's current harvest inventory.</p>
                 </div>
-                <span class="meta-sub">Automated Escrow &amp; Transporter Dispatch</span>
+                <span class="meta-sub">Agreement Required Prior to Dispatch</span>
             </div>
 
             <div class="table-responsive">
                 <table class="dash-table">
                     <thead>
                         <tr>
-                            <th>Order Ref</th>
-                            <th>Buyer</th>
-                            <th>Commodity</th>
-                            <th class="text-right">Volume</th>
-                            <th class="text-right">Total (ETB)</th>
-                            <th class="text-center">Status</th>
-                            <th>Date</th>
+                            <th>Demand Ref</th>
+                            <th>Verified Buyer</th>
+                            <th>Required Commodity</th>
+                            <th class="text-right">Requested Volume</th>
+                            <th>Offered Floor Tariff</th>
+                            <th class="text-center">Match Quality</th>
+                            <th class="text-right">Cooperative Action</th>
                         </tr>
                     </thead>
-                    <tbody id="sales-orders-tbody"><tr><td colspan="7">Loading live records...</td></tr></tbody>
-                </table>
-            </div>
-        </section>
+                    <tbody>
+                        <tr>
+                            <td class="code-ref">#DEM-8812</td>
+                            <td>
+                                <div style="font-weight:700; color:var(--deep);">Abyssinia Flour Mills PLC</div>
+                                <div class="meta-sub">Verified Institutional Buyer</div>
+                            </td>
+                            <td>White Teff (Grade 1 Magna)</td>
+                            <td class="text-right" style="font-weight:700;">800 Qtl</td>
+                            <td style="font-weight:700; color:var(--brand);">11,500 ETB / Qtl</td>
+                            <td class="text-center">
+                                <span class="badge badge-green">
+                                    <span class="badge-dot"></span> 98% Match
+                                </span>
+                            </td>
+                            <td class="text-right">
+                                <button type="button" class="btn btn-primary btn-sm propose-match-btn"
+                                    data-crop="White Teff"
+                                    data-buyer="Abyssinia Flour Mills PLC"
+                                    data-volume="120 Qtl">
+                                    Propose Lot
+                                </button>
+                            </td>
+                        </tr>
 
-        <section id="transfer-approvals" class="dash-card">
-            <div class="dash-card-header">
-                <div><h2>{{ icon('shield-check') }} Hub Delivery Approval Queue</h2><p>Confirm the goods attributed to your lots arrived at the destination hub, or report the problem for admin review.</p></div>
-            </div>
-            <div class="table-responsive">
-                <table class="dash-table"><thead><tr><th>Waybill / Route</th><th>Produce</th><th>Quantity</th><th>Requested</th><th>Status / Response</th><th>Action</th></tr></thead>
-                    <tbody id="transfer-approvals-tbody"><tr><td colspan="6">Loading delivery approvals...</td></tr></tbody>
+                        <tr>
+                            <td class="code-ref">#DEM-8809</td>
+                            <td>
+                                <div style="font-weight:700; color:var(--deep);">Kaliti Food Complex SC</div>
+                                <div class="meta-sub">Verified Government Processor</div>
+                            </td>
+                            <td>Bread Wheat (Grade 1)</td>
+                            <td class="text-right" style="font-weight:700;">1,500 Qtl</td>
+                            <td style="font-weight:700; color:var(--brand);">5,200 ETB / Qtl</td>
+                            <td class="text-center">
+                                <span class="badge badge-green">
+                                    <span class="badge-dot"></span> 95% Match
+                                </span>
+                            </td>
+                            <td class="text-right">
+                                <button type="button" class="btn btn-primary btn-sm propose-match-btn"
+                                    data-crop="Bread Wheat"
+                                    data-buyer="Kaliti Food Complex SC"
+                                    data-volume="250 Qtl">
+                                    Propose Lot
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
                 </table>
-            </div>
-        </section>
-
-        <section id="hub-supply" class="dash-card">
-            <div class="dash-card-header">
-                <div><h2>{{ icon('truck') }} Request Supply from Nearby Hubs</h2><p>Request stock for {{ hub_location or 'your assigned hub' }}. The system checks neighboring hubs, protects a 10-Qtl reserve, and assigns an approved available carrier.</p></div>
-            </div>
-            <div class="dash-card-body">
-                <form id="hub-supply-form" class="hub-supply-form">
-                    <div class="search-field"><label for="supply-crop">Crop</label><select id="supply-crop" required><option value="">Loading configured crops...</option></select></div>
-                    <div class="search-field"><label for="supply-quality">Quality</label><select id="supply-quality" required><option>Grade 1 (Magna / Premium)</option><option>Grade 1 (Standard)</option><option>Grade 2 Commercial</option><option>Export Quality Verified</option></select></div>
-                    <div class="search-field"><label for="supply-quantity">Quantity (Qtl)</label><input id="supply-quantity" type="number" min="0.01" step="0.01" required placeholder="Quantity needed"></div>
-                    <button class="btn btn-primary" id="supply-request-submit" type="submit">Request nearby supply</button>
-                </form>
-                <div class="table-responsive" style="margin-top:1.25rem;">
-                    <table class="dash-table"><thead><tr><th>Requested</th><th>Produce</th><th>Quantity</th><th>Source</th><th>Waybill / Carrier</th><th>Status</th></tr></thead>
-                        <tbody id="supply-requests-tbody"><tr><td colspan="6">Loading supply requests...</td></tr></tbody>
-                    </table>
-                </div>
             </div>
         </section>
 
     </main>
-
-    <div id="lot-edit-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="lot-edit-title">
-        <div class="modal-box">
-            <div class="modal-head"><h3 id="lot-edit-title">Correct Produce Lot</h3><button type="button" class="modal-close" data-close-lot-modal aria-label="Close">&times;</button></div>
-            <form id="lot-edit-form">
-                <input type="hidden" id="edit-lot-id">
-                <div class="modal-body">
-                    <p class="meta-sub">Only fully available lots can be changed. Once any stock has been ordered or reserved, the lot is locked to protect the transaction record.</p>
-                    <div class="search-field"><label for="edit-lot-crop">Crop</label><select id="edit-lot-crop" required></select><small id="edit-lot-price"></small></div>
-                    <div class="search-field"><label for="edit-lot-quality">Quality grade</label><select id="edit-lot-quality" required>
-                        <option>Grade 1 (Magna / Premium)</option><option>Grade 1 (Standard)</option><option>Grade 2 Commercial</option><option>Export Quality Verified</option>
-                    </select></div>
-                    <div class="search-field"><label for="edit-lot-quantity">Quantity (Qtl)</label><input id="edit-lot-quantity" type="number" min="0.01" step="0.01" required></div>
-                    <div class="search-field"><label for="edit-lot-harvest">Harvest date</label><input id="edit-lot-harvest" type="date" required></div>
-                    <div class="search-field"><label for="edit-lot-origin">Source hub</label><select id="edit-lot-origin" required disabled>{% for hub in hubs %}<option value="{{ hub }}">{{ hub }}</option>{% endfor %}</select></div>
-                    <div class="search-field"><label for="edit-lot-target">Destination hub</label><select id="edit-lot-target"><option value="">No planned destination</option>{% for hub in hubs %}<option value="{{ hub }}">{{ hub }}</option>{% endfor %}</select></div>
-                </div>
-                <div class="modal-foot"><button type="button" class="btn btn-ghost" data-close-lot-modal>Cancel</button><button type="submit" class="btn btn-primary">Save correction</button></div>
-            </form>
-        </div>
-    </div>
 
     <!-- Toast Notification -->
     <div id="toast-msg" class="toast-msg" role="status" aria-live="polite"></div>

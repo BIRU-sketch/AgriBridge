@@ -26,15 +26,15 @@
             </a>
 
             <div class="aside-body">
-                <p class="aside-title">One secure login for every AgriBridge account.</p>
+                <p class="aside-title">Log in to list produce, review matches, or update a shipment.</p>
                 <dl class="aside-roles">
                     <div><dt>Agents</dt><dd>Register farmers and list their produce.</dd></div>
-                    <div><dt>Buyers</dt><dd>Search hub stock and purchase produce.</dd></div>
-                    <div><dt>Transporters</dt><dd>Contracted carriers. Log in with company-issued credentials to claim loads.</dd></div>
+                    <div><dt>Buyers</dt><dd>Post demand and confirm delivery.</dd></div>
+                    <div><dt>Transporters</dt><dd>Claim loads and update shipments.</dd></div>
                 </dl>
             </div>
 
-            <p class="aside-foot">Buyers can create accounts here. <a href="/staff/login" style="color:inherit; text-decoration:underline;">Agents, transporters, and administrators sign in through the staff portal.</a></p>
+            <p class="aside-foot">Farmers don't log in. Their extension agent or cooperative works on their behalf.</p>
         </aside>
 
         <main class="auth-main">
@@ -48,12 +48,12 @@
                 <div id="auth-top">
                     <div class="seg" role="tablist" aria-label="Log in or create an account">
                         <button type="button" role="tab" id="tab-login" aria-controls="panel-login" aria-selected="true">Log in</button>
-                        <button type="button" role="tab" id="tab-signup" aria-controls="panel-signup" aria-selected="false" tabindex="-1">Buyer sign up</button>
+                        <button type="button" role="tab" id="tab-signup" aria-controls="panel-signup" aria-selected="false" tabindex="-1">Create account</button>
                     </div>
 
                     <div class="auth-head">
                         <h1 id="auth-title">Log in</h1>
-                <p id="auth-sub">Buyers sign in here. Staff members use the company-issued staff sign-in page.</p>
+                        <p id="auth-sub">Welcome back. Enter your details to continue.</p>
                     </div>
                 </div>
 
@@ -68,10 +68,7 @@
                     </div>
 
                     <div class="field">
-                        <div class="field-header">
-                            <label for="login-password">Password</label>
-                            <button type="button" class="link-btn" id="btn-forgot-pw">Forgot password?</button>
-                        </div>
+                        <label for="login-password">Password</label>
                         <div class="pw">
                             <input id="login-password" name="password" type="password" autocomplete="current-password" aria-describedby="login-password-err">
                             <button type="button" class="pw-toggle" data-target="login-password" aria-pressed="false">Show</button>
@@ -92,7 +89,31 @@
                         <p class="field-err" id="signup-name-err" hidden></p>
                     </div>
 
-                    <p class="field-hint">This form creates a buyer account. Staff members sign in at <a href="/staff/login">the staff sign-in page</a>.</p>
+                    <fieldset class="field role-set" aria-describedby="signup-role-err">
+                        <legend>How will you use AgriBridge?</legend>
+                        <label class="role-opt">
+                            <input type="radio" name="role" value="agent">
+                            <span class="role-text">
+                                <span class="role-title">Extension or cooperative agent</span>
+                                <span class="role-desc">I register farmers and list their produce.</span>
+                            </span>
+                        </label>
+                        <label class="role-opt">
+                            <input type="radio" name="role" value="buyer">
+                            <span class="role-text">
+                                <span class="role-title">Buyer</span>
+                                <span class="role-desc">I want to buy produce.</span>
+                            </span>
+                        </label>
+                        <label class="role-opt">
+                            <input type="radio" name="role" value="transporter">
+                            <span class="role-text">
+                                <span class="role-title">Transporter</span>
+                                <span class="role-desc">I carry loads with my vehicles.</span>
+                            </span>
+                        </label>
+                        <p class="field-err" id="signup-role-err" hidden></p>
+                    </fieldset>
 
                     <div class="field">
                         <label for="signup-email">Email</label>
@@ -110,63 +131,10 @@
                         <p class="field-err" id="signup-password-err" hidden></p>
                     </div>
 
-                    <p class="verify-note">An administrator verifies new buyer accounts before purchasing is available.</p>
+                    <p class="verify-note">An administrator verifies new accounts. Some actions stay locked until yours is verified.</p>
 
                     <button type="submit" class="btn btn-primary btn-lg btn-block" data-label="Create account" data-busy="Creating account…">Create account</button>
                 </form>
-
-                <!-- Forgot password -->
-                <form id="panel-forgot" class="auth-form" role="region" aria-labelledby="auth-title" novalidate hidden data-kind="forgot">
-                    <div class="form-alert" role="alert" hidden></div>
-
-                    <div class="field">
-                        <label for="forgot-email">Account Email</label>
-                        <input id="forgot-email" name="email" type="email" autocomplete="email" inputmode="email" autocapitalize="off" spellcheck="false" placeholder="name@example.com" aria-describedby="forgot-email-err" required>
-                        <p class="field-err" id="forgot-email-err" hidden></p>
-                    </div>
-
-                    <p class="field-hint">We will send a secure password recovery link to your registered email address.</p>
-
-                    <button type="submit" class="btn btn-primary btn-lg btn-block" data-label="Send reset link" data-busy="Sending reset link…">Send reset link</button>
-
-                    <button type="button" class="btn btn-ghost btn-block" id="btn-back-to-login">
-                        Back to log in
-                    </button>
-                </form>
-
-                <!-- Update password (after clicking reset link) -->
-                <form id="panel-reset" class="auth-form" role="region" aria-labelledby="auth-title" novalidate hidden data-kind="reset">
-                    <div class="form-alert" role="alert" hidden></div>
-
-                    <div class="field">
-                        <label for="reset-password">New Password</label>
-                        <div class="pw">
-                            <input id="reset-password" name="password" type="password" autocomplete="new-password" aria-describedby="reset-password-hint reset-password-err" required>
-                            <button type="button" class="pw-toggle" data-target="reset-password" aria-pressed="false">Show</button>
-                        </div>
-                        <p class="field-hint" id="reset-password-hint">Use at least 8 characters.</p>
-                        <p class="field-err" id="reset-password-err" hidden></p>
-                    </div>
-
-                    <div class="field">
-                        <label for="reset-password-confirm">Confirm New Password</label>
-                        <div class="pw">
-                            <input id="reset-password-confirm" name="password_confirm" type="password" autocomplete="new-password" aria-describedby="reset-password-confirm-err" required>
-                            <button type="button" class="pw-toggle" data-target="reset-password-confirm" aria-pressed="false">Show</button>
-                        </div>
-                        <p class="field-err" id="reset-password-confirm-err" hidden></p>
-                    </div>
-
-                    <button type="submit" class="btn btn-primary btn-lg btn-block" data-label="Update password" data-busy="Updating password…">Update password</button>
-                </form>
-
-                <!-- Shown after requesting a password reset -->
-                <div id="forgot-success" class="success" hidden tabindex="-1">
-                    <h1>Check your email</h1>
-                    <p>We've sent a password reset link to <strong id="forgot-success-email"></strong>.</p>
-                    <p>Click the link in the email to choose a new password. If you don't see it within a few minutes, check your spam folder.</p>
-                    <button type="button" class="btn btn-primary btn-lg btn-block" id="btn-forgot-to-login">Return to log in</button>
-                </div>
 
                 <!-- Shown after a successful sign-up -->
                 <div id="signup-success" class="success" hidden tabindex="-1">
@@ -176,7 +144,7 @@
                     <button type="button" class="btn btn-primary btn-lg btn-block" id="go-login">Go to log in</button>
                 </div>
 
-                <p class="auth-back"><a href="/staff/login">Staff sign in</a> · <a href="/">Back to home</a></p>
+                <p class="auth-back"><a href="/">Back to home</a></p>
             </div>
         </main>
     </div>

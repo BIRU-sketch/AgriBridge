@@ -16,7 +16,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+Ethiopic:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/transporter_dashboard.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard-shell.css') }}">
 </head>
 <body class="transporter-body">
     {% include 'partials/icons.html' %}
@@ -33,7 +32,7 @@
             </div>
 
             <nav class="dash-nav" aria-label="Transporter navigation">
-                <a href="#available-loads" aria-current="true">Loads &amp; Active Trip</a>
+                <a href="#active-route" aria-current="true">Active Trip</a>
                 <a href="#available-loads">Available Loads</a>
                 <a href="#fleet">Vehicle Fleet</a>
                 <a href="#completed-trips">Waybills &amp; History</a>
@@ -50,7 +49,7 @@
                     </div>
                 </div>
                 <a href="/logout" class="btn btn-ghost btn-sm" title="Log out of terminal">
-                    {{ icon('arrow-right') }} Log out
+                    {{ icon('arrow-right') }} <span class="logout-label">Log out</span>
                 </a>
             </div>
         </div>
@@ -72,7 +71,7 @@
             </div>
             <div class="welcome-actions">
                 <button type="button" class="btn btn-primary btn-lg" data-open-modal="vehicle-modal">
-                    {{ icon('truck') }} Register Vehicle
+                    {{ icon('truck') }} <span class="btn-label">Register Vehicle</span>
                 </button>
                 <a href="#available-loads" class="btn btn-outline btn-lg">
                     {{ icon('package') }} View Bulk Loads
@@ -88,8 +87,8 @@
                 </div>
                 <div class="metric-content">
                     <span class="metric-label">Active Consignments</span>
-                    <span class="metric-val" id="metric-active-consignments">0 <small style="font-size:.9rem;font-weight:600;">Trips</small></span>
-                    <span class="metric-sub">In transit to destination</span>
+                    <span class="metric-val"><span id="metric-active-consignments">1</span> <small style="font-size:.9rem;font-weight:600;">Trip</small></span>
+                    <span class="metric-sub" id="metric-active-sub">In transit to destination</span>
                 </div>
             </div>
 
@@ -99,7 +98,7 @@
                 </div>
                 <div class="metric-content">
                     <span class="metric-label">Available Hub Loads</span>
-                    <span class="metric-val" id="metric-available-loads">0</span>
+                    <span class="metric-val" id="metric-available-loads">4</span>
                     <span class="metric-sub">Ready for carrier assignment</span>
                 </div>
             </div>
@@ -110,44 +109,350 @@
                 </div>
                 <div class="metric-content">
                     <span class="metric-label">Registered Fleet</span>
-                    <span class="metric-val" id="metric-fleet-count">0 <small style="font-size:.9rem;font-weight:600;">Trucks</small></span>
-                    <span class="metric-sub">Includes vehicles awaiting inspection</span>
+                    <span class="metric-val"><span id="metric-fleet-count">3</span> <small style="font-size:.9rem;font-weight:600;">Trucks</small></span>
+                    <span class="metric-sub">Roadworthy &bull; GPS verified</span>
                 </div>
             </div>
 
+            <div class="metric-card">
+                <div class="metric-ic">
+                    {{ icon('check-circle') }}
+                </div>
+                <div class="metric-content">
+                    <span class="metric-label">Delivery SLA</span>
+                    <span class="metric-val">99.1%</span>
+                    <span class="metric-sub">Official offloading rating</span>
+                </div>
+            </div>
         </section>
 
-        <section id="available-loads" class="dash-card">
-            <div class="dash-card-header"><div><h2>Available Loads</h2><p>Buyer loads are available to claim. Hub replenishment duties are assigned automatically when you have an approved vehicle free.</p></div></div>
+        <!-- Section 1: Active Assigned Route Card & Stepper -->
+        <section id="active-route" class="dash-card">
+            <div class="dash-card-header">
+                <div>
+                    <h2>{{ icon('truck') }} Active Route Assignment</h2>
+                    <p>Driver journey tracker with multi-stage waybill confirmation (no live GPS required).</p>
+                </div>
+                <span class="badge badge-amber" id="active-route-status-badge">
+                    <span class="badge-dot"></span> <span id="active-route-status-text">In Transit</span>
+                </span>
+            </div>
+
             <div class="dash-card-body">
-                <div id="active-route" class="active-trip-compact" hidden>
-                    <div class="active-trip-compact-head">
-                        <div><span class="meta-sub">Active trip · <span id="active-waybill-id">—</span></span><h3 class="route-title" id="active-route-title">—</h3></div>
-                        <span class="badge badge-amber" id="active-route-status-badge">In progress</span>
-                    </div>
-                    <div class="active-trip-compact-meta"><span id="active-assigned-cargo"><strong>—</strong></span><span id="active-assigned-vehicle"><strong>—</strong></span><span>Current status: <strong id="current-status-text">—</strong></span></div>
-                    <details class="active-trip-progress"><summary>Trip progress</summary>
-                        <div class="stepper-container"><div class="stepper-track"><div class="stepper-fill" id="stepper-fill"></div></div>
-                            <div class="stepper-steps"><div class="step-item"><span class="step-num">1</span><span class="step-name">Dispatched</span></div><div class="step-item"><span class="step-num">2</span><span class="step-name">Loaded at Hub</span></div><div class="step-item"><span class="step-num">3</span><span class="step-name">In Transit</span></div><div class="step-item"><span class="step-num">4</span><span class="step-name">Delivered</span></div></div>
+                <div class="active-route-banner" id="active-route-banner"
+                    data-waybill="WB-9042"
+                    data-route-from="Humera Aggregation Hub"
+                    data-route-to="Addis Central Distribution Center"
+                    data-cargo="Sesame - Export Quality"
+                    data-quantity="120"
+                    data-tonnage="120 Quintals (12 MT)"
+                    data-tariff="22,000 ETB"
+                    data-vehicle="Isuzu FSR"
+                    data-plate="ET-3-4521"
+                    data-driver="Tariku F.">
+                    <div class="route-header">
+                        <div>
+                            <div class="meta-sub" style="margin-bottom:.3rem;">
+                                Waybill Ref: <span class="code-ref" id="active-route-ref">#WB-9042</span> &bull; State Buffer Consignment
+                            </div>
+                            <div class="route-title" id="active-route-title">
+                                Humera Aggregation Hub {{ icon('arrow-right') }} Addis Central Distribution Center
+                            </div>
                         </div>
-                    </details>
-                    <button type="button" id="advance-status-btn" class="btn btn-primary">Update trip status</button>
+                        <div class="route-meta">
+                            <div>
+                                <span class="meta-sub">Assigned Cargo:</span>
+                                <div><strong id="active-route-cargo">120 Quintals (Sesame - Export Quality)</strong></div>
+                            </div>
+                            <div>
+                                <span class="meta-sub">Assigned Vehicle:</span>
+                                <div><strong id="active-route-vehicle">Isuzu FSR (ET-3-4521)</strong></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Journey Stepper -->
+                    <div class="stepper-container">
+                        <div class="stepper-track">
+                            <div class="stepper-fill" id="stepper-fill" style="width: 75%;"></div>
+                        </div>
+
+                        <div class="stepper-steps">
+                            <div class="step-item completed">
+                                <span class="step-num">1</span>
+                                <span class="step-name">Dispatched</span>
+                            </div>
+                            <div class="step-item completed">
+                                <span class="step-num">2</span>
+                                <span class="step-name">Loaded at Hub</span>
+                            </div>
+                            <div class="step-item active">
+                                <span class="step-num">3</span>
+                                <span class="step-name">In Transit</span>
+                            </div>
+                            <div class="step-item">
+                                <span class="step-num">4</span>
+                                <span class="step-name">Delivered</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Driver Action Bar -->
+                    <div class="route-action-box">
+                        <div class="route-current-status">
+                            {{ icon('clock') }}
+                            <div>
+                                Current Status: <span style="color:#B45309;" id="current-status-text">In Transit</span>
+                                <div class="meta-sub" style="font-weight:400;" id="current-status-hint">Update the progress below once arrival or offloading is completed.</div>
+                            </div>
+                        </div>
+                        <button type="button" id="advance-status-btn" class="btn btn-primary" style="min-height:2.9rem;">
+                            {{ icon('check-circle') }} <span class="btn-label">Mark as Delivered &amp; Offloaded</span>
+                        </button>
+                    </div>
                 </div>
-                <div class="loads-grid" id="available-loads-grid"><div>Loading live loads...</div></div>
             </div>
         </section>
-        <section id="fleet" class="dash-card">
-            <div class="dash-card-header"><div><h2>Vehicle Fleet</h2><p>Only vehicles approved by an administrator can be assigned to a load.</p></div></div>
-            <div class="dash-card-body"><div class="fleet-grid" id="fleet-grid"><div>Loading your fleet...</div></div></div>
+
+        <!-- Section 2: Available Bulk Loads (Direct Hub Pickup) -->
+        <section id="available-loads" class="dash-card">
+            <div class="dash-card-header">
+                <div>
+                    <h2>{{ icon('package') }} Available Bulk Loads (Hub Pickup Pool)</h2>
+                    <p>Claim official route assignments to transport bulk grain from rural collection points to regional reserves.</p>
+                </div>
+                <span class="meta-sub"><span id="available-loads-count">4</span> Verified Routes Ready</span>
+            </div>
+
+            <div class="dash-card-body">
+                <div class="loads-grid">
+                    <!-- Load Card 1 -->
+                    <div class="load-card"
+                        data-route-from="Bishoftu Cooperative"
+                        data-route-to="Adama Processing Hub"
+                        data-cargo="Grade 1 Magna Teff"
+                        data-quantity="100"
+                        data-tonnage="100 Quintals (10 MT)"
+                        data-tariff="18,500 ETB">
+                        <div>
+                            <div class="load-card-head">
+                                <span class="badge badge-green">High Priority</span>
+                                <span class="code-ref">~450 km</span>
+                            </div>
+                            <h3 class="load-route-title" style="margin-top:.75rem;">
+                                Bishoftu Cooperative {{ icon('arrow-right') }} Adama Processing Hub
+                            </h3>
+                            <ul class="load-specs-list">
+                                <li>
+                                    <span>Commodity:</span>
+                                    <strong>Grade 1 Magna Teff (100 Qtl)</strong>
+                                </li>
+                                <li>
+                                    <span>Extension Agent:</span>
+                                    <span>Dawit K. (+251 91...)</span>
+                                </li>
+                                <li>
+                                    <span>Loading Point:</span>
+                                    <span>Ada'a Multi-Purpose Depot</span>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="load-tariff">
+                            <span class="meta-sub">Approved Tariff:</span>
+                            <span class="load-tariff-val">18,500 ETB</span>
+                        </div>
+                        <button type="button" class="btn btn-outline btn-block accept-load-btn">
+                            {{ icon('truck') }} <span class="btn-label">Accept Route Assignment</span>
+                        </button>
+                    </div>
+
+                    <!-- Load Card 2 -->
+                    <div class="load-card"
+                        data-route-from="Jimma Collection Point"
+                        data-route-to="Addis Central Warehouse"
+                        data-cargo="Wollega Coffee - Grade 1"
+                        data-quantity="80"
+                        data-tonnage="80 Quintals (8 MT)"
+                        data-tariff="15,000 ETB">
+                        <div>
+                            <div class="load-card-head">
+                                <span class="badge badge-blue">Standard Route</span>
+                                <span class="code-ref">~320 km</span>
+                            </div>
+                            <h3 class="load-route-title" style="margin-top:.75rem;">
+                                Jimma Collection Point {{ icon('arrow-right') }} Addis Central Warehouse
+                            </h3>
+                            <ul class="load-specs-list">
+                                <li>
+                                    <span>Commodity:</span>
+                                    <strong>Wollega Coffee - Grade 1 (80 Qtl)</strong>
+                                </li>
+                                <li>
+                                    <span>Extension Agent:</span>
+                                    <span>Amina M. (+251 92...)</span>
+                                </li>
+                                <li>
+                                    <span>Loading Point:</span>
+                                    <span>Gomma Farmers Cooperative</span>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="load-tariff">
+                            <span class="meta-sub">Approved Tariff:</span>
+                            <span class="load-tariff-val">15,000 ETB</span>
+                        </div>
+                        <button type="button" class="btn btn-outline btn-block accept-load-btn">
+                            {{ icon('truck') }} <span class="btn-label">Accept Route Assignment</span>
+                        </button>
+                    </div>
+
+                    <!-- Load Card 3 -->
+                    <div class="load-card"
+                        data-route-from="Asella Union Depot"
+                        data-route-to="Hawassa Industrial Hub"
+                        data-cargo="Bread Wheat Grade 1"
+                        data-quantity="250"
+                        data-tonnage="250 Quintals (25 MT)"
+                        data-tariff="28,000 ETB">
+                        <div>
+                            <div class="load-card-head">
+                                <span class="badge badge-green">High Priority</span>
+                                <span class="code-ref">~280 km</span>
+                            </div>
+                            <h3 class="load-route-title" style="margin-top:.75rem;">
+                                Asella Union Depot {{ icon('arrow-right') }} Hawassa Industrial Hub
+                            </h3>
+                            <ul class="load-specs-list">
+                                <li>
+                                    <span>Commodity:</span>
+                                    <strong>Bread Wheat Grade 1 (250 Qtl)</strong>
+                                </li>
+                                <li>
+                                    <span>Extension Agent:</span>
+                                    <span>Tolossa B. (+251 93...)</span>
+                                </li>
+                                <li>
+                                    <span>Loading Point:</span>
+                                    <span>Hitosa Silos Facility</span>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="load-tariff">
+                            <span class="meta-sub">Approved Tariff:</span>
+                            <span class="load-tariff-val">28,000 ETB</span>
+                        </div>
+                        <button type="button" class="btn btn-outline btn-block accept-load-btn">
+                            {{ icon('truck') }} <span class="btn-label">Accept Route Assignment</span>
+                        </button>
+                    </div>
+
+                    <!-- Load Card 4 -->
+                    <div class="load-card"
+                        data-route-from="Gondar Aggregation Hub"
+                        data-route-to="Metema Buffer Depot"
+                        data-cargo="Humera White Sesame"
+                        data-quantity="180"
+                        data-tonnage="180 Quintals (18 MT)"
+                        data-tariff="24,500 ETB">
+                        <div>
+                            <div class="load-card-head">
+                                <span class="badge badge-blue">Export Corridor</span>
+                                <span class="code-ref">~510 km</span>
+                            </div>
+                            <h3 class="load-route-title" style="margin-top:.75rem;">
+                                Gondar Aggregation Hub {{ icon('arrow-right') }} Metema Buffer Depot
+                            </h3>
+                            <ul class="load-specs-list">
+                                <li>
+                                    <span>Commodity:</span>
+                                    <strong>Humera White Sesame (180 Qtl)</strong>
+                                </li>
+                                <li>
+                                    <span>Extension Agent:</span>
+                                    <span>Getachew A. (+251 94...)</span>
+                                </li>
+                                <li>
+                                    <span>Loading Point:</span>
+                                    <span>North Gondar Union Silos</span>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="load-tariff">
+                            <span class="meta-sub">Approved Tariff:</span>
+                            <span class="load-tariff-val">24,500 ETB</span>
+                        </div>
+                        <button type="button" class="btn btn-outline btn-block accept-load-btn">
+                            {{ icon('truck') }} <span class="btn-label">Accept Route Assignment</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
         </section>
-<!-- Section 4: Completed Distribution & Settled Waybills -->
+
+        <!-- Section 3: Vehicle Fleet Management -->
+        <section id="fleet" class="dash-card">
+            <div class="dash-card-header">
+                <div>
+                    <h2>{{ icon('truck') }} Registered Vehicle Fleet</h2>
+                    <p>Commercial trucks registered for official grain and harvest distribution.</p>
+                </div>
+                <button type="button" class="btn btn-primary btn-sm" data-open-modal="vehicle-modal">
+                    {{ icon('truck') }} Register New Vehicle
+                </button>
+            </div>
+
+            <div class="dash-card-body">
+                <div class="fleet-grid" id="fleet-grid">
+                    <div class="vehicle-card" data-plate="ET-3-4521" data-type="Isuzu FSR Medium Truck" data-capacity="120" data-driver="Tariku F." data-status="on-route">
+                        <div class="vehicle-head">
+                            <span class="vehicle-plate">ET-3-4521</span>
+                            <span class="badge badge-amber">
+                                <span class="badge-dot"></span> On Route (Humera)
+                            </span>
+                        </div>
+                        <div class="vehicle-meta">
+                            <div><strong>Isuzu FSR Medium Truck</strong> &bull; 120 Qtl Capacity</div>
+                            <div>Driver: Tariku F. &bull; Tel: +251 911 234 567</div>
+                        </div>
+                    </div>
+
+                    <div class="vehicle-card" data-plate="ET-3-8891" data-type="Sino Truck Heavy Cargo" data-capacity="350" data-driver="Bekele T." data-status="available">
+                        <div class="vehicle-head">
+                            <span class="vehicle-plate">ET-3-8891</span>
+                            <span class="badge badge-green">
+                                <span class="badge-dot"></span> Available at Hub
+                            </span>
+                        </div>
+                        <div class="vehicle-meta">
+                            <div><strong>Sino Truck Heavy Cargo</strong> &bull; 350 Qtl Capacity</div>
+                            <div>Driver: Bekele T. &bull; Tel: +251 912 345 678</div>
+                        </div>
+                    </div>
+
+                    <div class="vehicle-card" data-plate="ET-3-2019" data-type="Mitsubishi Fuso Truck" data-capacity="180" data-driver="Henok G." data-status="available">
+                        <div class="vehicle-head">
+                            <span class="vehicle-plate">ET-3-2019</span>
+                            <span class="badge badge-green">
+                                <span class="badge-dot"></span> Available at Hub
+                            </span>
+                        </div>
+                        <div class="vehicle-meta">
+                            <div><strong>Mitsubishi Fuso Truck</strong> &bull; 180 Qtl Capacity</div>
+                            <div>Driver: Henok G. &bull; Tel: +251 913 456 789</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: Completed Distribution & Settled Waybills -->
         <section id="completed-trips" class="dash-card">
             <div class="dash-card-header">
                 <div>
                     <h2>{{ icon('clipboard-check') }} Completed Distribution &amp; Settled Waybills</h2>
-                    <p>Delivery records for shipments assigned to your transporter account.</p>
+                    <p>Audit trail of verified deliveries, offloading certificates, and settled transporter tariffs.</p>
                 </div>
-                <span class="meta-sub">AgriBridge shipment history</span>
+                <span class="meta-sub">Official Ethiopian Waybill Ledger</span>
             </div>
 
             <div class="table-responsive">
@@ -157,13 +462,69 @@
                             <th>Waybill ID</th>
                             <th>Route Details</th>
                             <th class="text-right">Tonnage</th>
-                            <th class="text-right">Tariff (ETB)</th>
+                            <th class="text-right">Tariff Paid</th>
                             <th>Completed Date</th>
                             <th class="text-center">Status</th>
                             <th class="text-right">Documentation</th>
                         </tr>
                     </thead>
-                    <tbody id="completed-history-tbody"><tr><td colspan="7">Loading live records...</td></tr></tbody>
+                    <tbody id="completed-history-tbody">
+                        <tr>
+                            <td class="code-ref">#WB-9011</td>
+                            <td>
+                                <div class="route-inline">Gojjam Union Depot {{ icon('arrow-right') }} Addis Central Warehouse</div>
+                                <div class="meta-sub">Wheat (Bulk Reserve) &bull; Sino Truck Heavy</div>
+                            </td>
+                            <td class="text-right" style="font-weight:700;">200 Qtl</td>
+                            <td class="text-right" style="font-weight:800; color:var(--brand);">26,000 ETB</td>
+                            <td class="meta-sub">Oct 24, 2026</td>
+                            <td class="text-center">
+                                <span class="badge badge-green">
+                                    <span class="badge-dot"></span> Verified &amp; Settled
+                                </span>
+                            </td>
+                            <td class="text-right">
+                                <button type="button" class="action-link view-waybill-btn"
+                                    data-waybill="#WB-9011"
+                                    data-route="Gojjam Union Depot ➔ Addis Central Warehouse"
+                                    data-cargo="Wheat (Bulk Reserve)"
+                                    data-tonnage="200 Quintals (20 MT)"
+                                    data-tariff="26,000 ETB"
+                                    data-vehicle="Sino Truck Heavy (ET-3-8891)"
+                                    data-driver="Bekele T.">
+                                    Digital Waybill
+                                </button>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="code-ref">#WB-8984</td>
+                            <td>
+                                <div class="route-inline">Adama Hub {{ icon('arrow-right') }} Dire Dawa Strategic Depot</div>
+                                <div class="meta-sub">White Teff &bull; Mitsubishi Fuso</div>
+                            </td>
+                            <td class="text-right" style="font-weight:700;">150 Qtl</td>
+                            <td class="text-right" style="font-weight:800; color:var(--brand);">21,500 ETB</td>
+                            <td class="meta-sub">Oct 19, 2026</td>
+                            <td class="text-center">
+                                <span class="badge badge-green">
+                                    <span class="badge-dot"></span> Verified &amp; Settled
+                                </span>
+                            </td>
+                            <td class="text-right">
+                                <button type="button" class="action-link view-waybill-btn"
+                                    data-waybill="#WB-8984"
+                                    data-route="Adama Hub ➔ Dire Dawa Strategic Depot"
+                                    data-cargo="White Teff (Standard)"
+                                    data-tonnage="150 Quintals (15 MT)"
+                                    data-tariff="21,500 ETB"
+                                    data-vehicle="Mitsubishi Fuso (ET-3-2019)"
+                                    data-driver="Henok G.">
+                                    Digital Waybill
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
                 </table>
             </div>
         </section>
@@ -181,7 +542,7 @@
             <form id="vehicle-form">
                 <div class="modal-body">
                     <p style="font-size:.875rem; color:var(--muted); margin:0;">
-                        Add a transport vehicle to your carrier fleet (Maximum quota: 5 vehicles). Newly registered vehicles must undergo administrative roadworthiness approval before dispatch.
+                        Add a transport vehicle to your carrier profile to claim bulk consignments from rural hubs.
                     </p>
 
                     <div class="input-field">
@@ -189,7 +550,7 @@
                         <input type="text" id="vehicle-plate" name="plate_number" placeholder="e.g. ET-3-9942" required>
                     </div>
 
-                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+                    <div class="form-grid">
                         <div class="input-field">
                             <label for="vehicle-type">Vehicle Model / Type</label>
                             <select id="vehicle-type" name="vehicle_type">
@@ -201,11 +562,11 @@
                         </div>
                         <div class="input-field">
                             <label for="vehicle-capacity">Capacity (Quintals)</label>
-                            <input type="number" id="vehicle-capacity" name="capacity_quintals" placeholder="e.g. 150" min="1" required>
+                            <input type="number" id="vehicle-capacity" name="capacity_quintals" placeholder="e.g. 150" value="150" min="1" step="any" required>
                         </div>
                     </div>
 
-                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+                    <div class="form-grid">
                         <div class="input-field">
                             <label for="vehicle-driver">Assigned Driver Name</label>
                             <input type="text" id="vehicle-driver" name="driver_name" placeholder="e.g. Girma Tesfaye" required>
@@ -220,7 +581,7 @@
                 <div class="modal-foot">
                     <button type="button" class="btn btn-ghost" data-close-modal="vehicle-modal">Cancel</button>
                     <button type="submit" class="btn btn-primary">
-                        {{ icon('truck') }} Register Vehicle
+                        {{ icon('truck') }} <span class="btn-label">Register Vehicle</span>
                     </button>
                 </div>
             </form>
@@ -236,34 +597,34 @@
             </div>
 
             <div class="modal-body" style="background:#fff;">
-                <div style="display:flex; justify-content:space-between; align-items:flex-start; border-bottom:1px solid var(--line); padding-bottom:1rem;">
+                <div class="waybill-header">
                     <div>
                         <div class="brand" style="font-size:1.2rem;">
                             {% include 'partials/logo.html' %}
                             AgriBridge
                         </div>
-                        <div class="meta-sub">AgriBridge shipment record</div>
+                        <div class="meta-sub">Ministry of Agriculture &bull; Inter-Regional Waybill Certificate</div>
                     </div>
-                    <div style="text-align:right;">
-                        <div class="code-ref" id="wb-modal-ref"></div>
-                        <div class="meta-sub">Trip reference</div>
+                    <div class="waybill-meta">
+                        <div class="code-ref" id="wb-modal-ref">#WB-9042</div>
+                        <div class="meta-sub">Official Gate Pass Authorized</div>
                     </div>
                 </div>
 
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; font-size:.875rem;">
+                <div class="waybill-grid">
                     <div>
                         <span class="meta-sub">Carrier Account:</span>
                         <div style="font-weight:700; color:var(--deep);">{{ username or 'Licensed Transporter' }}</div>
-                        <div class="meta-sub" id="wb-modal-vehicle"></div>
+                        <div class="meta-sub" id="wb-modal-vehicle">Isuzu FSR (ET-3-4521)</div>
                     </div>
                     <div>
                         <span class="meta-sub">Designated Driver:</span>
-                        <div style="font-weight:700; color:var(--deep);" id="wb-modal-driver"></div>
-                        <div class="meta-sub">Assigned transporter</div>
+                        <div style="font-weight:700; color:var(--deep);" id="wb-modal-driver">Tariku F.</div>
+                        <div class="meta-sub">Commercial License Verified</div>
                     </div>
                 </div>
 
-                <div style="border:1px solid var(--line); border-radius:8px; overflow:hidden;">
+                <div class="waybill-table-wrap">
                     <table class="dash-table">
                         <thead>
                             <tr>
@@ -275,17 +636,17 @@
                         </thead>
                         <tbody>
                             <tr>
-                                <td style="font-weight:700;" id="wb-modal-route"></td>
-                                <td id="wb-modal-cargo"></td>
-                                <td class="text-right" id="wb-modal-tonnage"></td>
-                                <td class="text-right" style="font-weight:800; color:var(--brand);" id="wb-modal-tariff"></td>
+                                <td style="font-weight:700;" id="wb-modal-route">Humera Hub ➔ Addis Central</td>
+                                <td id="wb-modal-cargo">Sesame - Export Quality</td>
+                                <td class="text-right" id="wb-modal-tonnage">120 Qtl</td>
+                                <td class="text-right" style="font-weight:800; color:var(--brand);" id="wb-modal-tariff">22,000 ETB</td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
 
                 <div class="meta-sub" style="text-align:center;">
-                    AgriBridge shipment record for the assigned load.
+                    Official electronic waybill generated under the Federal Agricultural Transport Authority. Valid across regional checkpoints.
                 </div>
             </div>
 
@@ -313,7 +674,7 @@
             </div>
             <ul class="footer-contact">
                 <li><a href="/logout">Switch Account</a></li>
-                <li><a href="#available-loads">Loads &amp; Active Trip</a></li>
+                <li><a href="#active-route">Active Trip</a></li>
                 <li><a href="#available-loads">Available Loads</a></li>
                 <li><a href="mailto:logistics@agribridge.et">logistics@agribridge.et</a></li>
             </ul>

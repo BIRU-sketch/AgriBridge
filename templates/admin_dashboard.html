@@ -16,7 +16,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+Ethiopic:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/admin_dashboard.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard-shell.css') }}">
 </head>
 <body class="admin-body">
     {% include 'partials/icons.html' %}
@@ -33,11 +32,10 @@
             </div>
 
             <nav class="dash-nav" aria-label="Admin navigation">
-                <button type="button" data-admin-view="staff">{{ icon('users') }}<span>Create Staff Account</span></button>
-                <button type="button" data-admin-view="crop-prices">{{ icon('banknote') }}<span>Crop Fixed Prices</span></button>
-                <button type="button" data-admin-view="verification">{{ icon('shield-check') }}<span>User Verification Queue</span></button>
-                <button type="button" data-admin-view="vehicles" aria-current="page">{{ icon('truck') }}<span>Vehicle Registration Approval</span><span class="nav-queue-count" id="nav-pending-vehicles-count" hidden>0</span></button>
-                <button type="button" data-admin-view="delivery-issues">{{ icon('shield-check') }}<span>Delivery Issues</span></button>
+                <a href="#verification" aria-current="true">User Verification</a>
+                <a href="#kpis">Platform KPIs</a>
+                <a href="#audit">Audit History</a>
+                <a href="#oracle">Price Oracle</a>
             </nav>
 
             <div class="header-user">
@@ -51,7 +49,7 @@
                     </div>
                 </div>
                 <a href="/logout" class="btn btn-ghost btn-sm" title="Log out of terminal">
-                    {{ icon('arrow-right') }} Log out
+                    {{ icon('arrow-right') }} <span class="logout-label">Log out</span>
                 </a>
             </div>
         </div>
@@ -64,33 +62,33 @@
         <section class="welcome-card" aria-label="Admin summary">
             <div class="welcome-copy">
                 <div class="welcome-pill">
-                    {{ icon('shield-check') }} Platform Administration
+                    {{ icon('shield-check') }} Federal Oversight Authority
                 </div>
                 <h1>Administrator Command Center</h1>
                 <p>
-                    Review account registrations and approve transporter vehicles.
+                    Verify market participants, inspect grain reserves across regional collection hubs, and maintain price oracle guardrails across Ethiopia.
                 </p>
             </div>
             <div class="welcome-actions">
-                <button type="button" class="btn btn-primary btn-lg" data-admin-view-target="staff">
-                    {{ icon('users') }} Create Staff Account
-                </button>
-                <button type="button" class="btn btn-outline btn-lg" data-admin-view-target="vehicles">
-                    {{ icon('truck') }} Review Vehicle Registration
-                </button>
+                <a href="#verification" class="btn btn-primary btn-lg">
+                    {{ icon('shield-check') }} Review Pending Users
+                </a>
+                <a href="#audit" class="btn btn-outline btn-lg">
+                    {{ icon('clipboard-check') }} Live Audit Log
+                </a>
             </div>
         </section>
 
         <!-- KPI Metrics Grid -->
-        <section class="metrics-grid" aria-label="Key metrics">
+        <section class="metrics-grid" id="kpis" aria-label="Platform key performance indicators" tabindex="-1">
             <div class="metric-card">
                 <div class="metric-ic metric-ic-purple">
                     {{ icon('users') }}
                 </div>
                 <div class="metric-content">
                     <span class="metric-label">Total Users</span>
-                    <span class="metric-val" id="metric-total-users">0</span>
-                    <span class="metric-sub">Buyers &amp; transporters</span>
+                    <span class="metric-val">128</span>
+                    <span class="metric-sub">Agents, buyers &amp; fleets</span>
                 </div>
             </div>
 
@@ -100,7 +98,7 @@
                 </div>
                 <div class="metric-content">
                     <span class="metric-label">Pending Verification</span>
-                    <span class="metric-val" id="metric-pending-count">0</span>
+                    <span class="metric-val" id="metric-pending-count">{{ pending_count }}</span>
                     <span class="metric-sub">Awaiting credential check</span>
                 </div>
             </div>
@@ -110,9 +108,9 @@
                     {{ icon('package') }}
                 </div>
                 <div class="metric-content">
-                    <span class="metric-label">Available Hub Stock</span>
-                    <span class="metric-val" id="metric-buffer-stock">0 <small style="font-size:.9rem;font-weight:600;">Qtl</small></span>
-                    <span class="metric-sub">Positive-quantity lots currently in hub silos</span>
+                    <span class="metric-label">Hub Buffer Stock</span>
+                    <span class="metric-val">24,500 <small style="font-size:.9rem;font-weight:600;">Qtl</small></span>
+                    <span class="metric-sub">Across 6 regional hubs</span>
                 </div>
             </div>
 
@@ -121,91 +119,26 @@
                     {{ icon('banknote') }}
                 </div>
                 <div class="metric-content">
-                    <span class="metric-label">Total Order Value</span>
-                    <span class="metric-val" id="metric-trade-settled">0 <small style="font-size:.9rem;font-weight:600;">ETB</small></span>
-                    <span class="metric-sub">Recorded buyer order value</span>
+                    <span class="metric-label">Total Trade Settled</span>
+                    <span class="metric-val">84.5M <small style="font-size:.9rem;font-weight:600;">ETB</small></span>
+                    <span class="metric-sub">100% escrow guaranteed</span>
                 </div>
             </div>
 
-        </section>
-
-        <!-- Staff account creation view -->
-        <section id="staff-account" class="dash-card admin-view" data-admin-panel="staff" hidden>
-            <div class="dash-card-header">
-                <div>
-                    <h2>{{ icon('users') }} Create Staff Account</h2>
-                    <p>Create a database-backed account for an agent or transporter.</p>
+            <div class="metric-card">
+                <div class="metric-ic">
+                    {{ icon('shield-check') }}
                 </div>
-                <span class="meta-sub">Staff sign in at /staff/login</span>
-            </div>
-            <form id="staff-account-form">
-                <div class="dash-card-body">
-                    <div class="staff-account-grid">
-                        <div class="search-field">
-                            <label for="staff-role">Staff role</label>
-                            <select id="staff-role" name="role" required>
-                                <option value="agent">Agent</option>
-                                <option value="transporter">Transporter</option>
-                            </select>
-                        </div>
-                        <div class="search-field" id="staff-hub-field">
-                            <label for="staff-hub">Agent hub assignment</label>
-                            <select id="staff-hub" name="hub_location" required>
-                                <option value="" disabled selected>Select the hub this agent will oversee</option>
-                                {% for hub in hubs %}<option value="{{ hub }}">{{ hub }}</option>{% endfor %}
-                            </select>
-                        </div>
-                        <div class="search-field">
-                            <label for="staff-name">Full name</label>
-                            <input type="text" id="staff-name" name="full_name" placeholder="e.g. Tariku Fikadu" required>
-                        </div>
-                        <div class="search-field">
-                            <label for="staff-username">Staff login name</label>
-                            <input type="text" id="staff-username" name="username" autocomplete="off" required>
-                        </div>
-                        <div class="search-field">
-                            <label for="staff-company">Cooperative / company (optional)</label>
-                            <input type="text" id="staff-company" name="company_name">
-                        </div>
-                        <div class="search-field">
-                            <label for="staff-password">Temporary password</label>
-                            <input type="password" id="staff-password" name="password" autocomplete="new-password" minlength="8" required>
-                        </div>
-                        <div class="search-field">
-                            <label for="staff-license">License / registration reference (optional)</label>
-                            <input type="text" id="staff-license" name="license_ref">
-                        </div>
-                    </div>
-                    <div class="staff-form-actions">
-                        <p>Passwords are stored as hashes. Give the staff member their login name and temporary password securely.</p>
-                        <button type="submit" class="btn btn-primary">{{ icon('users') }} Create Account</button>
-                    </div>
+                <div class="metric-content">
+                    <span class="metric-label">System Health</span>
+                    <span class="metric-val">100%</span>
+                    <span class="metric-sub">0 Active Alerts</span>
                 </div>
-            </form>
-            <div class="dash-card-header" style="margin-top:1.5rem;">
-                <div><h3>Agent Hub Assignments</h3><p>Assign existing agents to the hub whose inbound deliveries they review.</p></div>
-            </div>
-            <div class="table-responsive">
-                <table class="dash-table"><thead><tr><th>Agent</th><th>Login</th><th>Assigned Hub</th><th>Action</th></tr></thead>
-                    <tbody id="agent-hub-assignments-tbody"><tr><td colspan="4">Loading agents...</td></tr></tbody>
-                </table>
             </div>
         </section>
 
-        <section id="crop-prices" class="dash-card admin-view" data-admin-panel="crop-prices" hidden>
-            <div class="dash-card-header"><div><h2>{{ icon('banknote') }} Fixed Crop Prices</h2><p>Set one buyer price per quintal for each crop. Agents cannot override these rates on produce lots.</p></div></div>
-            <form id="crop-price-form" class="dash-card-body" style="display:flex;gap:1rem;align-items:end;flex-wrap:wrap;">
-                <div class="search-field"><label for="price-crop-name">Crop name</label><input id="price-crop-name" maxlength="100" required></div>
-                <div class="search-field"><label for="fixed-price-qtl">Fixed price (ETB / Qtl)</label><input id="fixed-price-qtl" type="number" min="0.01" step="0.01" required></div>
-                <button type="submit" class="btn btn-primary">Save crop price</button>
-            </form>
-            <div class="table-responsive"><table class="dash-table"><thead><tr><th>Crop</th><th>Fixed price / Qtl</th><th>Status</th><th>Actions</th></tr></thead>
-                <tbody id="crop-prices-tbody"><tr><td colspan="4">Loading crop prices...</td></tr></tbody>
-            </table></div>
-        </section>
-
-        <!-- User Verification Queue view -->
-        <section id="verification" class="dash-card admin-view" data-admin-panel="verification" hidden>
+        <!-- Section 1: User Verification Queue -->
+        <section id="verification" class="dash-card">
             <div class="dash-card-header">
                 <div>
                     <h2>{{ icon('shield-check') }} User Verification Queue</h2>
@@ -227,47 +160,204 @@
                             <th class="text-right">Admin Action</th>
                         </tr>
                     </thead>
-                    <tbody id="verification-tbody"><tr><td colspan="7">Loading live records...</td></tr></tbody>
+                    <tbody id="verification-tbody">
+                        {% for record in verification_records %}
+                        <tr data-status="{{ record.status }}" data-user="{{ record.id }}" data-role="{{ record.role }}">
+                            <td class="code-ref">{{ record.id }}</td>
+                            <td>
+                                <div style="font-weight:700; color:var(--deep);">{{ record.name }}</div>
+                                <div class="meta-sub">{{ record.contact }}</div>
+                            </td>
+                            <td>
+                                <span class="badge {{ record.role_badge }}">{{ record.role_label }}</span>
+                            </td>
+                            <td class="code-ref">{{ record.license }}</td>
+                            <td class="meta-sub">{{ record.registered }}</td>
+                            <td class="text-center status-col">
+                                {% if record.status == 'verified' %}
+                                <span class="badge badge-green">
+                                    <span class="badge-dot"></span> Verified
+                                </span>
+                                {% elif record.status == 'suspended' %}
+                                <span class="badge badge-red">Suspended</span>
+                                {% else %}
+                                <span class="badge badge-amber">
+                                    <span class="badge-dot"></span> Pending Review
+                                </span>
+                                {% endif %}
+                            </td>
+                            <td class="text-right action-col" style="white-space:nowrap;">
+                                {% if record.status == 'pending' %}
+                                <button type="button" class="btn btn-primary btn-sm verify-user-btn"
+                                    data-user="{{ record.id }}"
+                                    data-role="{{ record.role }}"
+                                    data-action="verify">
+                                    Approve
+                                </button>
+                                <button type="button" class="btn btn-ghost btn-sm verify-user-btn"
+                                    data-user="{{ record.id }}"
+                                    data-role="{{ record.role }}"
+                                    data-action="reject">
+                                    Reject
+                                </button>
+                                {% elif record.status == 'verified' %}
+                                <button type="button" class="btn btn-ghost btn-sm verify-user-btn"
+                                    data-user="{{ record.id }}"
+                                    data-role="{{ record.role }}"
+                                    data-action="reject"
+                                    title="Suspend this verified account">
+                                    Revoke
+                                </button>
+                                {% else %}
+                                <button type="button" class="btn btn-primary btn-sm verify-user-btn"
+                                    data-user="{{ record.id }}"
+                                    data-role="{{ record.role }}"
+                                    data-action="verify"
+                                    title="Restore verification for this account">
+                                    Reinstate
+                                </button>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
                 </table>
             </div>
         </section>
 
-        <!-- Section 2: Fleet Vehicle Inspection Queue -->
-        <section id="vehicles" class="dash-card admin-view" data-admin-panel="vehicles">
+        <!-- Section 2: Platform Live Activity & Audit Stream -->
+        <section id="audit" class="dash-card">
             <div class="dash-card-header">
                 <div>
-                    <h2>{{ icon('truck') }} Vehicle Registration Approval Queue</h2>
-                    <p>Inspect newly registered commercial vehicles and authorize them for regional hub cargo distribution.</p>
+                    <h2>{{ icon('clipboard-check') }} Platform Audit Trail &amp; Transaction Ledger</h2>
+                    <p>Tamper-evident system activity log recording all smallholder registrations, lot entries, and fulfilled trades.</p>
                 </div>
-                <span class="badge badge-amber" id="pending-vehicles-badge">Inspection Required</span>
+                <button type="button" id="export-audit-btn" class="btn btn-outline btn-sm">
+                    Export Audit CSV
+                </button>
             </div>
 
             <div class="table-responsive">
-                <table class="dash-table">
+                <table class="dash-table" id="audit-table">
                     <thead>
                         <tr>
-                            <th>Plate Number</th>
-                            <th>Vehicle Model</th>
-                            <th class="text-right">Payload Capacity</th>
-                            <th>Assigned Driver</th>
-                            <th>Driver Contact</th>
-                            <th class="text-center">Inspection Status</th>
-                            <th class="text-right">Roadworthiness Action</th>
+                            <th>Timestamp</th>
+                            <th>Action Executed</th>
+                            <th>Initiating Actor</th>
+                            <th>Associated Entity</th>
+                            <th>Hub Location</th>
+                            <th class="text-center">Integrity Status</th>
                         </tr>
                     </thead>
-                    <tbody id="vehicle-inspection-tbody"><tr><td colspan="7">Loading live records...</td></tr></tbody>
+                    <tbody>
+                        <tr>
+                            <td class="meta-sub">Today &bull; 14:32</td>
+                            <td>
+                                <strong style="color:var(--deep);">Produce Purchase Reservation</strong>
+                                <div class="meta-sub">50 Qtl White Teff reserved from Hub Silos</div>
+                            </td>
+                            <td>Abyssinia Flour Mills PLC (Buyer)</td>
+                            <td class="code-ref">Order #TRD-88201</td>
+                            <td>Bishoftu Hub</td>
+                            <td class="text-center">
+                                <span class="badge badge-green">
+                                    <span class="badge-dot"></span> Escrow Locked
+                                </span>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="meta-sub">Today &bull; 11:15</td>
+                            <td>
+                                <strong style="color:var(--deep);">Waybill Checkpoint Clearance</strong>
+                                <div class="meta-sub">Consignment WB-9042 verified at Regional Gate</div>
+                            </td>
+                            <td>Tariku Freight (Transporter)</td>
+                            <td class="code-ref">Waybill #WB-9042</td>
+                            <td>Humera ➔ Addis Corridor</td>
+                            <td class="text-center">
+                                <span class="badge badge-green">
+                                    <span class="badge-dot"></span> Gate Pass Signed
+                                </span>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="meta-sub">Today &bull; 09:40</td>
+                            <td>
+                                <strong style="color:var(--deep);">Produce Lot Registered</strong>
+                                <div class="meta-sub">120 Qtl Magna Teff inspected and graded</div>
+                            </td>
+                            <td>Dawit Kassa (Agent)</td>
+                            <td class="code-ref">Farmer KBL-88204-BS</td>
+                            <td>Ada'a Collection Depot</td>
+                            <td class="text-center">
+                                <span class="badge badge-green">
+                                    <span class="badge-dot"></span> Certified
+                                </span>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="meta-sub">Yesterday &bull; 16:50</td>
+                            <td>
+                                <strong style="color:var(--deep);">Farmer Payout Disbursed</strong>
+                                <div class="meta-sub">Direct bank transfer for Lot #LOT-WH-4410</div>
+                            </td>
+                            <td>AgriBridge Automated Settlement</td>
+                            <td class="code-ref">Account: CBE 1000293849201</td>
+                            <td>Asella Hub</td>
+                            <td class="text-center">
+                                <span class="badge badge-green">
+                                    <span class="badge-dot"></span> Settled 100%
+                                </span>
+                            </td>
+                        </tr>
+                    </tbody>
                 </table>
             </div>
         </section>
 
-        <section id="delivery-issues" class="dash-card admin-view" data-admin-panel="delivery-issues" hidden>
-            <div class="dash-card-header"><div><h2>{{ icon('shield-check') }} Reported Hub Delivery Issues</h2><p>Review destination-hub agent reports and choose whether to complete, retry, or cancel a transfer.</p></div></div>
-            <div class="table-responsive"><table class="dash-table"><thead><tr><th>Waybill / Route</th><th>Reported By</th><th>Produce</th><th>Quantity</th><th>Reported Problem</th><th>Reported At</th><th>Admin Resolution</th></tr></thead>
-                <tbody id="delivery-issues-tbody"><tr><td colspan="7">Loading reported issues...</td></tr></tbody>
-            </table></div>
+        <!-- Section 3: National Commodity Price Oracle -->
+        <section id="oracle" class="dash-card">
+            <div class="dash-card-header">
+                <div>
+                    <h2>{{ icon('activity') }} National Commodity Price Oracle Settings</h2>
+                    <p>Price collar safeguards preventing price gouging and guaranteeing minimum farm-gate floors.</p>
+                </div>
+                <span class="badge badge-green">Oracle Active &bull; Low Volatility</span>
+            </div>
+
+            <div class="dash-card-body">
+                <div class="oracle-grid">
+                    <div style="background:var(--mint); border:1px solid var(--line); border-radius:12px; padding:1.25rem;">
+                        <span class="meta-sub">White Teff Magna</span>
+                        <div style="font-size:1.35rem; font-weight:800; color:var(--deep); margin-top:.25rem;">11,500 ETB / Qtl</div>
+                        <div class="meta-sub" style="margin-top:.4rem;">Floor: 10,800 &bull; Ceiling: 12,500 ETB</div>
+                    </div>
+
+                    <div style="background:var(--mint); border:1px solid var(--line); border-radius:12px; padding:1.25rem;">
+                        <span class="meta-sub">Bread Wheat (Grade 1)</span>
+                        <div style="font-size:1.35rem; font-weight:800; color:var(--deep); margin-top:.25rem;">5,200 ETB / Qtl</div>
+                        <div class="meta-sub" style="margin-top:.4rem;">Floor: 4,900 &bull; Ceiling: 5,600 ETB</div>
+                    </div>
+
+                    <div style="background:var(--mint); border:1px solid var(--line); border-radius:12px; padding:1.25rem;">
+                        <span class="meta-sub">Yellow Maize</span>
+                        <div style="font-size:1.35rem; font-weight:800; color:var(--deep); margin-top:.25rem;">3,750 ETB / Qtl</div>
+                        <div class="meta-sub" style="margin-top:.4rem;">Floor: 3,500 &bull; Ceiling: 4,100 ETB</div>
+                    </div>
+
+                    <div style="background:var(--mint); border:1px solid var(--line); border-radius:12px; padding:1.25rem;">
+                        <span class="meta-sub">Humera Sesame</span>
+                        <div style="font-size:1.35rem; font-weight:800; color:var(--deep); margin-top:.25rem;">16,800 ETB / Qtl</div>
+                        <div class="meta-sub" style="margin-top:.4rem;">Floor: 15,500 &bull; Ceiling: 18,200 ETB</div>
+                    </div>
+                </div>
+            </div>
         </section>
 
-        </main>
+    </main>
 
     <!-- Toast Notification -->
     <div id="toast-msg" class="toast-msg" role="status" aria-live="polite"></div>
@@ -284,11 +374,14 @@
             </div>
             <ul class="footer-contact">
                 <li><a href="/logout">Log out</a></li>
-                <li><button type="button" data-admin-view-target="verification">User Vetting</button></li>
+                <li><a href="#verification">User Vetting</a></li>
+                <li><a href="#audit">Audit Stream</a></li>
+                <li><a href="mailto:admin@agribridge.et">admin@agribridge.et</a></li>
             </ul>
         </div>
         <div class="wrap footer-base">
-            <div>&copy; 2026 AgriBridge Ethiopia. Platform Administration.</div>
+            <div>&copy; 2026 AgriBridge Ethiopia. Platform Administration &amp; National Audit Center.</div>
+            <div>Federal Ministry of Agriculture &bull; System Compliance Node</div>
         </div>
     </footer>
 

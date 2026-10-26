@@ -116,6 +116,12 @@ h1, h2, h3 {
     stroke-linejoin: round;
 }
 
+/* KPI icon accents shared by all role dashboards */
+.metric-ic.metric-ic-green { background: #DCFCE7; color: #15803D; }
+.metric-ic.metric-ic-amber { background: #FEF3C7; color: #B45309; }
+.metric-ic.metric-ic-blue  { background: #E0F2FE; color: #0369A1; }
+.metric-ic.metric-ic-purple { background: #EDE9FE; color: #6D28D9; }
+
 /* Brand */
 .brand {
     display: inline-flex;
