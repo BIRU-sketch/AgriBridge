@@ -107,7 +107,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!statusBadge || !toggleStatusBtn) return;
         try {
             const res = await fetch('/api/transporter/status');
-            const data = await res.json();
+            let data = {};
+            try { data = await res.json(); } catch (e) { data = {}; }
             if (!res.ok) return;
 
             const status = data.status || 'free';
@@ -154,8 +155,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ status: targetStatus })
                 });
-                const data = await res.json();
-                if (!res.ok) throw new Error(data.error || 'Failed to update availability status.');
+                let data = {};
+                try { data = await res.json(); } catch (e) { data = {}; }
+                if (!res.ok) throw new Error(data.error || `Server error (${res.status})`);
 
                 showToast(data.message || `Status set to ${targetStatus}`);
                 await loadTransporterStatus();
