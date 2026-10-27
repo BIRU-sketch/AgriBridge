@@ -225,6 +225,12 @@ body.admin-body {
     align-items: flex-start;
     gap: 1.1rem;
     box-shadow: 0 1px 2px rgba(10, 61, 49, 0.04);
+    transition: transform .18s ease, box-shadow .18s ease;
+}
+
+.metric-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px -6px rgba(10, 61, 49, 0.1);
 }
 
 .metric-ic {
@@ -390,6 +396,20 @@ body.admin-body {
     color: #6D28D9;
     border: 1px solid #DDD6FE;
 }
+
+.badge-blue {
+    background: #E0F2FE;
+    color: #0369A1;
+    border: 1px solid #BAE6FD;
+}
+.badge-blue .badge-dot { background: #0284C7; }
+
+.badge-red {
+    background: #FEE2E2;
+    color: #991B1B;
+    border: 1px solid #FECACA;
+}
+.badge-red .badge-dot { background: #DC2626; }
 
 .code-ref {
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
