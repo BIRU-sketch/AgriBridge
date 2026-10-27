@@ -767,13 +767,22 @@ def purchase_marketplace_stock():
         if not isinstance(result, dict) or not result.get("order") or not result.get("shipment"):
             raise RuntimeError("The database returned an incomplete purchase result.")
 
+        assigned = result.get("transporter_assigned", False)
+        if assigned:
+            message = f"Purchase request confirmed! Stock reserved and assigned to carrier {result.get('transporter_name')} (Plate: {result.get('vehicle_plate')})."
+        else:
+            message = "Purchase request confirmed! Stock reserved. All transporters are currently busy; consignment is queued and reported to admin."
+
         return jsonify({
-            "message": "Purchase request confirmed! Stock reserved and transport consignment generated.",
+            "message": message,
             "crop_name": crop_name,
             "quantity_purchased": requested_quantity,
             "remaining_stock": result["remaining_stock"],
             "order": result["order"],
-            "shipment": result["shipment"]
+            "shipment": result["shipment"],
+            "transporter_assigned": assigned,
+            "transporter_name": result.get("transporter_name"),
+            "vehicle_plate": result.get("vehicle_plate")
         }), 200
     except Exception as e:
         if "INSUFFICIENT_STOCK" in str(e):
@@ -801,7 +810,9 @@ def api_get_buyer_orders():
 def api_get_transporter_fleet():
     user = current_user()
     vehicles = supabase.table('vehicles').select('*').eq('transporter_id', user.id).order('created_at', desc=True).execute().data or []
-    return jsonify({"vehicles": vehicles}), 200
+    staff = get_current_staff_account() or {}
+    availability_status = staff.get('availability_status', 'free')
+    return jsonify({"vehicles": vehicles, "availability_status": availability_status}), 200
 
 
 @app.route("/api/vehicle", methods=['POST'])
@@ -829,6 +840,12 @@ def api_add_vehicle():
         return jsonify({"error": "Vehicle type, positive capacity, driver name, and phone number are required."}), 400
 
     try:
+        existing = supabase.table('vehicles').select('id,plate_number').eq('transporter_id', user.id).limit(1).execute().data or []
+        if existing:
+            return jsonify({
+                "error": f"Transporters can only register 1 vehicle. You already have vehicle {existing[0].get('plate_number')} registered."
+            }), 409
+
         vehicle_data["status"] = "Pending Roadworthiness Approval"
         saved = supabase.table('vehicles').insert(vehicle_data).execute().data[0]
 
@@ -839,6 +856,11 @@ def api_add_vehicle():
     except ValueError as ve:
         return jsonify({"error": str(ve)}), 400
     except Exception as e:
+        err_msg = str(e).lower()
+        if "duplicate key" in err_msg or "unique" in err_msg:
+            if "plate_number" in err_msg or "idx_vehicles_plate_uniq" in err_msg:
+                return jsonify({"error": "A vehicle with this license plate number is already registered."}), 409
+            return jsonify({"error": "Transporters can only register 1 vehicle. You already have a vehicle registered."}), 409
         return jsonify({"error": str(e)}), 400
 
 
@@ -854,12 +876,74 @@ def api_get_available_loads():
 def api_get_active_shipment():
     user = current_user()
     try:
+        supabase.rpc("assign_pending_buyer_loads").execute()
         supabase.rpc("assign_hub_supply_duties").execute()
     except Exception:
-        app.logger.exception("Could not check queued hub replenishment duties")
+        app.logger.exception("Could not check queued duties")
     rows = supabase.table('shipments').select('*').eq('transporter_id', user.id).in_('status', ['Dispatched', 'Loaded & Weighed', 'In Transit', 'Awaiting Agent Approval', 'Delivery Issue - Admin Review']).order('created_at', desc=True).limit(1).execute().data or []
     shipment = rows[0] if rows else None
-    return jsonify({"shipment": shipment}), 200
+    staff = get_current_staff_account() or {}
+    availability_status = staff.get('availability_status')
+    if not availability_status:
+        t_row = supabase.table('transporters').select('availability_status').eq('auth_user_id', user.id).maybe_single().execute()
+        availability_status = (t_row.data or {}).get('availability_status') if t_row else None
+    availability_status = availability_status or 'free'
+    return jsonify({"shipment": shipment, "availability_status": availability_status}), 200
+
+
+@app.route("/api/transporter/status", methods=['GET'])
+@require_roles('transporter')
+def api_get_transporter_status():
+    user = current_user()
+    status = 'free'
+    staff = get_current_staff_account() or {}
+    if staff.get('availability_status'):
+        status = staff['availability_status']
+    else:
+        t_row = supabase.table('transporters').select('availability_status').eq('auth_user_id', user.id).maybe_single().execute()
+        if t_row and t_row.data and t_row.data.get('availability_status'):
+            status = t_row.data['availability_status']
+
+    active_rows = supabase.table('shipments').select('waybill_id,status').eq('transporter_id', user.id).in_('status', ['Dispatched', 'Loaded & Weighed', 'In Transit', 'Awaiting Agent Approval', 'Delivery Issue - Admin Review']).limit(1).execute().data or []
+    is_on_trip = len(active_rows) > 0
+    active_waybill = active_rows[0].get('waybill_id') if is_on_trip else None
+
+    return jsonify({
+        "status": status,
+        "is_on_trip": is_on_trip,
+        "active_waybill": active_waybill
+    }), 200
+
+
+@app.route("/api/transporter/status", methods=['POST'])
+@require_roles('transporter')
+def api_set_transporter_status():
+    user = current_user()
+    data = request.get_json() or {}
+    target_status = str(data.get("status") or "").strip().lower()
+    if target_status not in ('free', 'busy'):
+        return jsonify({"error": "Status must be either 'free' or 'busy'."}), 400
+
+    active_rows = supabase.table('shipments').select('waybill_id,status').eq('transporter_id', user.id).in_('status', ['Dispatched', 'Loaded & Weighed', 'In Transit', 'Awaiting Agent Approval', 'Delivery Issue - Admin Review']).limit(1).execute().data or []
+    if target_status == 'free' and active_rows:
+        return jsonify({
+            "error": f"Cannot set status to 'free' while trip #{active_rows[0].get('waybill_id')} is currently in progress."
+        }), 409
+
+    supabase.table('staff_accounts').update({'availability_status': target_status}).eq('id', user.id).execute()
+    supabase.table('transporters').update({'availability_status': target_status}).eq('auth_user_id', user.id).execute()
+
+    if target_status == 'free':
+        try:
+            supabase.rpc("assign_pending_buyer_loads").execute()
+            supabase.rpc("assign_hub_supply_duties").execute()
+        except Exception:
+            app.logger.exception("Could not run automated load assignments on status switch to free")
+
+    return jsonify({
+        "message": f"Transporter duty status updated to '{target_status}'.",
+        "status": target_status
+    }), 200
 
 
 @app.route("/api/transporter/completed-history", methods=['GET'])
@@ -941,14 +1025,17 @@ def api_update_shipment_status():
             updated["status"] = "Awaiting Agent Approval"
             return jsonify({"message": "Delivery recorded. Active agents assigned to the destination hub must approve this handover before the driver can depart.", "shipment": updated}), 200
         if stage_index == 4 and updated.get('vehicle_plate'):
-            supabase.table('vehicles').update({'status': 'Available at Depot'}).eq('transporter_id', user.id).eq('plate_number', updated['vehicle_plate']).execute()
+            supabase.table('vehicles').update({'status': 'Approved for Hub Dispatch'}).eq('transporter_id', user.id).eq('plate_number', updated['vehicle_plate']).execute()
+            supabase.table('staff_accounts').update({'availability_status': 'free'}).eq('id', user.id).execute()
+            supabase.table('transporters').update({'availability_status': 'free'}).eq('auth_user_id', user.id).execute()
         if updated.get('order_id'):
             supabase.table('orders').update({'status': status}).eq('id', updated['order_id']).execute()
         if stage_index == 4:
             try:
+                supabase.rpc("assign_pending_buyer_loads").execute()
                 supabase.rpc("assign_hub_supply_duties").execute()
             except Exception:
-                app.logger.exception("Could not assign queued hub replenishment duties after trip completion")
+                app.logger.exception("Could not assign queued duties after trip completion")
 
         return jsonify({
             "message": f"Waybill #{updated['waybill_id']} status updated to: {updated['status']}.",
@@ -1066,9 +1153,10 @@ def api_agent_transfer_approval():
             "p_reason": reason or None,
         }).execute()
         try:
+            supabase.rpc("assign_pending_buyer_loads").execute()
             supabase.rpc("assign_hub_supply_duties").execute()
         except Exception:
-            app.logger.exception("Could not assign the next queued hub replenishment duty")
+            app.logger.exception("Could not assign the next queued duty")
         return jsonify({"message": "Delivery approval recorded.", "result": result.data}), 200
     except Exception as exc:
         app.logger.exception("Transfer delivery approval failed")
@@ -1138,10 +1226,13 @@ def api_admin_save_crop_price():
         current = supabase.table('crop_prices').select('crop_type').execute().data or []
         match = next((row for row in current if row['crop_type'].casefold() == crop_type.casefold()), None)
         canonical_crop = match['crop_type'] if match else crop_type
+        target_price = rate if active else (float(data.get('fixed_price_per_qtl') or 0))
         payload = {
             'crop_type': canonical_crop,
-            'fixed_price_per_qtl': rate if active else (float(data.get('fixed_price_per_qtl') or 0)),
+            'fixed_price_per_qtl': target_price,
+            'price_per_unit': target_price,
             'active': active,
+            'is_active': active,
             'updated_by': current_user().id,
             'updated_at': datetime.datetime.now(datetime.timezone.utc).isoformat(),
         }
@@ -1179,6 +1270,21 @@ def api_admin_delivery_issues():
     issues = list(grouped.values())
     for issue in issues:
         issue["reports"].sort(key=lambda report: report.get("responded_at") or "", reverse=True)
+
+    # Report unassigned consignments where no free transporter was available at purchase time
+    unassigned = supabase.table("shipments").select("*").eq("status", "Ready for Carrier").is_("transporter_id", "null").order("created_at", desc=True).execute().data or []
+    for item in unassigned:
+        issues.append({
+            "shipment": item,
+            "reports": [{
+                "reason": "No free transporter available at purchase time. Consignment queued awaiting eligible carrier.",
+                "responded_at": item.get("created_at"),
+                "agent": {"full_name": "Logistics Dispatch Engine", "username": "system"},
+                "attempt_no": 1
+            }],
+            "is_unassigned_load": True
+        })
+
     return jsonify({"issues": issues}), 200
 
 
@@ -1223,6 +1329,51 @@ def api_admin_resolve_delivery_issue():
         return jsonify({"error": "Choose a delivery issue and a valid resolution action."}), 400
     if len(note) < 5:
         return jsonify({"error": "Enter an admin resolution note of at least five characters."}), 400
+
+    # Check if this is an unassigned shipment
+    unassigned_res = supabase.table("shipments").select("*").eq("waybill_id", waybill_id).eq("status", "Ready for Carrier").maybe_single().execute()
+    if unassigned_res and unassigned_res.data:
+        shipment = unassigned_res.data
+        if action == "retry":
+            try:
+                supabase.rpc("assign_pending_buyer_loads").execute()
+                supabase.rpc("assign_hub_supply_duties").execute()
+            except Exception:
+                app.logger.exception("Could not retry carrier assignment")
+            refreshed = supabase.table("shipments").select("status,transporter_name,vehicle_plate").eq("id", shipment["id"]).maybe_single().execute()
+            if refreshed and refreshed.data and refreshed.data.get("transporter_name"):
+                return jsonify({
+                    "message": f"Carrier assigned to {waybill_id}: {refreshed.data.get('transporter_name')} ({refreshed.data.get('vehicle_plate')}).",
+                    "result": refreshed.data
+                }), 200
+            else:
+                return jsonify({
+                    "message": f"Retried assignment for {waybill_id}, but no free transporters with adequate capacity are currently available.",
+                    "result": shipment
+                }), 200
+        elif action == "cancel":
+            supabase.table("shipments").update({
+                "status": "Cancelled by Admin",
+                "resolution_action": "cancel",
+                "resolution_note": note,
+                "resolved_by": current_user().id,
+                "resolved_at": datetime.datetime.now(datetime.timezone.utc).isoformat()
+            }).eq("id", shipment["id"]).execute()
+            if shipment.get("order_id"):
+                supabase.table("orders").update({"status": "Cancelled"}).eq("id", shipment["order_id"]).execute()
+            return jsonify({"message": f"Unassigned load {waybill_id} cancelled by admin.", "result": {"status": "Cancelled by Admin"}}), 200
+        elif action == "complete":
+            supabase.table("shipments").update({
+                "status": "Admin Resolved - Complete",
+                "resolution_action": "complete",
+                "resolution_note": note,
+                "resolved_by": current_user().id,
+                "resolved_at": datetime.datetime.now(datetime.timezone.utc).isoformat()
+            }).eq("id", shipment["id"]).execute()
+            if shipment.get("order_id"):
+                supabase.table("orders").update({"status": "Delivered & Settled"}).eq("id", shipment["order_id"]).execute()
+            return jsonify({"message": f"Shipment {waybill_id} manually marked complete.", "result": {"status": "Admin Resolved - Complete"}}), 200
+
     try:
         result = supabase.rpc("resolve_hub_transfer_issue", {
             "p_waybill_id": waybill_id,
@@ -1231,9 +1382,10 @@ def api_admin_resolve_delivery_issue():
             "p_note": note,
         }).execute()
         try:
+            supabase.rpc("assign_pending_buyer_loads").execute()
             supabase.rpc("assign_hub_supply_duties").execute()
         except Exception:
-            app.logger.exception("Could not assign the next queued hub replenishment duty")
+            app.logger.exception("Could not assign the next queued duty")
         return jsonify({"message": f"Transfer {waybill_id} resolution recorded: {action}.", "result": result.data}), 200
     except Exception as exc:
         app.logger.exception("Admin transfer resolution failed")
@@ -1285,9 +1437,10 @@ def api_verify_vehicle():
         updated = rows[0]
         if approved:
             try:
+                supabase.rpc("assign_pending_buyer_loads").execute()
                 supabase.rpc("assign_hub_supply_duties").execute()
             except Exception:
-                app.logger.exception("Could not assign queued hub replenishment duties after vehicle approval")
+                app.logger.exception("Could not assign queued duties after vehicle approval")
 
         status_str = "Approved for Hub Dispatch" if approved else "Rejected / Grounded"
         return jsonify({
@@ -1327,12 +1480,14 @@ def api_admin_create_staff():
         account = supabase.table("staff_accounts").insert({
             "id": staff_id, "username": username, "full_name": full_name,
             "role": role, "password_hash": generate_password_hash(password), "active": True,
-            "hub_location": hub_location if role == "agent" else None
+            "hub_location": hub_location if role == "agent" else None,
+            "availability_status": "free"
         }).execute().data[0]
         profile_table = "agents" if role == "agent" else "transporters"
         profile_payload = {
             "auth_user_id": staff_id, "full_name": full_name, "verified": True,
-            "email": None, "license_ref": license_ref or None
+            "email": None, "license_ref": license_ref or None,
+            "availability_status": "free"
         }
         if role == "agent":
             profile_payload["cooperative"] = company_name

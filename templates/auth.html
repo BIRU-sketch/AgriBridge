@@ -1,9 +1,13 @@
+{% macro icon(name) -%}
+<svg class="icon" aria-hidden="true" focusable="false"><use href="#i-{{ name }}"/></svg>
+{%- endmacro %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Log in or create an account | AgriBridge</title>
+    <title>Account Portal | AgriBridge Ethiopia</title>
+    <meta name="description" content="Sign in or register for AgriBridge to source verified agricultural produce across regional aggregation hubs.">
     <meta name="theme-color" content="#0A3D31">
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M3.5 19.5C3.5 12 8 6.5 15.5 4.5c.4 7.5-3 13.5-12 15Z' fill='%230A7A41'/%3E%3Cpath d='M7 28C6 15 14 6 28.5 4.5 29 18.5 21 27 7 28Z' fill='%2312A05B'/%3E%3Cpath d='M8 26.5C13 19 18.5 13 25 8.5' fill='none' stroke='%23fff' stroke-width='1.7' stroke-linecap='round'/%3E%3C/svg%3E">
 
@@ -15,55 +19,108 @@
     <script src="{{ url_for('static', filename='js/auth.js') }}" defer></script>
 </head>
 <body>
+    {% include 'partials/icons.html' %}
     <a class="skip-link" href="#auth-card">Skip to form</a>
 
     <div class="auth">
 
+        <!-- ===== Left Branding Sidebar ===== -->
         <aside class="auth-aside on-dark">
-            <a class="brand" href="/" aria-label="AgriBridge home">
-                {% include 'partials/logo.html' %}
-                AgriBridge
-            </a>
-
-            <div class="aside-body">
-                <p class="aside-title">One secure login for every AgriBridge account.</p>
-                <dl class="aside-roles">
-                    <div><dt>Agents</dt><dd>Register farmers and list their produce.</dd></div>
-                    <div><dt>Buyers</dt><dd>Search hub stock and purchase produce.</dd></div>
-                    <div><dt>Transporters</dt><dd>Contracted carriers. Log in with company-issued credentials to claim loads.</dd></div>
-                </dl>
+            <div class="aside-top">
+                <a class="brand" href="/" aria-label="AgriBridge home">
+                    {% include 'partials/logo.html' %}
+                    AgriBridge
+                </a>
             </div>
 
-            <p class="aside-foot">Buyers can create accounts here. <a href="/staff/login" style="color:inherit; text-decoration:underline;">Agents, transporters, and administrators sign in through the staff portal.</a></p>
+            <div class="aside-body">
+                <div class="aside-pill">
+                    <span class="pill-dot"></span> Agricultural Exchange &amp; Logistics
+                </div>
+
+                <h2 class="aside-title">Direct procurement from regional hubs.</h2>
+
+                <p class="aside-desc">
+                    Connect directly with verified cooperative produce, transparent benchmark pricing, and coordinated carrier delivery across Ethiopia.
+                </p>
+
+                <div class="aside-features">
+                    <div class="aside-feature-item">
+                        <div class="aside-icon-box">
+                            {{ icon('leaf') }}
+                        </div>
+                        <div>
+                            <h4>Silo-Grade Inventory</h4>
+                            <p>Real-time grain, pulse, and oilseed lots aggregated at certified regional hubs.</p>
+                        </div>
+                    </div>
+
+                    <div class="aside-feature-item">
+                        <div class="aside-icon-box">
+                            {{ icon('shield-check') }}
+                        </div>
+                        <div>
+                            <h4>Verified Quality</h4>
+                            <p>Inspected by extension agents and classified under national standards.</p>
+                        </div>
+                    </div>
+
+                    <div class="aside-feature-item">
+                        <div class="aside-icon-box">
+                            {{ icon('truck') }}
+                        </div>
+                        <div>
+                            <h4>Coordinated Dispatch</h4>
+                            <p>Automated carrier assignment with digital waybills and live delivery milestones.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="aside-foot-card">
+                <div class="foot-card-text">
+                    <strong>Looking for the Staff Portal?</strong>
+                    <span>Extension agents, transporters, and platform administrators sign in through the internal operations portal.</span>
+                </div>
+                <a href="/staff/login" class="staff-portal-btn">
+                    Staff Sign In {{ icon('arrow-right') }}
+                </a>
+            </div>
         </aside>
 
+        <!-- ===== Right Form Main Column ===== -->
         <main class="auth-main">
-            <a class="brand auth-mbrand" href="/" aria-label="AgriBridge home">
-                {% include 'partials/logo.html' %}
-                AgriBridge
-            </a>
+            <div class="auth-mobile-header">
+                <a class="brand" href="/" aria-label="AgriBridge home">
+                    {% include 'partials/logo.html' %}
+                    AgriBridge
+                </a>
+                <a href="/" class="auth-close-btn" aria-label="Back to home">
+                    {{ icon('x') }}
+                </a>
+            </div>
 
             <div class="auth-card" id="auth-card" tabindex="-1">
 
                 <div id="auth-top">
-                    <div class="seg" role="tablist" aria-label="Log in or create an account">
-                        <button type="button" role="tab" id="tab-login" aria-controls="panel-login" aria-selected="true">Log in</button>
-                        <button type="button" role="tab" id="tab-signup" aria-controls="panel-signup" aria-selected="false" tabindex="-1">Buyer sign up</button>
+                    <div class="seg" role="tablist" aria-label="Sign in or create an account">
+                        <button type="button" role="tab" id="tab-login" aria-controls="panel-login" aria-selected="true">Sign In</button>
+                        <button type="button" role="tab" id="tab-signup" aria-controls="panel-signup" aria-selected="false" tabindex="-1">Create Account</button>
                     </div>
 
                     <div class="auth-head">
-                        <h1 id="auth-title">Log in</h1>
-                <p id="auth-sub">Buyers sign in here. Staff members use the company-issued staff sign-in page.</p>
+                        <h1 id="auth-title">Welcome back</h1>
+                        <p id="auth-sub">Sign in to access real-time stock, orders, and delivery waybills.</p>
                     </div>
                 </div>
 
-                <!-- Log in -->
+                <!-- 1. Log In Form -->
                 <form id="panel-login" class="auth-form" role="tabpanel" aria-labelledby="tab-login" novalidate data-kind="login">
                     <div class="form-alert" role="alert" hidden></div>
 
                     <div class="field">
-                        <label for="login-email">Email</label>
-                        <input id="login-email" name="email" type="email" autocomplete="email" inputmode="email" autocapitalize="off" spellcheck="false" placeholder="name@example.com" aria-describedby="login-email-err">
+                        <label for="login-email">Email address</label>
+                        <input id="login-email" name="email" type="email" autocomplete="email" inputmode="email" autocapitalize="off" spellcheck="false" placeholder="name@company.com" aria-describedby="login-email-err">
                         <p class="field-err" id="login-email-err" hidden></p>
                     </div>
 
@@ -73,75 +130,76 @@
                             <button type="button" class="link-btn" id="btn-forgot-pw">Forgot password?</button>
                         </div>
                         <div class="pw">
-                            <input id="login-password" name="password" type="password" autocomplete="current-password" aria-describedby="login-password-err">
+                            <input id="login-password" name="password" type="password" autocomplete="current-password" placeholder="Enter your password" aria-describedby="login-password-err">
                             <button type="button" class="pw-toggle" data-target="login-password" aria-pressed="false">Show</button>
                         </div>
                         <p class="field-err" id="login-password-err" hidden></p>
                     </div>
 
-                    <button type="submit" class="btn btn-primary btn-lg btn-block" data-label="Log in" data-busy="Logging in…">Log in</button>
+                    <button type="submit" class="btn btn-primary btn-block btn-auth-submit" data-label="Sign In" data-busy="Signing in…">Sign In</button>
                 </form>
 
-                <!-- Create account -->
+                <!-- 2. Create Account Form -->
                 <form id="panel-signup" class="auth-form" role="tabpanel" aria-labelledby="tab-signup" novalidate hidden data-kind="signup">
                     <div class="form-alert" role="alert" hidden></div>
 
                     <div class="field">
-                        <label for="signup-name">Full name</label>
-                        <input id="signup-name" name="full_name" type="text" autocomplete="name" aria-describedby="signup-name-err">
+                        <label for="signup-name">Full name or company</label>
+                        <input id="signup-name" name="full_name" type="text" autocomplete="name" placeholder="e.g. Alazar Trading PLC" aria-describedby="signup-name-err">
                         <p class="field-err" id="signup-name-err" hidden></p>
                     </div>
 
-                    <p class="field-hint">This form creates a buyer account. Staff members sign in at <a href="/staff/login">the staff sign-in page</a>.</p>
-
                     <div class="field">
-                        <label for="signup-email">Email</label>
-                        <input id="signup-email" name="email" type="email" autocomplete="email" inputmode="email" autocapitalize="off" spellcheck="false" placeholder="name@example.com" aria-describedby="signup-email-err">
+                        <label for="signup-email">Work email address</label>
+                        <input id="signup-email" name="email" type="email" autocomplete="email" inputmode="email" autocapitalize="off" spellcheck="false" placeholder="buyer@company.com" aria-describedby="signup-email-err">
                         <p class="field-err" id="signup-email-err" hidden></p>
                     </div>
 
                     <div class="field">
-                        <label for="signup-password">Password</label>
+                        <label for="signup-password">Create password</label>
                         <div class="pw">
-                            <input id="signup-password" name="password" type="password" autocomplete="new-password" aria-describedby="signup-password-hint signup-password-err">
+                            <input id="signup-password" name="password" type="password" autocomplete="new-password" placeholder="At least 8 characters" aria-describedby="signup-password-hint signup-password-err">
                             <button type="button" class="pw-toggle" data-target="signup-password" aria-pressed="false">Show</button>
                         </div>
-                        <p class="field-hint" id="signup-password-hint">Use at least 8 characters.</p>
+                        <p class="field-hint" id="signup-password-hint">Use at least 8 characters with a mix of letters and numbers.</p>
                         <p class="field-err" id="signup-password-err" hidden></p>
                     </div>
 
-                    <p class="verify-note">An administrator verifies new buyer accounts before purchasing is available.</p>
+                    <div class="auth-info-note">
+                        <span class="info-note-icon">{{ icon('info') }}</span>
+                        <span>New buyer accounts undergo administrative vetting before commodity purchase orders can be placed.</span>
+                    </div>
 
-                    <button type="submit" class="btn btn-primary btn-lg btn-block" data-label="Create account" data-busy="Creating account…">Create account</button>
+                    <button type="submit" class="btn btn-primary btn-block btn-auth-submit" data-label="Create Account" data-busy="Creating account…">Create Account</button>
                 </form>
 
-                <!-- Forgot password -->
+                <!-- 3. Forgot Password Form -->
                 <form id="panel-forgot" class="auth-form" role="region" aria-labelledby="auth-title" novalidate hidden data-kind="forgot">
                     <div class="form-alert" role="alert" hidden></div>
 
                     <div class="field">
-                        <label for="forgot-email">Account Email</label>
-                        <input id="forgot-email" name="email" type="email" autocomplete="email" inputmode="email" autocapitalize="off" spellcheck="false" placeholder="name@example.com" aria-describedby="forgot-email-err" required>
+                        <label for="forgot-email">Account email address</label>
+                        <input id="forgot-email" name="email" type="email" autocomplete="email" inputmode="email" autocapitalize="off" spellcheck="false" placeholder="name@company.com" aria-describedby="forgot-email-err" required>
                         <p class="field-err" id="forgot-email-err" hidden></p>
                     </div>
 
-                    <p class="field-hint">We will send a secure password recovery link to your registered email address.</p>
+                    <p class="field-hint">We will email you a secure link to reset your account password.</p>
 
-                    <button type="submit" class="btn btn-primary btn-lg btn-block" data-label="Send reset link" data-busy="Sending reset link…">Send reset link</button>
+                    <button type="submit" class="btn btn-primary btn-block btn-auth-submit" data-label="Send Reset Link" data-busy="Sending reset link…">Send Reset Link</button>
 
                     <button type="button" class="btn btn-ghost btn-block" id="btn-back-to-login">
-                        Back to log in
+                        Back to sign in
                     </button>
                 </form>
 
-                <!-- Update password (after clicking reset link) -->
+                <!-- 4. Update Password Form (After clicking email reset link) -->
                 <form id="panel-reset" class="auth-form" role="region" aria-labelledby="auth-title" novalidate hidden data-kind="reset">
                     <div class="form-alert" role="alert" hidden></div>
 
                     <div class="field">
-                        <label for="reset-password">New Password</label>
+                        <label for="reset-password">New password</label>
                         <div class="pw">
-                            <input id="reset-password" name="password" type="password" autocomplete="new-password" aria-describedby="reset-password-hint reset-password-err" required>
+                            <input id="reset-password" name="password" type="password" autocomplete="new-password" placeholder="At least 8 characters" aria-describedby="reset-password-hint reset-password-err" required>
                             <button type="button" class="pw-toggle" data-target="reset-password" aria-pressed="false">Show</button>
                         </div>
                         <p class="field-hint" id="reset-password-hint">Use at least 8 characters.</p>
@@ -149,34 +207,46 @@
                     </div>
 
                     <div class="field">
-                        <label for="reset-password-confirm">Confirm New Password</label>
+                        <label for="reset-password-confirm">Confirm new password</label>
                         <div class="pw">
-                            <input id="reset-password-confirm" name="password_confirm" type="password" autocomplete="new-password" aria-describedby="reset-password-confirm-err" required>
+                            <input id="reset-password-confirm" name="password_confirm" type="password" autocomplete="new-password" placeholder="Repeat your new password" aria-describedby="reset-password-confirm-err" required>
                             <button type="button" class="pw-toggle" data-target="reset-password-confirm" aria-pressed="false">Show</button>
                         </div>
                         <p class="field-err" id="reset-password-confirm-err" hidden></p>
                     </div>
 
-                    <button type="submit" class="btn btn-primary btn-lg btn-block" data-label="Update password" data-busy="Updating password…">Update password</button>
+                    <button type="submit" class="btn btn-primary btn-block btn-auth-submit" data-label="Update Password" data-busy="Updating password…">Update Password</button>
                 </form>
 
-                <!-- Shown after requesting a password reset -->
+                <!-- 5. Password Reset Email Sent View -->
                 <div id="forgot-success" class="success" hidden tabindex="-1">
-                    <h1>Check your email</h1>
-                    <p>We've sent a password reset link to <strong id="forgot-success-email"></strong>.</p>
-                    <p>Click the link in the email to choose a new password. If you don't see it within a few minutes, check your spam folder.</p>
-                    <button type="button" class="btn btn-primary btn-lg btn-block" id="btn-forgot-to-login">Return to log in</button>
+                    <div class="success-badge">
+                        {{ icon('mail') }}
+                    </div>
+                    <h1>Check your inbox</h1>
+                    <p>We've sent a password recovery link to <strong id="forgot-success-email"></strong>.</p>
+                    <p>Open the link to choose a new password. If you don't see it within a few minutes, check your spam folder.</p>
+                    <button type="button" class="btn btn-primary btn-block" id="btn-forgot-to-login">Return to sign in</button>
                 </div>
 
-                <!-- Shown after a successful sign-up -->
+                <!-- 6. Account Created View -->
                 <div id="signup-success" class="success" hidden tabindex="-1">
-                    <h1>Account created</h1>
-                    <p>We created an account for <strong id="success-email"></strong>.</p>
-                    <p>If you receive a confirmation email, open it first. Then log in.</p>
-                    <button type="button" class="btn btn-primary btn-lg btn-block" id="go-login">Go to log in</button>
+                    <div class="success-badge">
+                        {{ icon('check-circle') }}
+                    </div>
+                    <h1>Account registered</h1>
+                    <p>An account has been created for <strong id="success-email"></strong>.</p>
+                    <p>If you receive a verification email, please confirm it. An administrator will review your account for trade activation.</p>
+                    <button type="button" class="btn btn-primary btn-block" id="go-login">Proceed to sign in</button>
                 </div>
 
-                <p class="auth-back"><a href="/staff/login">Staff sign in</a> · <a href="/">Back to home</a></p>
+                <!-- Footer Navigation -->
+                <div class="auth-footer-nav">
+                    <span>Staff or transporter? <a href="/staff/login">Sign in here</a></span>
+                    <span class="auth-nav-sep">&bull;</span>
+                    <a href="/">Back to home</a>
+                </div>
+
             </div>
         </main>
     </div>

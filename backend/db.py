@@ -53,6 +53,11 @@ class Database:
         return self.supabase.table('demands').select('*').eq('id', demand_id).execute()
 
     def add_vehicle(self, vehicle_data: dict):
+        transporter_id = vehicle_data.get('transporter_id')
+        if transporter_id:
+            existing = self.get_vehicles(transporter_id).data or []
+            if existing:
+                raise ValueError("Transporters can only register 1 vehicle.")
         return self.supabase.table('vehicles').insert(vehicle_data).execute()
 
     def get_vehicles(self, transporter_id: str):

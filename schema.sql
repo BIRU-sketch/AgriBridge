@@ -150,6 +150,7 @@ ALTER TABLE public.transporters ADD COLUMN IF NOT EXISTS license_ref TEXT;
 ALTER TABLE public.produce_lots ADD COLUMN IF NOT EXISTS initial_quantity NUMERIC NOT NULL DEFAULT 0;
 ALTER TABLE public.shipments ADD COLUMN IF NOT EXISTS order_ref TEXT;
 ALTER TABLE public.vehicles ADD COLUMN IF NOT EXISTS approved BOOLEAN DEFAULT FALSE;
+CREATE UNIQUE INDEX IF NOT EXISTS idx_vehicles_transporter_uniq ON public.vehicles(transporter_id) WHERE transporter_id IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_orders_buyer_created ON public.orders(buyer_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_shipments_transporter_created ON public.shipments(transporter_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_shipments_status ON public.shipments(status);
@@ -182,6 +183,8 @@ CREATE TABLE IF NOT EXISTS public.staff_accounts (
 ALTER TABLE public.staff_accounts ENABLE ROW LEVEL SECURITY;
 REVOKE ALL ON public.staff_accounts FROM anon, authenticated;
 GRANT ALL ON public.staff_accounts TO service_role;
+ALTER TABLE public.staff_accounts ADD COLUMN IF NOT EXISTS availability_status TEXT NOT NULL DEFAULT 'free' CHECK (availability_status IN ('free', 'busy'));
+ALTER TABLE public.transporters ADD COLUMN IF NOT EXISTS availability_status TEXT NOT NULL DEFAULT 'free' CHECK (availability_status IN ('free', 'busy'));
 
 -- Reserve matching stock and create its order and shipment in one transaction.
 CREATE OR REPLACE FUNCTION public.purchase_marketplace_stock(
@@ -382,7 +385,9 @@ BEGIN
   UPDATE public.shipments SET status='Agent Approved - Complete' WHERE id=s.id;
   UPDATE public.hub_supply_request_shipments SET status='completed' WHERE shipment_id=s.id;
   UPDATE public.hub_supply_requests r SET status=CASE WHEN NOT EXISTS (SELECT 1 FROM public.hub_supply_request_shipments rs WHERE rs.request_id=r.id AND rs.status NOT IN ('completed','cancelled')) THEN 'completed' ELSE 'assigned' END WHERE r.id IN (SELECT request_id FROM public.hub_supply_request_shipments WHERE shipment_id=s.id);
-  UPDATE public.vehicles SET status='Available at Depot' WHERE transporter_id=s.transporter_id AND plate_number=s.vehicle_plate;
+  UPDATE public.vehicles SET status='Approved for Hub Dispatch' WHERE transporter_id=s.transporter_id AND plate_number=s.vehicle_plate;
+   UPDATE public.staff_accounts SET availability_status='free' WHERE id=s.transporter_id;
+   UPDATE public.transporters SET availability_status='free' WHERE auth_user_id=s.transporter_id;
  END IF;
  RETURN jsonb_build_object('status','Agent Approved - Complete');
 END; $$;
@@ -506,7 +511,9 @@ BEGIN
   UPDATE public.shipments SET status='Agent Approved - Complete' WHERE id=s.id;
   UPDATE public.hub_supply_request_shipments SET status='completed' WHERE shipment_id=s.id;
   UPDATE public.hub_supply_requests r SET status=CASE WHEN NOT EXISTS (SELECT 1 FROM public.hub_supply_request_shipments rs WHERE rs.request_id=r.id AND rs.status NOT IN ('completed','cancelled')) THEN 'completed' ELSE 'assigned' END WHERE r.id IN (SELECT request_id FROM public.hub_supply_request_shipments WHERE shipment_id=s.id);
-  UPDATE public.vehicles SET status='Available at Depot' WHERE transporter_id=s.transporter_id AND plate_number=s.vehicle_plate;
+  UPDATE public.vehicles SET status='Approved for Hub Dispatch' WHERE transporter_id=s.transporter_id AND plate_number=s.vehicle_plate;
+   UPDATE public.staff_accounts SET availability_status='free' WHERE id=s.transporter_id;
+   UPDATE public.transporters SET availability_status='free' WHERE auth_user_id=s.transporter_id;
  END IF;
  RETURN jsonb_build_object('status','Agent Approved - Complete');
 END; $$;
@@ -529,7 +536,9 @@ BEGIN
   UPDATE public.hub_supply_request_shipments SET status='completed' WHERE shipment_id=s.id;
   UPDATE public.hub_supply_requests r SET status=CASE WHEN NOT EXISTS (SELECT 1 FROM public.hub_supply_request_shipments rs WHERE rs.request_id=r.id AND rs.status NOT IN ('completed','cancelled')) THEN 'completed' ELSE 'assigned' END WHERE r.id IN (SELECT request_id FROM public.hub_supply_request_shipments WHERE shipment_id=s.id);
   UPDATE public.shipments SET status='Admin Resolved - Complete',resolution_action=p_action,resolution_note=BTRIM(p_note),resolved_by=p_admin_id,resolved_at=NOW() WHERE id=s.id;
-  UPDATE public.vehicles SET status='Available at Depot' WHERE transporter_id=s.transporter_id AND plate_number=s.vehicle_plate;
+  UPDATE public.vehicles SET status='Approved for Hub Dispatch' WHERE transporter_id=s.transporter_id AND plate_number=s.vehicle_plate;
+   UPDATE public.staff_accounts SET availability_status='free' WHERE id=s.transporter_id;
+   UPDATE public.transporters SET availability_status='free' WHERE auth_user_id=s.transporter_id;
  ELSIF p_action='retry' THEN
   UPDATE public.shipment_agent_approvals SET status='superseded' WHERE shipment_id=s.id AND attempt_no=s.transfer_attempt AND status='pending';
   UPDATE public.shipments SET status='In Transit',stage_index=3,transfer_attempt=transfer_attempt+1,delivered_at=NULL,
@@ -542,7 +551,9 @@ BEGIN
   UPDATE public.hub_supply_request_shipments SET status='cancelled' WHERE shipment_id=s.id;
   UPDATE public.hub_supply_requests r SET status=CASE WHEN NOT EXISTS (SELECT 1 FROM public.hub_supply_request_shipments rs WHERE rs.request_id=r.id AND rs.status NOT IN ('completed','cancelled')) THEN 'cancelled' ELSE 'assigned' END WHERE r.id IN (SELECT request_id FROM public.hub_supply_request_shipments WHERE shipment_id=s.id);
   UPDATE public.shipments SET status='Cancelled by Admin',resolution_action=p_action,resolution_note=BTRIM(p_note),resolved_by=p_admin_id,resolved_at=NOW() WHERE id=s.id;
-  UPDATE public.vehicles SET status='Available at Depot' WHERE transporter_id=s.transporter_id AND plate_number=s.vehicle_plate;
+  UPDATE public.vehicles SET status='Approved for Hub Dispatch' WHERE transporter_id=s.transporter_id AND plate_number=s.vehicle_plate;
+   UPDATE public.staff_accounts SET availability_status='free' WHERE id=s.transporter_id;
+   UPDATE public.transporters SET availability_status='free' WHERE auth_user_id=s.transporter_id;
  END IF;
  RETURN jsonb_build_object('status',CASE WHEN p_action='complete' THEN 'Admin Resolved - Complete' WHEN p_action='retry' THEN 'In Transit' ELSE 'Cancelled by Admin' END,'action',p_action,'transfer_attempt',CASE WHEN p_action='retry' THEN s.transfer_attempt+1 ELSE s.transfer_attempt END);
 END; $$;
@@ -570,6 +581,13 @@ BEGIN
  ) THEN
   ALTER TABLE public.crop_prices RENAME COLUMN crop_name TO crop_type;
  END IF;
+
+ IF EXISTS (
+  SELECT 1 FROM information_schema.columns
+  WHERE table_schema='public' AND table_name='crop_prices' AND column_name='price_per_unit'
+ ) THEN
+  ALTER TABLE public.crop_prices ALTER COLUMN price_per_unit DROP NOT NULL;
+ END IF;
 END $$;
 
 ALTER TABLE public.crop_prices ADD COLUMN IF NOT EXISTS crop_type TEXT;
@@ -594,6 +612,8 @@ DECLARE
  order_row public.orders%ROWTYPE; shipment_row public.shipments%ROWTYPE;
  unit_price NUMERIC; canonical_crop TEXT;
  order_ref_value TEXT:='ORD-'||replace(gen_random_uuid()::TEXT,'-','');
+ assigned_carrier RECORD;
+ carrier_found BOOLEAN:=FALSE;
 BEGIN
  IF p_buyer_id IS NULL OR NULLIF(BTRIM(p_buyer_name),'') IS NULL
     OR NULLIF(BTRIM(p_crop_name),'') IS NULL OR NULLIF(BTRIM(p_quality_grade),'') IS NULL
@@ -622,10 +642,42 @@ BEGIN
  INSERT INTO public.orders(order_ref,buyer_id,buyer_name,crop_type,quality_grade,quantity,unit_price,total_price,hub_location,status)
  VALUES(order_ref_value,p_buyer_id,BTRIM(p_buyer_name),canonical_crop,BTRIM(p_quality_grade),p_quantity,unit_price,ROUND(p_quantity*unit_price,2),BTRIM(p_destination_hub),'Confirmed')
  RETURNING * INTO order_row;
- INSERT INTO public.shipments(waybill_id,order_id,order_ref,crop_type,quality_grade,quantity,origin_hub,destination_hub,tariff_etb,status,stage_index)
- VALUES('WB-'||replace(gen_random_uuid()::TEXT,'-',''),order_row.id,order_ref_value,canonical_crop,BTRIM(p_quality_grade),p_quantity,BTRIM(p_origin_hub),BTRIM(p_destination_hub),NULL,'Ready for Carrier',0)
- RETURNING * INTO shipment_row;
- RETURN jsonb_build_object('remaining_stock',ROUND(available-p_quantity,2),'order',to_jsonb(order_row),'shipment',to_jsonb(shipment_row));
+  -- Randomly select an eligible free transporter with an approved vehicle
+  SELECT t.id AS transporter_id, t.full_name, v.id AS vehicle_id, v.plate_number
+   INTO assigned_carrier
+  FROM public.staff_accounts t
+  JOIN public.vehicles v ON v.transporter_id=t.id
+    AND v.approved=TRUE
+    AND v.status IN ('Approved for Hub Dispatch','Available at Depot','Available at Hub')
+    AND COALESCE(v.capacity_quintals,0)>=p_quantity
+  WHERE t.role='transporter' AND t.active
+    AND COALESCE(t.availability_status,'free')='free'
+    AND NOT EXISTS (
+     SELECT 1 FROM public.shipments active_trip
+     WHERE active_trip.transporter_id=t.id
+       AND active_trip.status IN ('Dispatched','Loaded & Weighed','In Transit','Awaiting Agent Approval','Delivery Issue - Admin Review')
+    )
+  ORDER BY random()
+  LIMIT 1 FOR UPDATE OF t,v SKIP LOCKED;
+
+  IF assigned_carrier.transporter_id IS NOT NULL THEN
+   carrier_found:=TRUE;
+   INSERT INTO public.shipments(waybill_id,order_id,order_ref,crop_type,quality_grade,quantity,origin_hub,destination_hub,transporter_id,transporter_name,vehicle_plate,tariff_etb,status,stage_index,claimed_at,shipment_type)
+   VALUES('WB-'||replace(gen_random_uuid()::TEXT,'-',''),order_row.id,order_ref_value,canonical_crop,BTRIM(p_quality_grade),p_quantity,BTRIM(p_origin_hub),BTRIM(p_destination_hub),
+     assigned_carrier.transporter_id,assigned_carrier.full_name,assigned_carrier.plate_number,NULL,'Dispatched',1,NOW(),'buyer_order')
+   RETURNING * INTO shipment_row;
+
+   UPDATE public.orders SET status='Dispatched' WHERE id=order_row.id RETURNING * INTO order_row;
+   UPDATE public.vehicles SET status='On Trip ('||shipment_row.waybill_id||')' WHERE id=assigned_carrier.vehicle_id;
+   UPDATE public.staff_accounts SET availability_status='busy' WHERE id=assigned_carrier.transporter_id;
+   UPDATE public.transporters SET availability_status='busy' WHERE auth_user_id=assigned_carrier.transporter_id;
+  ELSE
+   INSERT INTO public.shipments(waybill_id,order_id,order_ref,crop_type,quality_grade,quantity,origin_hub,destination_hub,tariff_etb,status,stage_index,shipment_type)
+   VALUES('WB-'||replace(gen_random_uuid()::TEXT,'-',''),order_row.id,order_ref_value,canonical_crop,BTRIM(p_quality_grade),p_quantity,BTRIM(p_origin_hub),BTRIM(p_destination_hub),NULL,'Ready for Carrier',0,'buyer_order')
+   RETURNING * INTO shipment_row;
+  END IF;
+
+  RETURN jsonb_build_object('remaining_stock',ROUND(available-p_quantity,2),'order',to_jsonb(order_row),'shipment',to_jsonb(shipment_row),'transporter_assigned',carrier_found);
 END; $$;
 REVOKE ALL ON FUNCTION public.purchase_marketplace_stock(UUID,TEXT,TEXT,TEXT,TEXT,TEXT,NUMERIC) FROM PUBLIC,anon,authenticated;
 GRANT EXECUTE ON FUNCTION public.purchase_marketplace_stock(UUID,TEXT,TEXT,TEXT,TEXT,TEXT,NUMERIC) TO service_role;
@@ -771,18 +823,18 @@ BEGIN
   SELECT t.id AS transporter_id,t.full_name,v.id AS vehicle_id,v.plate_number
    INTO carrier
   FROM public.staff_accounts t
-  JOIN public.vehicles v ON v.transporter_id=t.id AND v.status='Approved for Hub Dispatch'
+  JOIN public.vehicles v ON v.transporter_id=t.id
+    AND v.approved=TRUE
+    AND v.status IN ('Approved for Hub Dispatch','Available at Depot','Available at Hub')
     AND COALESCE(v.capacity_quintals,0)>=pending.quantity
   WHERE t.role='transporter' AND t.active
+    AND COALESCE(t.availability_status,'free')='free'
     AND NOT EXISTS (
      SELECT 1 FROM public.shipments active_trip
      WHERE active_trip.transporter_id=t.id
        AND active_trip.status IN ('Dispatched','Loaded & Weighed','In Transit','Awaiting Agent Approval','Delivery Issue - Admin Review')
     )
-  ORDER BY
-   (SELECT COUNT(*) FROM public.shipments history WHERE history.transporter_id=t.id AND history.claimed_at>=NOW()-INTERVAL '30 days') ASC,
-   (SELECT MAX(history.claimed_at) FROM public.shipments history WHERE history.transporter_id=t.id) ASC NULLS FIRST,
-   t.id,v.capacity_quintals,v.id
+  ORDER BY random()
   LIMIT 1 FOR UPDATE OF t,v SKIP LOCKED;
   IF FOUND THEN
    UPDATE public.shipments SET transporter_id=carrier.transporter_id,transporter_name=carrier.full_name,
@@ -790,6 +842,8 @@ BEGIN
    WHERE id=pending.id AND status='Ready for Carrier' AND transporter_id IS NULL;
    IF FOUND THEN
     UPDATE public.vehicles SET status='On Trip ('||pending.waybill_id||')' WHERE id=carrier.vehicle_id;
+    UPDATE public.staff_accounts SET availability_status='busy' WHERE id=carrier.transporter_id;
+    UPDATE public.transporters SET availability_status='busy' WHERE auth_user_id=carrier.transporter_id;
     UPDATE public.hub_supply_requests SET status='assigned' WHERE id IN (SELECT request_id FROM public.hub_supply_request_shipments WHERE shipment_id=pending.id);
     UPDATE public.hub_supply_request_shipments SET status='assigned' WHERE shipment_id=pending.id;
     assigned_count:=assigned_count+1;
@@ -803,6 +857,58 @@ REVOKE ALL ON FUNCTION public.create_hub_supply_request(UUID,TEXT,TEXT,NUMERIC,T
 REVOKE ALL ON FUNCTION public.assign_hub_supply_duties() FROM PUBLIC,anon,authenticated;
 GRANT EXECUTE ON FUNCTION public.create_hub_supply_request(UUID,TEXT,TEXT,NUMERIC,TEXT,TEXT[],NUMERIC,NUMERIC) TO service_role;
 GRANT EXECUTE ON FUNCTION public.assign_hub_supply_duties() TO service_role;
+
+CREATE OR REPLACE FUNCTION public.assign_pending_buyer_loads()
+RETURNS INTEGER LANGUAGE plpgsql SECURITY DEFINER SET search_path=public AS $$
+DECLARE
+ pending public.shipments%ROWTYPE;
+ carrier RECORD;
+ assigned_count INTEGER:=0;
+BEGIN
+ PERFORM pg_advisory_xact_lock(174110,2);
+ FOR pending IN
+  SELECT * FROM public.shipments
+  WHERE COALESCE(shipment_type,'buyer_order')='buyer_order'
+    AND status='Ready for Carrier' AND transporter_id IS NULL
+  ORDER BY created_at,id FOR UPDATE SKIP LOCKED
+ LOOP
+  SELECT t.id AS transporter_id, t.full_name, v.id AS vehicle_id, v.plate_number
+   INTO carrier
+  FROM public.staff_accounts t
+  JOIN public.vehicles v ON v.transporter_id=t.id
+    AND v.approved=TRUE
+    AND v.status IN ('Approved for Hub Dispatch','Available at Depot','Available at Hub')
+    AND COALESCE(v.capacity_quintals,0)>=pending.quantity
+  WHERE t.role='transporter' AND t.active
+    AND COALESCE(t.availability_status,'free')='free'
+    AND NOT EXISTS (
+     SELECT 1 FROM public.shipments active_trip
+     WHERE active_trip.transporter_id=t.id
+       AND active_trip.status IN ('Dispatched','Loaded & Weighed','In Transit','Awaiting Agent Approval','Delivery Issue - Admin Review')
+    )
+  ORDER BY random()
+  LIMIT 1 FOR UPDATE OF t,v SKIP LOCKED;
+
+  IF FOUND THEN
+   UPDATE public.shipments SET transporter_id=carrier.transporter_id,transporter_name=carrier.full_name,
+    vehicle_plate=carrier.plate_number,status='Dispatched',stage_index=1,claimed_at=NOW()
+   WHERE id=pending.id AND status='Ready for Carrier' AND transporter_id IS NULL;
+   IF FOUND THEN
+    UPDATE public.vehicles SET status='On Trip ('||pending.waybill_id||')' WHERE id=carrier.vehicle_id;
+    UPDATE public.staff_accounts SET availability_status='busy' WHERE id=carrier.transporter_id;
+    UPDATE public.transporters SET availability_status='busy' WHERE auth_user_id=carrier.transporter_id;
+    IF pending.order_id IS NOT NULL THEN
+     UPDATE public.orders SET status='Dispatched' WHERE id=pending.order_id;
+    END IF;
+    assigned_count:=assigned_count+1;
+   END IF;
+  END IF;
+ END LOOP;
+ RETURN assigned_count;
+END; $$;
+REVOKE ALL ON FUNCTION public.assign_pending_buyer_loads() FROM PUBLIC,anon,authenticated;
+GRANT EXECUTE ON FUNCTION public.assign_pending_buyer_loads() TO service_role;
+
 
 -- Make manual buyer-load claims serialize with automatic hub-duty assignment.
 CREATE OR REPLACE FUNCTION public.claim_available_shipment(
