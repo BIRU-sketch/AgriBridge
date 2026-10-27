@@ -4,36 +4,61 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Staff Sign In | AgriBridge</title>
+    <meta name="description" content="Internal operations portal for AgriBridge agents, transporters, and administrators.">
+    <meta name="theme-color" content="#0A3D31">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M3.5 19.5C3.5 12 8 6.5 15.5 4.5c.4 7.5-3 13.5-12 15Z' fill='%230A7A41'/%3E%3Cpath d='M7 28C6 15 14 6 28.5 4.5 29 18.5 21 27 7 28Z' fill='%2312A05B'/%3E%3Cpath d='M8 26.5C13 19 18.5 13 25 8.5' fill='none' stroke='%23fff' stroke-width='1.7' stroke-linecap='round'/%3E%3C/svg%3E">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+Ethiopic:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
 </head>
 <body>
-    <main class="auth" style="min-height:100vh; display:grid; place-items:center; padding:1.25rem;">
-        <section class="auth-card" style="margin:0;" aria-labelledby="staff-login-title">
+    <main class="auth auth-single">
+        <section class="auth-card" aria-labelledby="staff-login-title">
             <a class="brand" href="/" aria-label="AgriBridge home">{% include 'partials/logo.html' %} AgriBridge</a>
             <div class="auth-head">
                 <h1 id="staff-login-title">Staff sign in</h1>
                 <p>Agents, transporters, and administrators use their company-issued name and password.</p>
             </div>
-            <form id="staff-login-form" class="auth-form">
+            <form id="staff-login-form" class="auth-form" autocomplete="on">
                 <div class="form-alert" role="alert" hidden></div>
                 <div class="field">
                     <label for="staff-username">Staff name</label>
-                    <input id="staff-username" name="username" type="text" autocomplete="username" required>
+                    <input id="staff-username" name="username" type="text" autocomplete="username" placeholder="e.g. adama_agent_1 or admin" required>
                 </div>
                 <div class="field">
                     <label for="staff-password">Password</label>
-                    <input id="staff-password" name="password" type="password" autocomplete="current-password" required>
+                    <div class="pw">
+                        <input id="staff-password" name="password" type="password" autocomplete="current-password" placeholder="Enter your staff password" required>
+                        <button type="button" class="pw-toggle" data-target="staff-password" aria-label="Show password">Show</button>
+                    </div>
                 </div>
-                <button class="btn btn-primary btn-lg btn-block" type="submit">Sign in</button>
+                <button class="btn btn-primary btn-block btn-auth-submit" type="submit">Sign in</button>
             </form>
-            <p class="auth-back"><a href="/auth">Buyer sign in</a> · <a href="/">Back to home</a></p>
+            <nav class="auth-footer-nav" aria-label="Portal navigation">
+                <a href="/auth">Buyer sign in</a>
+                <span class="auth-nav-sep" aria-hidden="true">·</span>
+                <a href="/">Back to home</a>
+            </nav>
         </section>
     </main>
     <script>
-        document.getElementById('staff-login-form').addEventListener('submit', async (event) => {
+        const form = document.getElementById('staff-login-form');
+        const pwToggle = form.querySelector('.pw-toggle');
+        if (pwToggle) {
+            pwToggle.addEventListener('click', () => {
+                const targetInput = document.getElementById('staff-password');
+                const isPassword = targetInput.type === 'password';
+                targetInput.type = isPassword ? 'text' : 'password';
+                pwToggle.textContent = isPassword ? 'Hide' : 'Show';
+                pwToggle.setAttribute('aria-label', isPassword ? 'Hide password' : 'Show password');
+            });
+        }
+
+        form.addEventListener('submit', async (event) => {
             event.preventDefault();
-            const form = event.currentTarget;
             const alert = form.querySelector('.form-alert');
             const button = form.querySelector('button[type="submit"]');
             alert.hidden = true;
@@ -44,7 +69,7 @@
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        username: form.elements.namedItem('username').value,
+                        username: form.elements.namedItem('username').value.trim(),
                         password: form.elements.namedItem('password').value
                     })
                 });
