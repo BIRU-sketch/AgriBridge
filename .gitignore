@@ -1,5 +1,6 @@
 .env
 *.txt
+!requirements.txt
 *.sql
 __pycache__/
 *.pyc
