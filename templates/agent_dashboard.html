@@ -24,6 +24,7 @@
     <!-- ===== Top Header ===== -->
     <header class="site-header" id="site-header">
         <div class="wrap header-row">
+         <button type="button" class="dash-nav-toggle" id="dash-nav-toggle" aria-label="Open navigation menu" aria-expanded="false" aria-controls="dash-nav">☰</button>
             <div class="brand-group">
                 <a class="brand" href="/" aria-label="AgriBridge home">
                     {% include 'partials/logo.html' %}
@@ -32,13 +33,16 @@
                 <span class="portal-tag">Extension &amp; Cooperative Agent</span>
             </div>
 
-            <nav class="dash-nav" aria-label="Agent navigation">
-                <a href="#farmers" aria-current="true">Registered Farmers</a>
-                <a href="#produce-lots">Produce Lots</a>
-                <a href="#orders">Buyer Orders</a>
-                <a href="#transfer-approvals">Delivery Approvals</a>
-                <a href="#hub-supply">Request Hub Supply</a>
+            <nav class="dash-nav" id="dash-nav" aria-label="Agent navigation">
+                {% set active_page = active_page or 'overview' %}
+                <a href="/dashboard/overview" {% if active_page == 'overview' %}aria-current="page"{% endif %}>Overview</a>
+                <a href="/dashboard/farmers" {% if active_page == 'farmers' %}aria-current="page"{% endif %}>Registered Farmers</a>
+                <a href="/dashboard/produce-lots" {% if active_page == 'produce-lots' %}aria-current="page"{% endif %}>Produce Lots</a>
+                <a href="/dashboard/orders" {% if active_page == 'orders' %}aria-current="page"{% endif %}>Buyer Orders</a>
+                <a href="/dashboard/transfer-approvals" {% if active_page == 'transfer-approvals' %}aria-current="page"{% endif %}>Delivery Approvals</a>
+                <a href="/dashboard/hub-supply" {% if active_page == 'hub-supply' %}aria-current="page"{% endif %}>Request Hub Supply</a>
                 <a href="/register-farmer">+ New Farmer</a>
+                <a href="/add-produce-lot" > + New Product Lot</a>
             </nav>
 
             <div class="header-user">
@@ -57,11 +61,13 @@
             </div>
         </div>
     </header>
+    <div class="dash-nav-overlay" id="dash-nav-overlay" aria-hidden="true"></div>
 
     <!-- ===== Main Content ===== -->
     <main class="main-content" id="main">
+        {% set active_page = active_page or 'overview' %}
 
-        <!-- Welcome Banner -->
+        {% if active_page == 'overview' %}
         <section class="welcome-card" aria-label="Agent summary">
             <div class="welcome-copy">
                 <div class="welcome-pill">
@@ -82,7 +88,6 @@
             </div>
         </section>
 
-        <!-- KPI Metrics Grid -->
         <section class="metrics-grid" aria-label="Key metrics">
             <div class="metric-card">
                 <div class="metric-ic metric-ic-green">
@@ -116,10 +121,8 @@
                     <span class="metric-sub">White Teff, Wheat &amp; Maize</span>
                 </div>
             </div>
-
         </section>
-
-        <!-- Section 1: Registered Farmers Directory -->
+        {% elif active_page == 'farmers' %}
         <section id="farmers" class="dash-card">
             <div class="dash-card-header">
                 <div>
@@ -157,8 +160,7 @@
                 </table>
             </div>
         </section>
-
-        <!-- Section 2: Produce Lots in Cooperative Silos -->
+        {% elif active_page == 'produce-lots' %}
         <section id="produce-lots" class="dash-card">
             <div class="dash-card-header">
                 <div>
@@ -187,8 +189,7 @@
                 </table>
             </div>
         </section>
-
-        <!-- Section 3: Buyer Orders & Dispatched Lots -->
+        {% elif active_page == 'orders' %}
         <section id="orders" class="dash-card">
             <div class="dash-card-header">
                 <div>
@@ -217,7 +218,7 @@
                 </table>
             </div>
         </section>
-
+        {% elif active_page == 'transfer-approvals' %}
         <section id="transfer-approvals" class="dash-card">
             <div class="dash-card-header">
                 <div><h2>{{ icon('shield-check') }} Hub Delivery Approval Queue</h2><p>Confirm the goods attributed to your lots arrived at the destination hub, or report the problem for admin review.</p></div>
@@ -228,7 +229,7 @@
                 </table>
             </div>
         </section>
-
+        {% elif active_page == 'hub-supply' %}
         <section id="hub-supply" class="dash-card">
             <div class="dash-card-header">
                 <div><h2>{{ icon('truck') }} Request Supply from Nearby Hubs</h2><p>Request stock for {{ hub_location or 'your assigned hub' }}. The system checks neighboring hubs, protects a 10-Qtl reserve, and assigns an approved available carrier.</p></div>
@@ -247,7 +248,7 @@
                 </div>
             </div>
         </section>
-
+        {% endif %}
     </main>
 
     <div id="lot-edit-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="lot-edit-title">
@@ -297,6 +298,7 @@
         </div>
     </footer>
 
+    <script src="{{ url_for('static', filename='js/dashboard_nav.js') }}"></script>
     <script src="{{ url_for('static', filename='js/agent_dashboard.js') }}"></script>
 </body>
 </html>

@@ -13,7 +13,8 @@ body.agent-body,
 body.buyer-body,
 body.transporter-body,
 body.admin-body {
-    display: block;
+    display: flex;
+    flex-direction: column;
     min-height: 100vh;
     background: var(--dash-canvas);
     color: var(--dash-ink);
@@ -102,7 +103,7 @@ body.admin-body .site-header {
     gap: .7rem;
     min-height: 44px;
     padding: .65rem .75rem;
-    border: 0;
+    border: 1px solid transparent;
     border-radius: 10px;
     color: #c8d9d1;
     background: transparent;
@@ -112,16 +113,28 @@ body.admin-body .site-header {
     text-decoration: none;
     text-align: left;
     cursor: pointer;
-    transition: color .15s ease, background .15s ease, transform .15s ease;
+    transition: color .15s ease, background .15s ease, border-color .15s ease, box-shadow .15s ease, transform .12s ease;
 }
 
 .dash-nav :is(a, button):hover,
-.dash-nav :is(a, button):focus-visible,
+.dash-nav :is(a, button):focus-visible {
+    color: #fff;
+    background: rgba(226, 246, 235, .12);
+    border-color: rgba(149, 214, 175, .22);
+    box-shadow: inset 0 0 0 1px rgba(149, 214, 175, .12);
+}
+
+.dash-nav :is(a, button):active {
+    transform: translateY(1px) scale(.995);
+    box-shadow: inset 0 2px 8px rgba(8, 23, 18, .18);
+}
+
 .dash-nav :is(a, button)[aria-current="true"],
 .dash-nav :is(a, button)[aria-current="page"] {
     color: #fff;
-    background: rgba(226, 246, 235, .12);
-    border: 0;
+    background: linear-gradient(180deg, rgba(126, 224, 163, .18), rgba(60, 125, 93, .16));
+    border-color: rgba(126, 224, 163, .34);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08), 0 0 0 1px rgba(126, 224, 163, .12);
 }
 
 .dash-nav :is(a, button)[aria-current="true"]::before,
@@ -132,6 +145,26 @@ body.admin-body .site-header {
     margin: 0 .65rem 0 -.75rem;
     border-radius: 4px;
     background: #7dd7a1;
+}
+
+.dash-nav .nav-cta {
+    margin-top: .2rem;
+    color: #0c2d26;
+    background: linear-gradient(180deg, #dbf7e6 0%, #c5f0d7 100%);
+    border-color: rgba(89, 161, 116, .35);
+    box-shadow: 0 10px 18px rgba(32, 92, 67, .12);
+}
+
+.dash-nav .nav-cta:hover,
+.dash-nav .nav-cta:focus-visible {
+    color: #0c2d26;
+    background: linear-gradient(180deg, #e7fcef 0%, #d2f3df 100%);
+    border-color: rgba(89, 161, 116, .45);
+}
+
+.dash-nav .nav-cta:active {
+    transform: translateY(1px) scale(.995);
+    box-shadow: inset 0 2px 8px rgba(8, 23, 18, .12), 0 4px 10px rgba(32, 92, 67, .08);
 }
 
 .dash-nav button .icon { width: 1rem; height: 1rem; flex: 0 0 auto; }
@@ -176,6 +209,7 @@ body.admin-body .site-header {
 .header-user .btn:hover { color: #fff; background: rgba(255, 255, 255, .08); }
 
 .main-content {
+    flex: 1 0 auto;
     width: auto;
     max-width: 1560px;
     margin: 0 0 0 var(--dash-rail);
@@ -274,7 +308,7 @@ body.admin-body .site-header {
 .dash-table tbody tr:hover { background: #f9fbfa; }
 
 .site-footer {
-    margin: 0 0 0 var(--dash-rail);
+    margin: auto 0 0 var(--dash-rail);
     border-top: 1px solid var(--dash-border);
     background: #fff;
 }
@@ -290,12 +324,14 @@ body.admin-body .site-header {
 
 @media (max-width: 900px) {
     :root { --dash-rail: 0px; }
+    body { overflow-x: hidden; }
     body.agent-body .site-header,
     body.buyer-body .site-header,
     body.transporter-body .site-header,
     body.admin-body .site-header {
         position: sticky;
         inset: auto;
+        z-index: 60;
         width: 100%;
         max-height: none;
         overflow: visible;
@@ -305,7 +341,7 @@ body.admin-body .site-header {
         min-height: 0;
         padding: 12px 18px 8px;
         display: grid;
-        grid-template-columns: minmax(0, 1fr) auto;
+        grid-template-columns: auto minmax(0, 1fr) auto;
         align-items: center;
         gap: 4px 12px;
     }
@@ -320,19 +356,38 @@ body.admin-body .site-header {
     .site-header .brand { font-size: 1.1rem; }
     .portal-tag { max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .dash-nav {
-        grid-column: 1 / -1;
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        width: min(84vw, 300px);
+        margin: 0;
+        padding: 1.25rem 1rem;
         flex: none;
-        flex-direction: row;
-        gap: .3rem;
-        margin: 8px 0 0;
-        padding: 0 0 3px;
-        overflow-x: auto;
-        scrollbar-width: thin;
+        flex-direction: column;
+        gap: .35rem;
+        overflow-y: auto;
+        overflow-x: hidden;
+        overscroll-behavior: contain;
+        background: #12382d;
+        z-index: 60;
+        transform: translateX(-100%);
+        transition: transform .24s ease;
+        box-shadow: 8px 0 28px rgba(10, 39, 30, .28);
     }
-    .dash-nav::before { display: none; }
-    .dash-nav :is(a, button) { flex: 0 0 auto; min-height: 38px; padding: .45rem .7rem; white-space: nowrap; font-size: .78rem; }
+    body.dash-nav-open .dash-nav {
+        transform: translateX(0);
+    }
+    .dash-nav::before { display: block; }
+    .dash-nav :is(a, button) {
+        flex: 0 0 auto;
+        min-height: 44px;
+        padding: .65rem .75rem;
+        white-space: normal;
+        font-size: .875rem;
+    }
     .dash-nav :is(a, button)[aria-current="true"]::before,
-    .dash-nav :is(a, button)[aria-current="page"]::before { display: none; }
+    .dash-nav :is(a, button)[aria-current="page"]::before { display: block; }
     .header-user {
         flex-direction: row;
         align-items: center;
@@ -371,4 +426,49 @@ body.admin-body .site-header {
     .staff-account-grid { grid-template-columns: 1fr; gap: 14px; }
     .staff-form-actions { align-items: stretch; flex-direction: column; }
     .site-footer .wrap { padding-inline: 14px; }
+}
+
+/* Dashboard mobile drawer (global) */
+body.dash-nav-open { overflow: hidden; }
+.dash-nav-toggle {
+    display: none;
+}
+.dash-nav-overlay {
+    display: none;
+}
+@media (max-width: 900px) {
+    .dash-nav-toggle {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        border: 1px solid rgba(255, 255, 255, .2);
+        border-radius: 10px;
+        background: rgba(255, 255, 255, .08);
+        color: #fff;
+        font-size: 1.25rem;
+        line-height: 1;
+        cursor: pointer;
+        position: relative;
+        z-index: 70;
+    }
+    .dash-nav-toggle:focus-visible {
+        outline: 3px solid rgba(126, 224, 163, .55);
+        outline-offset: 2px;
+    }
+    .dash-nav-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(8, 23, 18, .52);
+        z-index: 55;
+        opacity: 0;
+        transition: opacity .2s ease;
+        pointer-events: none;
+    }
+    body.dash-nav-open .dash-nav-overlay {
+        display: block;
+        opacity: 1;
+        pointer-events: auto;
+    }
 }

@@ -24,6 +24,7 @@
     <!-- ===== Top Header ===== -->
     <header class="site-header" id="site-header">
         <div class="wrap header-row">
+            <button type="button" class="dash-nav-toggle" id="dash-nav-toggle" aria-label="Open navigation menu" aria-expanded="false" aria-controls="dash-nav">☰</button>
             <div class="brand-group">
                 <a class="brand" href="/" aria-label="AgriBridge home">
                     {% include 'partials/logo.html' %}
@@ -32,11 +33,12 @@
                 <span class="portal-tag">Transporter Logistics</span>
             </div>
 
-            <nav class="dash-nav" aria-label="Transporter navigation">
-                <a href="#available-loads" aria-current="true">Loads &amp; Active Trip</a>
-                <a href="#available-loads">Available Loads</a>
-                <a href="#fleet">Vehicle Fleet</a>
-                <a href="#completed-trips">Waybills &amp; History</a>
+            <nav class="dash-nav" id="dash-nav" aria-label="Transporter navigation">
+                {% set active_page = active_page or 'overview' %}
+                <a href="/dashboard/transporter/overview" {% if active_page == 'overview' %}aria-current="page"{% endif %}>Overview</a>
+                <a href="/dashboard/transporter/loads" {% if active_page == 'loads' %}aria-current="page"{% endif %}>Loads &amp; Active Trip</a>
+                <a href="/dashboard/transporter/fleet" {% if active_page == 'fleet' %}aria-current="page"{% endif %}>Vehicle Fleet</a>
+                <a href="/dashboard/transporter/history" {% if active_page == 'history' %}aria-current="page"{% endif %}>Waybills &amp; History</a>
             </nav>
 
             <div class="header-user">
@@ -55,11 +57,13 @@
             </div>
         </div>
     </header>
+    <div class="dash-nav-overlay" id="dash-nav-overlay" aria-hidden="true"></div>
 
     <!-- ===== Main Dashboard Content ===== -->
     <main class="main-content" id="main">
+        {% set active_page = active_page or 'overview' %}
 
-        <!-- Welcome Banner -->
+        {% if active_page == 'overview' %}
         <section class="welcome-card" aria-label="Transporter summary">
             <div class="welcome-copy">
                 <div class="welcome-pill">
@@ -74,13 +78,12 @@
                 <button type="button" class="btn btn-primary btn-lg" data-open-modal="vehicle-modal">
                     {{ icon('truck') }} Register Vehicle
                 </button>
-                <a href="#available-loads" class="btn btn-outline btn-lg">
+                <a href="/dashboard/transporter/loads" class="btn btn-outline btn-lg">
                     {{ icon('package') }} View Bulk Loads
                 </a>
             </div>
         </section>
 
-        <!-- KPI Metrics Grid -->
         <section class="metrics-grid" aria-label="Key metrics">
             <div class="metric-card">
                 <div class="metric-ic metric-ic-amber">
@@ -114,9 +117,8 @@
                     <span class="metric-sub">Includes vehicles awaiting inspection</span>
                 </div>
             </div>
-
         </section>
-
+        {% elif active_page == 'loads' %}
         <section id="available-loads" class="dash-card">
             <div class="dash-card-header"><div><h2>Available Loads</h2><p>Buyer loads are available to claim. Hub replenishment duties are assigned automatically when you have an approved vehicle free.</p></div></div>
             <div class="dash-card-body">
@@ -136,11 +138,12 @@
                 <div class="loads-grid" id="available-loads-grid"><div>Loading live loads...</div></div>
             </div>
         </section>
+        {% elif active_page == 'fleet' %}
         <section id="fleet" class="dash-card">
             <div class="dash-card-header"><div><h2>Vehicle Fleet</h2><p>Only vehicles approved by an administrator can be assigned to a load.</p></div></div>
             <div class="dash-card-body"><div class="fleet-grid" id="fleet-grid"><div>Loading your fleet...</div></div></div>
         </section>
-<!-- Section 4: Completed Distribution & Settled Waybills -->
+        {% elif active_page == 'history' %}
         <section id="completed-trips" class="dash-card">
             <div class="dash-card-header">
                 <div>
@@ -167,6 +170,7 @@
                 </table>
             </div>
         </section>
+        {% endif %}
 
     </main>
 
@@ -324,6 +328,7 @@
         </div>
     </footer>
 
+    <script src="{{ url_for('static', filename='js/dashboard_nav.js') }}"></script>
     <script src="{{ url_for('static', filename='js/transporter_dashboard.js') }}"></script>
 </body>
 </html>

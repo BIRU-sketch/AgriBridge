@@ -427,7 +427,7 @@
 }
 
 /* ---------- Four roles ---------- */
-.roles-grid { display: grid; gap: 1rem; }
+.roles-grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
 .role { display: flex; flex-direction: column; padding: 1.25rem; }
 .role-top { display: flex; align-items: center; gap: .85rem; }
 .role-top h3 { font-size: 1.0625rem; color: var(--deep); }
@@ -451,8 +451,6 @@
     text-underline-offset: 4px;
 }
 .role-note { margin-top: auto; font-size: .9375rem; color: var(--muted); }
-@media (min-width: 640px) { .roles-grid { grid-template-columns: repeat(2, 1fr); } }
-@media (min-width: 1040px) { .roles-grid { grid-template-columns: repeat(4, 1fr); } }
 
 .future {
     display: grid;

@@ -251,6 +251,51 @@ def api_staff_login():
 
 @app.route('/dashboard')
 def dashboard():
+    return redirect('/dashboard/overview')
+
+
+@app.route('/dashboard/overview')
+def dashboard_overview():
+    return _render_dashboard_for_current_user(view_name='overview')
+
+
+@app.route('/dashboard/transporter')
+def transporter_dashboard():
+    return redirect('/dashboard/transporter/overview')
+
+
+@app.route('/dashboard/transporter/<view_name>')
+def transporter_dashboard_view(view_name):
+    view_name = (view_name or '').strip().lower()
+    allowed_transporter_views = {
+        'overview',
+        'loads',
+        'fleet',
+        'history',
+    }
+    if view_name not in allowed_transporter_views:
+        return redirect('/dashboard/transporter/overview')
+    return _render_dashboard_for_current_user(view_name=view_name, role_prefix='transporter')
+
+
+@app.route('/dashboard/<view_name>')
+def dashboard_view(view_name):
+    view_name = (view_name or '').strip().lower()
+    allowed_agent_views = {
+        'overview',
+        'farmers',
+        'produce-lots',
+        'orders',
+        'transfer-approvals',
+        'hub-supply',
+        'new-product-lot',
+    }
+    if view_name not in allowed_agent_views:
+        return redirect('/dashboard/overview')
+    return _render_dashboard_for_current_user(view_name=view_name)
+
+
+def _render_dashboard_for_current_user(view_name=None, role_prefix=None):
     token = request.cookies.get('access_token')
     staff_account = get_current_staff_account()
     if not token and not staff_account:
@@ -273,11 +318,25 @@ def dashboard():
             return render_template('pending_verification.html', username=user_name)
 
     if role == 'agent':
-        return render_template('agent_dashboard.html', username=user_name, hub_location=getattr(user, 'hub_location', None), hubs=ETHIOPIAN_HUBS)
+        active_page = view_name or 'overview'
+        if active_page == 'new-product-lot':
+            return redirect('/add-produce-lot')
+        return render_template(
+            'agent_dashboard.html',
+            username=user_name,
+            hub_location=getattr(user, 'hub_location', None),
+            hubs=ETHIOPIAN_HUBS,
+            active_page=active_page,
+        )
     elif role == 'buyer':
         return render_template('buyer_dashboard.html', username=user_name)
     elif role == 'transporter':
-        return render_template('transporter_dashboard.html', username=user_name)
+        active_page = view_name or 'overview'
+        return render_template(
+            'transporter_dashboard.html',
+            username=user_name,
+            active_page=active_page,
+        )
     elif role == 'admin':
         return render_template('admin_dashboard.html', username=user_name, hubs=ETHIOPIAN_HUBS)
     return redirect('/auth')
