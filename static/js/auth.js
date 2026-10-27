@@ -89,8 +89,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (panelReset) panelReset.hidden = true;
             if (panelForgot) panelForgot.hidden = false;
 
-            authTitle.textContent = 'Reset your password';
-            authSub.textContent = 'Enter your email address and we\'ll send you a password recovery link.';
+            authTitle.textContent = 'Reset password';
+            authSub.textContent = 'Enter your email address and we\'ll send you a recovery link.';
 
             // Prefill email if entered in login
             const loginEmailVal = document.getElementById('login-email')?.value.trim();
@@ -107,7 +107,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (panelReset) panelReset.hidden = false;
 
             authTitle.textContent = 'Set new password';
-            authSub.textContent = 'Choose a strong password with at least 8 characters.';
+            authSub.textContent = 'Choose a password with at least 8 characters.';
         } else if (mode === 'signup') {
             if (segTabs) segTabs.hidden = false;
             tabSignup?.setAttribute('aria-selected', 'true');
@@ -120,8 +120,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (panelForgot) panelForgot.hidden = true;
             if (panelReset) panelReset.hidden = true;
 
-            authTitle.textContent = 'Create account';
-            authSub.textContent = 'Create a buyer account to source produce from participating hubs.';
+            authTitle.textContent = 'Create an account';
+            authSub.textContent = 'Register to browse regional hub inventory and place commodity orders.';
         } else {
             // Default: 'login'
             if (segTabs) segTabs.hidden = false;
@@ -135,8 +135,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (panelForgot) panelForgot.hidden = true;
             if (panelReset) panelReset.hidden = true;
 
-            authTitle.textContent = 'Log in';
-            authSub.textContent = 'Buyers sign in here. Staff members use the company-issued staff sign-in page.';
+            authTitle.textContent = 'Welcome back';
+            authSub.textContent = 'Sign in to access real-time stock, orders, and delivery waybills.';
         }
     }
 
@@ -242,7 +242,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (hasError) return;
 
-        const originalText = submitBtn?.dataset.label || submitBtn?.textContent || 'Log in';
+        const originalText = submitBtn?.dataset.label || submitBtn?.textContent || 'Sign In';
         const busyText = submitBtn?.dataset.busy || 'Logging in…';
 
         try {
@@ -326,7 +326,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        const originalText = submitBtn?.dataset.label || submitBtn?.textContent || 'Create account';
+        const originalText = submitBtn?.dataset.label || submitBtn?.textContent || 'Create Account';
         const busyText = submitBtn?.dataset.busy || 'Creating account…';
 
         try {

@@ -32,6 +32,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const closeWaybillBtns = document.querySelectorAll('[data-close-modal="waybill-modal"]');
     const printWaybillBtn = document.getElementById('print-waybill-btn');
 
+    // Availability status elements
+    const statusBadge = document.getElementById('transporter-status-badge');
+    const statusSub = document.getElementById('transporter-status-sub');
+    const toggleStatusBtn = document.getElementById('toggle-availability-btn');
+    const statusIc = document.getElementById('metric-ic-status');
+    const viewActiveWaybillBtn = document.getElementById('view-active-waybill-btn');
+    let currentTransporterStatus = 'free';
+
     // Toast
     const toast = document.getElementById('toast-msg');
     let toastTimeout = null;
@@ -94,6 +102,104 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // 0. Load Transporter Availability Status
+    async function loadTransporterStatus() {
+        if (!statusBadge || !toggleStatusBtn) return;
+        try {
+            const res = await fetch('/api/transporter/status');
+            let data = {};
+            try { data = await res.json(); } catch (e) { data = {}; }
+            if (!res.ok) return;
+
+            const status = data.status || 'free';
+            const isOnTrip = data.is_on_trip === true;
+            currentTransporterStatus = status;
+
+            if (status === 'free') {
+                statusBadge.className = 'badge badge-green';
+                statusBadge.textContent = 'Free';
+                if (statusSub) statusSub.textContent = 'Ready for automated load assignment';
+                toggleStatusBtn.textContent = 'Set Busy';
+                toggleStatusBtn.className = 'btn btn-sm btn-outline';
+                toggleStatusBtn.disabled = false;
+                if (statusIc) {
+                    statusIc.style.background = 'rgba(16,185,129,0.12)';
+                    statusIc.style.color = '#059669';
+                }
+            } else {
+                statusBadge.className = 'badge badge-amber';
+                statusBadge.textContent = 'Busy';
+                if (statusSub) statusSub.textContent = isOnTrip ? 'Active delivery in progress' : 'Unavailable for automated assignment';
+                toggleStatusBtn.textContent = isOnTrip ? 'On Active Trip' : 'Set Free';
+                toggleStatusBtn.className = isOnTrip ? 'btn btn-sm btn-ghost' : 'btn btn-sm btn-primary';
+                toggleStatusBtn.disabled = isOnTrip;
+                if (statusIc) {
+                    statusIc.style.background = 'rgba(245,158,11,0.12)';
+                    statusIc.style.color = '#D97706';
+                }
+            }
+        } catch (err) {
+            console.error('Failed to load transporter status:', err);
+        }
+    }
+
+    if (toggleStatusBtn) {
+        toggleStatusBtn.addEventListener('click', async () => {
+            const targetStatus = currentTransporterStatus === 'free' ? 'busy' : 'free';
+            toggleStatusBtn.disabled = true;
+            toggleStatusBtn.textContent = 'Updating...';
+
+            try {
+                const res = await fetch('/api/transporter/status', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: targetStatus })
+                });
+                let data = {};
+                try { data = await res.json(); } catch (e) { data = {}; }
+                if (!res.ok) throw new Error(data.error || `Server error (${res.status})`);
+
+                showToast(data.message || `Status set to ${targetStatus}`);
+                await loadTransporterStatus();
+                await loadActiveRoute();
+                await loadAvailableLoads();
+                await loadFleet();
+            } catch (err) {
+                showToast(err.message || 'Error toggling availability status');
+                await loadTransporterStatus();
+            }
+        });
+    }
+
+    if (viewActiveWaybillBtn) {
+        viewActiveWaybillBtn.addEventListener('click', () => {
+            if (!currentShipment) {
+                showToast('No active trip consignment to view.');
+                return;
+            }
+            const modal = document.getElementById('waybill-modal');
+            if (!modal) return;
+            const refEl = document.getElementById('wb-modal-ref');
+            const routeEl = document.getElementById('wb-modal-route');
+            const cargoEl = document.getElementById('wb-modal-cargo');
+            const tonnageEl = document.getElementById('wb-modal-tonnage');
+            const tariffEl = document.getElementById('wb-modal-tariff');
+            const vehicleEl = document.getElementById('wb-modal-vehicle');
+            const driverEl = document.getElementById('wb-modal-driver');
+
+            if (refEl) refEl.textContent = '#' + (currentShipment.waybill_id || '---');
+            if (routeEl) routeEl.textContent = `${currentShipment.origin_hub || '--'} -> ${currentShipment.destination_hub || '--'}`;
+            if (cargoEl) cargoEl.textContent = `${currentShipment.crop_type || 'Crop'} (${currentShipment.quality_grade || 'Standard'})`;
+            if (tonnageEl) tonnageEl.textContent = `${currentShipment.quantity || 0} Quintals`;
+            if (tariffEl) tariffEl.textContent = `${(Number(currentShipment.quantity || 0) * 110).toLocaleString()} ETB`;
+            if (vehicleEl) vehicleEl.textContent = currentShipment.vehicle_plate || 'Assigned Truck';
+            if (driverEl) driverEl.textContent = currentShipment.transporter_name || 'Designated Driver';
+
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        });
+    }
+
     // 1. Load Active Shipment
     async function loadActiveRoute() {
         try {
@@ -103,6 +209,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const previousShipment = currentShipment;
             currentShipment = shipment;
 
+            loadTransporterStatus();
             if (!shipment) {
                 if (previousShipment) { loadCompletedHistory(); loadFleet(); }
                 if (activeRoutePanel) activeRoutePanel.hidden = true;
@@ -302,19 +409,19 @@ document.addEventListener('DOMContentLoaded', () => {
             const registerVehBtn = document.getElementById('register-veh-btn');
 
             if (fleetCountEl) {
-                fleetCountEl.innerHTML = `${vehicles.length} / 5 <small style="font-size:.9rem;font-weight:600;">Trucks</small>`;
+                fleetCountEl.innerHTML = `${vehicles.length} / 1 <small style="font-size:.9rem;font-weight:600;">Vehicle</small>`;
             }
 
-            // Enforce limit on frontend button
+            // Enforce 1 vehicle limit on frontend button
             if (registerVehBtn) {
-                if (vehicles.length >= 5) {
+                if (vehicles.length >= 1) {
                     registerVehBtn.disabled = true;
-                    registerVehBtn.textContent = 'Quota Reached (Max 5)';
+                    registerVehBtn.textContent = 'Vehicle Registered (Limit 1)';
                     registerVehBtn.classList.remove('btn-primary');
                     registerVehBtn.classList.add('btn-ghost');
                 } else {
                     registerVehBtn.disabled = false;
-                    registerVehBtn.textContent = 'Register New Vehicle';
+                    registerVehBtn.textContent = 'Register Vehicle';
                     registerVehBtn.classList.remove('btn-ghost');
                     registerVehBtn.classList.add('btn-primary');
                 }
@@ -323,7 +430,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (vehicles.length === 0) {
                 fleetGrid.innerHTML = `
                     <div style="grid-column: 1 / -1; padding: 2rem; text-align: center; color: var(--muted);">
-                        No vehicles registered yet. Click "Register New Vehicle" above (Max 5).
+                        No vehicle registered yet. Click "Register Vehicle" above to register your commercial vehicle (1 vehicle limit).
                     </div>
                 `;
                 return;
@@ -332,7 +439,7 @@ document.addEventListener('DOMContentLoaded', () => {
             fleetGrid.innerHTML = '';
             vehicles.forEach(veh => {
                 const isApproved = veh.approved !== false && !veh.status?.includes('Pending');
-                const isAvailable = isApproved && (veh.status?.includes('Available') || !veh.status);
+                const isAvailable = isApproved && (veh.status?.includes('Available') || veh.status === 'Approved for Hub Dispatch' || !veh.status);
                 const isPending = !isApproved || veh.status?.includes('Pending');
 
                 let badgeHtml = '';
@@ -445,6 +552,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // Vehicle Modal Open/Close
     openVehicleBtns.forEach(btn => {
         btn.addEventListener('click', () => {
+            if (availableVehicles.length >= 1) {
+                showToast('You already have a vehicle registered. Transporters are limited to 1 vehicle.');
+                return;
+            }
             vehicleModal?.classList.add('active');
             document.body.style.overflow = 'hidden';
         });
@@ -461,6 +572,12 @@ document.addEventListener('DOMContentLoaded', () => {
     if (vehicleForm) {
         vehicleForm.addEventListener('submit', async (e) => {
             e.preventDefault();
+            if (availableVehicles.length >= 1) {
+                showToast('Transporters can only register 1 vehicle. You already have a vehicle registered.');
+                vehicleModal?.classList.remove('active');
+                document.body.style.overflow = '';
+                return;
+            }
             const submitBtn = vehicleForm.querySelector('button[type="submit"]');
             if (submitBtn) {
                 submitBtn.disabled = true;
@@ -508,7 +625,7 @@ document.addEventListener('DOMContentLoaded', () => {
             } finally {
                 if (submitBtn) {
                     submitBtn.disabled = false;
-                    submitBtn.textContent = 'Register Vehicle in Fleet';
+                    submitBtn.textContent = 'Register Vehicle';
                 }
             }
         });
@@ -527,11 +644,15 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Initial Execution
+    loadTransporterStatus();
     loadActiveRoute();
     loadAvailableLoads();
     loadFleet();
     loadCompletedHistory();
     // Keep system-assigned replenishment duties visible while the dashboard is open.
-    setInterval(loadActiveRoute, 15000);
+    setInterval(() => {
+        loadActiveRoute();
+        loadTransporterStatus();
+    }, 15000);
     setInterval(loadAvailableLoads, 30000);
 });

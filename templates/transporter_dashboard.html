@@ -75,7 +75,7 @@
                 </p>
             </div>
             <div class="welcome-actions">
-                <button type="button" class="btn btn-primary btn-lg" data-open-modal="vehicle-modal">
+                <button type="button" class="btn btn-primary btn-lg" id="register-veh-btn" data-open-modal="vehicle-modal">
                     {{ icon('truck') }} Register Vehicle
                 </button>
                 <a href="/dashboard/transporter/loads" class="btn btn-outline btn-lg">
@@ -112,11 +112,30 @@
                     {{ icon('shield-check') }}
                 </div>
                 <div class="metric-content">
-                    <span class="metric-label">Registered Fleet</span>
-                    <span class="metric-val" id="metric-fleet-count">0 <small style="font-size:.9rem;font-weight:600;">Trucks</small></span>
-                    <span class="metric-sub">Includes vehicles awaiting inspection</span>
+                    <span class="metric-label">Registered Vehicle</span>
+                    <span class="metric-val" id="metric-fleet-count">0 <small style="font-size:.9rem;font-weight:600;">/ 1 Vehicle</small></span>
+                    <span class="metric-sub">Limit: 1 vehicle per transporter</span>
                 </div>
             </div>
+
+
+
+            <div class="metric-card">
+                <div class="metric-ic" id="metric-ic-status" style="background:rgba(16,185,129,0.12); color:#059669;">
+                    {{ icon('shield-check') }}
+                </div>
+                <div class="metric-content" style="flex:1;">
+                    <span class="metric-label">Duty Availability</span>
+                    <div style="display:flex; align-items:center; justify-content:space-between; gap:0.5rem; margin-top:0.35rem; margin-bottom:0.25rem;">
+                        <span class="badge badge-green" id="transporter-status-badge">Free</span>
+                        <button type="button" id="toggle-availability-btn" class="btn btn-sm btn-outline" style="font-size:0.75rem; padding:0.25rem 0.6rem;">
+                            Set Busy
+                        </button>
+                    </div>
+                    <span class="metric-sub" id="transporter-status-sub">Ready for automated load assignment</span>
+                </div>
+            </div>
+
         </section>
         {% elif active_page == 'loads' %}
         <section id="available-loads" class="dash-card">
@@ -133,7 +152,10 @@
                             <div class="stepper-steps"><div class="step-item"><span class="step-num">1</span><span class="step-name">Dispatched</span></div><div class="step-item"><span class="step-num">2</span><span class="step-name">Loaded at Hub</span></div><div class="step-item"><span class="step-num">3</span><span class="step-name">In Transit</span></div><div class="step-item"><span class="step-num">4</span><span class="step-name">Delivered</span></div></div>
                         </div>
                     </details>
-                    <button type="button" id="advance-status-btn" class="btn btn-primary">Update trip status</button>
+                    <div style="display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap; margin-top:1rem;">
+                        <button type="button" id="advance-status-btn" class="btn btn-primary">Update trip status</button>
+                        <button type="button" id="view-active-waybill-btn" class="btn btn-outline">{{ icon('clipboard-check') }} Digital Waybill</button>
+                    </div>
                 </div>
                 <div class="loads-grid" id="available-loads-grid"><div>Loading live loads...</div></div>
             </div>
@@ -178,14 +200,14 @@
     <div id="vehicle-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="vehicle-modal-title">
         <div class="modal-box">
             <div class="modal-head">
-                <h3 id="vehicle-modal-title">Register Commercial Vehicle to Fleet</h3>
+                <h3 id="vehicle-modal-title">Register Commercial Vehicle</h3>
                 <button type="button" class="modal-close" data-close-modal="vehicle-modal" aria-label="Close dialog">&times;</button>
             </div>
 
             <form id="vehicle-form">
                 <div class="modal-body">
                     <p style="font-size:.875rem; color:var(--muted); margin:0;">
-                        Add a transport vehicle to your carrier fleet (Maximum quota: 5 vehicles). Newly registered vehicles must undergo administrative roadworthiness approval before dispatch.
+                        Add your commercial transport vehicle (Limit: 1 vehicle per transporter). Newly registered vehicles must undergo administrative roadworthiness approval before dispatch.
                     </p>
 
                     <div class="input-field">

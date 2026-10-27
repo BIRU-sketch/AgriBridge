@@ -6,8 +6,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>AgriBridge | Digital agricultural market and logistics for Ethiopia</title>
-    <meta name="description" content="AgriBridge connects registered farm supply with verified buyers and coordinates transport from collection point to delivery, across Ethiopia.">
+    <title>AgriBridge | Agricultural Marketplace &amp; Logistics — Ethiopia</title>
+    <meta name="description" content="AgriBridge connects buyers with verified produce stock at regional hubs across Ethiopia. Search inventory, place orders, and track delivery.">
     <meta name="theme-color" content="#0A3D31">
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M3.5 19.5C3.5 12 8 6.5 15.5 4.5c.4 7.5-3 13.5-12 15Z' fill='%230A7A41'/%3E%3Cpath d='M7 28C6 15 14 6 28.5 4.5 29 18.5 21 27 7 28Z' fill='%2312A05B'/%3E%3Cpath d='M8 26.5C13 19 18.5 13 25 8.5' fill='none' stroke='%23fff' stroke-width='1.7' stroke-linecap='round'/%3E%3C/svg%3E">
     <script>document.documentElement.classList.add('js');</script>
@@ -39,7 +39,7 @@
                 <a href="#features" data-spy="features">Features</a>
                 <a href="#about" data-spy="about">About</a>
                 <a href="#contact" data-spy="contact">Contact</a>
-                <a class="nav-login" href="/auth">Login</a>
+                <a class="nav-login" href="/auth">Sign In</a>
                 <a class="nav-cta btn btn-primary" href="/auth?mode=signup">Get Started</a>
             </nav>
 
@@ -53,7 +53,7 @@
                         <span class="lang-item is-soon" lang="am">አማርኛ <small>(coming soon)</small></span>
                     </div>
                 </details>
-                <a class="btn btn-outline btn-sm hide-md" href="/auth">Login</a>
+                <a class="btn btn-outline btn-sm hide-md" href="/auth">Sign In</a>
                 <a class="btn btn-primary btn-sm hide-xs" href="/auth?mode=signup">Get Started</a>
                 <button class="nav-toggle" id="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Menu">
                     <span class="nt-open">{{ icon('menu') }}</span>
@@ -69,14 +69,14 @@
         <section class="hero" id="top">
             <div class="wrap hero-inner">
                 <div class="hero-copy">
-                    <p class="hero-kicker">A clearer way to source agricultural produce in Ethiopia</p>
-                    <h1>Find the produce your business needs with <span class="accent">AgriBridge</span></h1>
+                    <p class="hero-kicker">Agricultural Marketplace &amp; Logistics Platform</p>
+                    <h1>Source verified produce directly from Ethiopian hubs with <span class="accent">AgriBridge</span></h1>
                     <p class="hero-lead">
-                        Search available hub stock, compare crop grades and prices, place an order, and follow its transport from dispatch to delivery.
+                        Browse real-time grain and produce inventory at regional aggregation hubs, place orders at transparent prices, and let the platform handle carrier dispatch and delivery tracking.
                     </p>
                     <div class="cta-row">
-                        <a class="btn btn-primary btn-lg" href="/auth?mode=signup">Create a Buyer Account {{ icon('arrow-right') }}</a>
-                        <a class="btn btn-outline btn-lg" href="/auth?mode=login">Log in</a>
+                        <a class="btn btn-primary btn-lg" href="/auth?mode=signup">Create an Account {{ icon('arrow-right') }}</a>
+                        <a class="btn btn-outline btn-lg" href="/auth?mode=login">Sign In</a>
                     </div>
                 </div>
             </div>
@@ -91,10 +91,10 @@
 
         <!-- ===== Flow strip ===== -->
         <div class="wrap strip-wrap">
-            <ol class="strip" aria-label="The process in five words">
-                <li class="strip-item"><span class="ic">{{ icon('leaf') }}</span><span>Produce</span></li>
-                <li class="strip-item"><span class="ic">{{ icon('search') }}</span><span>Match</span></li>
-                <li class="strip-item"><span class="ic">{{ icon('handshake') }}</span><span>Agreement</span></li>
+            <ol class="strip" aria-label="The process in five steps">
+                <li class="strip-item"><span class="ic">{{ icon('search') }}</span><span>Search</span></li>
+                <li class="strip-item"><span class="ic">{{ icon('leaf') }}</span><span>Select</span></li>
+                <li class="strip-item"><span class="ic">{{ icon('handshake') }}</span><span>Purchase</span></li>
                 <li class="strip-item"><span class="ic">{{ icon('truck') }}</span><span>Transport</span></li>
                 <li class="strip-item"><span class="ic">{{ icon('package') }}</span><span>Delivery</span></li>
             </ol>
@@ -104,34 +104,34 @@
         <section class="section" id="how">
             <div class="wrap">
                 <div class="section-head">
-                <h2>Buy through AgriBridge</h2>
-                    <p>Source available produce and coordinate delivery through one buyer account.</p>
+                    <h2>How It Works</h2>
+                    <p>From searching available stock to receiving delivery at your destination — five steps, one platform.</p>
                 </div>
                 <ol class="how-grid">
                     <li class="card how-card">
-                        <div class="card-top"><span class="num">1</span><span class="how-icon">{{ icon('users') }}</span></div>
-                        <h3>Search available stock</h3>
-                        <p>Browse produce lots recorded at participating aggregation hubs.</p>
+                        <div class="card-top"><span class="num">1</span><span class="how-icon">{{ icon('search') }}</span></div>
+                        <h3>Search Inventory</h3>
+                        <p>Browse available grain, pulse, and oilseed lots stored across regional aggregation hubs.</p>
                     </li>
                     <li class="card how-card">
                         <div class="card-top"><span class="num">2</span><span class="how-icon">{{ icon('leaf') }}</span></div>
-                        <h3>Review crop details</h3>
-                        <p>Check grade, quantity, price, and hub location before placing an order.</p>
+                        <h3>Review Quality &amp; Price</h3>
+                        <p>Check quality grades, available tonnage, and fixed prices per quintal before committing.</p>
                     </li>
                     <li class="card how-card">
-                        <div class="card-top"><span class="num">3</span><span class="how-icon">{{ icon('search') }}</span></div>
-                        <h3>Place your order</h3>
-                        <p>Choose a quantity from available stock and select a destination hub.</p>
+                        <div class="card-top"><span class="num">3</span><span class="how-icon">{{ icon('clipboard-check') }}</span></div>
+                        <h3>Place Your Order</h3>
+                        <p>Select a quantity and destination hub. Stock is reserved immediately — no double-selling.</p>
                     </li>
                     <li class="card how-card">
                         <div class="card-top"><span class="num">4</span><span class="how-icon">{{ icon('truck') }}</span></div>
-                        <h3>Follow delivery</h3>
-                        <p>Review the order and waybill status as a transporter moves the produce.</p>
+                        <h3>Carrier Is Assigned</h3>
+                        <p>A verified transporter is automatically dispatched with a digital consignment waybill.</p>
                     </li>
                     <li class="card how-card">
                         <div class="card-top"><span class="num">5</span><span class="how-icon">{{ icon('check-circle') }}</span></div>
-                        <h3>Manage trade history</h3>
-                        <p>Return to your buyer dashboard to see your orders and receipts.</p>
+                        <h3>Track &amp; Receive</h3>
+                        <p>Follow each delivery milestone — loading, transit, offloading — until settlement.</p>
                     </li>
                 </ol>
             </div>
@@ -141,87 +141,102 @@
         <section class="section section-tight" id="features">
             <div class="wrap">
                 <div class="section-head">
-                    <h2>Built for Agricultural Coordination</h2>
-                    <p>Tools to help institutional buyers source produce and arrange delivery.</p>
+                    <h2>Platform Features</h2>
+                    <p>Everything needed to coordinate agricultural procurement and delivery across Ethiopia.</p>
                 </div>
                 <div class="feature-grid">
                     <article class="card feature">
                         <span class="ic ic-lg">{{ icon('leaf') }}</span>
-                        <div><h3>Farmer &amp; Produce Registration</h3><p>Agents register farmers and available produce lots.</p></div>
-                    </article>
-                    <article class="card feature">
-                        <span class="ic ic-lg">{{ icon('users') }}</span>
-                        <div><h3>Buyer Access</h3><p>Verified buyers search and purchase available hub stock.</p></div>
+                        <div><h3>Live Hub Stock</h3><p>Real-time inventory from cooperatives and collection centers, aggregated at certified hubs.</p></div>
                     </article>
                     <article class="card feature">
                         <span class="ic ic-lg">{{ icon('target') }}</span>
-                        <div><h3>Stock Search</h3><p>Search hub stock by crop and grade, then review listed quantity and price.</p></div>
+                        <div><h3>Quality Grading</h3><p>Every lot is inspected by extension agents and classified by national quality standards.</p></div>
+                    </article>
+                    <article class="card feature">
+                        <span class="ic ic-lg">{{ icon('banknote') }}</span>
+                        <div><h3>Transparent Pricing</h3><p>Fixed benchmark prices per quintal — no hidden fees or broker markups.</p></div>
                     </article>
                     <article class="card feature">
                         <span class="ic ic-lg">{{ icon('shield-check') }}</span>
-                        <div><h3>Purchase Orders</h3><p>Buyers select available quantities and submit purchase orders.</p></div>
+                        <div><h3>Guaranteed Reservation</h3><p>Confirmed orders lock stock instantly. What you buy is held for your delivery.</p></div>
                     </article>
                     <article class="card feature">
                         <span class="ic ic-lg">{{ icon('truck') }}</span>
-                        <div><h3>Shipment Coordination</h3><p>Transporters handle shipments and update delivery status.</p></div>
+                        <div><h3>Automated Dispatch</h3><p>Transporters are assigned automatically and tracked through loading, transit, and offloading.</p></div>
+                    </article>
+                    <article class="card feature">
+                        <span class="ic ic-lg">{{ icon('activity') }}</span>
+                        <div><h3>Full Traceability</h3><p>Digital waybills and milestone tracking from origin hub to final destination.</p></div>
                     </article>
                 </div>
             </div>
         </section>
 
-        <!-- ===== Four roles ===== -->
+        <!-- ===== About / Roles ===== -->
         <section class="section section-mint" id="about">
             <div class="wrap">
                 <div class="section-head">
-                        <h2>Designed for Buyers, Connected to Supply Teams</h2>
+                    <h2>Who Uses AgriBridge</h2>
+                    <p>The platform connects three roles to move produce from farm to market.</p>
                 </div>
                 <div class="roles-grid">
                     <article class="card role">
-                        <div class="role-top"><span class="ic ic-lg">{{ icon('users') }}</span><h3>Extension / Cooperative Agent</h3></div>
+                        <div class="role-top"><span class="ic ic-lg">{{ icon('users') }}</span><h3>Extension Agents</h3></div>
                         <ul>
-                            <li>Register farmers</li>
-                            <li>Register produce</li>
-                            <li>Manage farmer and produce records</li>
+                            <li>Register farmers and record produce lots</li>
+                            <li>Manage inventory at assigned hubs</li>
+                            <li>Approve incoming hub-to-hub transfers</li>
                         </ul>
-                        <a class="role-link" href="/staff/login">Staff login</a>
+                        <span class="role-note">Staff portal access</span>
                     </article>
                     <article class="card role">
-                        <div class="role-top"><span class="ic ic-lg ic-blue">{{ icon('user') }}</span><h3>Buyer</h3></div>
+                        <div class="role-top"><span class="ic ic-lg ic-blue">{{ icon('user') }}</span><h3>Buyers</h3></div>
                         <ul>
-                            <li>Search live hub inventory</li>
-                            <li>Place produce orders</li>
-                            <li>Review order history</li>
+                            <li>Search and compare available stock</li>
+                            <li>Place orders and reserve quantities</li>
+                            <li>Track delivery status in real-time</li>
                         </ul>
-                        <a class="role-link" href="/auth?mode=signup">Create a buyer account</a>
+                        <a class="role-link" href="/auth?mode=signup">Create an account &rarr;</a>
                     </article>
                     <article class="card role">
-                        <div class="role-top"><span class="ic ic-lg ic-orange">{{ icon('truck') }}</span><h3>Transporter</h3></div>
+                        <div class="role-top"><span class="ic ic-lg ic-orange">{{ icon('truck') }}</span><h3>Transporters</h3></div>
                         <ul>
-                            <li>Manage vehicles</li>
-                            <li>Claim available shipments</li>
-                            <li>Update shipment status</li>
+                            <li>Register vehicles for roadworthiness review</li>
+                            <li>Receive automated load assignments</li>
+                            <li>Update trip progress and generate waybills</li>
                         </ul>
-                        <a class="role-link" href="/staff/login">Staff login</a>
+                        <span class="role-note">Staff portal access</span>
                     </article>
+
+                </div>
+
+                <!-- Staff portal link -->
+                <div style="margin-top: 1.75rem; background: #fff; border: 1.5px solid var(--line); border-left: 4px solid var(--brand); border-radius: var(--radius-m, 10px); padding: 1.15rem 1.5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .75rem;">
+                    <div>
+                        <h4 style="margin: 0 0 .2rem; font-size: 1rem; font-weight: 700; color: var(--deep);">Staff &amp; Logistics Partners</h4>
+                        <p style="margin: 0; color: var(--ink-soft); font-size: .9rem;">Agents, transporters, and administrators sign in through the staff portal.</p>
+                    </div>
+                    <a href="/staff/login" class="btn btn-outline btn-sm" style="white-space: nowrap;">Staff Sign In {{ icon('arrow-right') }}</a>
                 </div>
 
                 <div class="future">
                     <div class="future-text">
-                        <h3>Designed for Future Expansion</h3>
-                        <p>We plan to add more features in future versions to make AgriBridge even more powerful.</p>
+                        <h3>Coming Soon</h3>
+                        <p>Features we're working on for future releases.</p>
                     </div>
                     <ul class="future-list">
-                        <li>{{ icon('credit-card') }}<span>Payments</span></li>
-                        <li>{{ icon('message') }}<span>SMS / USSD</span></li>
-                        <li>{{ icon('pin') }}<span>Live GPS</span></li>
+                        <li>{{ icon('credit-card') }}<span>Digital Payments</span></li>
+                        <li>{{ icon('message') }}<span>SMS Alerts</span></li>
+                        <li>{{ icon('pin') }}<span>Live GPS Tracking</span></li>
                         <li>{{ icon('link') }}<span>External APIs</span></li>
-                        <li>{{ icon('chart') }}<span>Advanced Analytics</span></li>
+                        <li>{{ icon('chart') }}<span>Price Analytics</span></li>
                     </ul>
                 </div>
             </div>
         </section>
 
-        <!-- ===== Closing call to action ===== -->
+        <!-- ===== Closing CTA ===== -->
         <section class="cta on-dark">
             <svg class="cta-leaf" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
                 <path d="M3.5 19.5C3.5 12 8 6.5 15.5 4.5c.4 7.5-3 13.5-12 15Z"/>
@@ -229,8 +244,8 @@
             </svg>
             <div class="wrap cta-inner">
                 <div>
-                    <h2>Bridging Agricultural Supply and Demand</h2>
-                    <p>Coordinate produce, matching, transport, and delivery through one connected platform.</p>
+                    <h2>Ready to get started?</h2>
+                    <p>Create an account to search live hub inventory, place orders, and coordinate delivery across Ethiopia.</p>
                 </div>
                 <a class="btn btn-primary btn-lg" href="/auth?mode=signup">Get Started {{ icon('arrow-right') }}</a>
             </div>
@@ -249,7 +264,8 @@
             </div>
             <ul class="footer-contact">
                 <li>{{ icon('mail') }}<a href="mailto:info@agribridge.et">info@agribridge.et</a></li>
-                <li>{{ icon('pin') }}<span>Addis Ababa, Ethiopia</span></li>
+                <li>{{ icon('pin') }}<span>Bahir Dar, Ethiopia</span></li>
+                <li style="margin-top: .25rem;"><a href="/auth" style="font-weight:600; color:var(--brand);">Buyer Portal</a> &middot; <a href="/staff/login">Staff Portal</a></li>
             </ul>
         </div>
         <div class="wrap footer-base">&copy; 2026 AgriBridge. All rights reserved.</div>
