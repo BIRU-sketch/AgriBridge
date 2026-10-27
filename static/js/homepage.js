@@ -96,4 +96,44 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }, { passive: true });
     }
+
+    // ------------------------------------------------------------------------
+    // Sticky Header Glass Effect on Scroll
+    // ------------------------------------------------------------------------
+    if (siteHeader) {
+        const handleHeaderScroll = () => {
+            if (window.scrollY > 16) {
+                siteHeader.classList.add('is-scrolled');
+            } else {
+                siteHeader.classList.remove('is-scrolled');
+            }
+        };
+        window.addEventListener('scroll', handleHeaderScroll, { passive: true });
+        handleHeaderScroll();
+    }
+
+    // ------------------------------------------------------------------------
+    // Scroll Reveal Observer (Subtle Entry Animations)
+    // ------------------------------------------------------------------------
+    const revealEls = document.querySelectorAll('.reveal');
+    if (revealEls.length > 0) {
+        if ('IntersectionObserver' in window) {
+            const revealObserver = new IntersectionObserver((entries, observer) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-revealed');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, {
+                root: null,
+                rootMargin: '0px 0px -40px 0px',
+                threshold: 0.08
+            });
+
+            revealEls.forEach((el) => revealObserver.observe(el));
+        } else {
+            revealEls.forEach((el) => el.classList.add('is-revealed'));
+        }
+    }
 });

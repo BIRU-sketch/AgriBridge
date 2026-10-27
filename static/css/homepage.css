@@ -8,8 +8,16 @@
     position: sticky;
     top: 0;
     z-index: 30;
-    background: rgba(255, 255, 255, .97);
+    background: rgba(255, 255, 255, .96);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     border-bottom: 1px solid var(--line);
+    transition: background-color 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+.site-header.is-scrolled {
+    background: rgba(255, 255, 255, .92);
+    box-shadow: 0 4px 20px -8px rgba(10, 61, 49, 0.12);
+    border-bottom-color: rgba(214, 230, 220, 0.7);
 }
 .header-row { display: flex; align-items: center; gap: 1rem; min-height: 4.5rem; }
 .header-actions { display: flex; align-items: center; gap: .6rem; margin-left: auto; }
@@ -141,6 +149,33 @@
     border: 1px solid var(--line);
     border-radius: var(--radius-l);
     box-shadow: 0 1px 2px rgba(10, 61, 49, .04), 0 12px 28px -20px rgba(10, 61, 49, .25);
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+                box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+                border-color 0.25s ease;
+}
+.card:hover {
+    transform: translateY(-4px);
+    border-color: #B2D8C3;
+    box-shadow: 0 16px 32px -12px rgba(10, 61, 49, 0.14), 0 2px 6px -1px rgba(0, 0, 0, 0.03);
+}
+
+.card .ic,
+.card .how-icon {
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.card:hover .ic {
+    transform: scale(1.07);
+}
+.how-card .num {
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+                background-color 0.25s ease;
+}
+.how-card:hover .num {
+    transform: scale(1.1);
+    background-color: var(--brand-2);
+}
+.how-card:hover .how-icon {
+    transform: translateY(-2px);
 }
 
 /* Round icon badges */
@@ -160,17 +195,82 @@
 .ic-purple { --ic-bg: #ECE8FA; --ic-fg: #5B3FC0; }
 
 /* ---------- Hero ---------- */
+@keyframes heroFadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(18px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes heroMediaFade {
+    from {
+        opacity: 0;
+        transform: scale(1.03);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
 .hero { position: relative; overflow: hidden; background: var(--mint); }
 .hero-inner { position: relative; z-index: 2; }
 .hero-copy { padding-block: 2.75rem 2.25rem; max-width: 38rem; }
-.hero-kicker { max-width: 22rem; margin-bottom: 1rem; font-size: .9375rem; font-weight: 500; color: var(--ink-soft); }
-.hero-copy h1 { font-size: clamp(2rem, 4.6vw, 3.25rem); font-weight: 800; color: var(--deep); }
-.accent { color: var(--green); }
-.hero-lead { margin-top: 1.25rem; max-width: 30rem; font-size: 1.0625rem; color: var(--ink-soft); }
-.hero-copy .cta-row { margin-top: 1.75rem; }
+.hero-kicker {
+    max-width: 22rem;
+    margin-bottom: 1rem;
+    font-size: .9375rem;
+    font-weight: 500;
+    color: var(--ink-soft);
+    animation: heroFadeUp 0.65s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+    animation-delay: 0.05s;
+}
+.hero-copy h1 {
+    font-size: clamp(2rem, 4.6vw, 3.25rem);
+    font-weight: 800;
+    color: var(--deep);
+    animation: heroFadeUp 0.75s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+    animation-delay: 0.16s;
+}
+.accent {
+    color: var(--green);
+    display: inline-block;
+    transition: transform 0.3s ease;
+}
+.hero:hover .accent {
+    transform: translateY(-1px);
+}
+.hero-lead {
+    margin-top: 1.25rem;
+    max-width: 30rem;
+    font-size: 1.0625rem;
+    color: var(--ink-soft);
+    animation: heroFadeUp 0.75s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+    animation-delay: 0.26s;
+}
+.hero-copy .cta-row {
+    margin-top: 1.75rem;
+    animation: heroFadeUp 0.75s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+    animation-delay: 0.36s;
+}
 
-.hero-media { position: relative; aspect-ratio: 16 / 10; }
-.hero-media img { width: 100%; height: 100%; object-fit: cover; object-position: 72% 50%; }
+.hero-media { position: relative; aspect-ratio: 16 / 10; overflow: hidden; }
+.hero-media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 72% 50%;
+    animation: heroMediaFade 1.1s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+    animation-delay: 0.12s;
+    transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.hero:hover .hero-media img {
+    transform: scale(1.02);
+}
 
 @media (max-width: 480px) {
     .wrap { width: min(100% - 1.5rem, var(--wrap)); }
@@ -271,7 +371,46 @@
     font-weight: 700;
     color: var(--deep);
 }
-.strip-item .ic { width: 2.6rem; height: 2.6rem; background: #fff; }
+.brand .brand-mark {
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.brand:hover .brand-mark {
+    transform: scale(1.07) rotate(-2deg);
+}
+
+.btn {
+    transition: background-color .18s ease, border-color .18s ease, color .18s ease, transform .2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow .2s ease;
+}
+.btn:hover {
+    transform: translateY(-2px);
+}
+.btn-primary:hover {
+    box-shadow: 0 6px 18px -4px rgba(8, 128, 63, 0.35);
+}
+.btn-outline:hover {
+    box-shadow: 0 4px 12px -3px rgba(10, 61, 49, 0.12);
+}
+.btn:active {
+    transform: translateY(0);
+}
+.btn .icon {
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.btn:hover .icon {
+    transform: translateX(3px);
+}
+
+.strip-item .ic {
+    width: 2.6rem;
+    height: 2.6rem;
+    background: #fff;
+    transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+                box-shadow 0.22s ease;
+}
+.strip-item:hover .ic {
+    transform: translateY(-3px) scale(1.06);
+    box-shadow: 0 6px 16px -2px rgba(10, 61, 49, 0.14);
+}
 .strip-item .icon { width: 1.3rem; height: 1.3rem; }
 .strip-item:not(:last-child)::after { display: none; }
 @media (min-width: 400px) { .strip-item { font-size: .78rem; } }
@@ -482,7 +621,27 @@
     background: linear-gradient(100deg, #013D31 0%, #0A4F38 100%);
     color: #fff;
 }
-.cta-leaf { position: absolute; right: -2.5rem; bottom: -3rem; width: 16rem; height: 16rem; fill: #2FA967; opacity: .18; }
+@keyframes ctaLeafFloat {
+    0%, 100% {
+        transform: translate(0, 0) rotate(0deg);
+    }
+    50% {
+        transform: translate(-8px, -12px) rotate(3deg);
+    }
+}
+
+.cta-leaf {
+    position: absolute;
+    right: -2.5rem;
+    bottom: -3rem;
+    width: 16rem;
+    height: 16rem;
+    fill: #2FA967;
+    opacity: .18;
+    transform-origin: center center;
+    animation: ctaLeafFloat 10s ease-in-out infinite;
+    pointer-events: none;
+}
 .cta-inner { position: relative; display: grid; gap: 1.5rem; align-items: center; padding-block: clamp(2.5rem, 6vw, 3.5rem); }
 .cta h2 { font-size: clamp(1.5rem, 3vw, 2rem); }
 .cta p { margin-top: .5rem; max-width: 34rem; color: #CFE6DA; }
@@ -608,5 +767,71 @@
 @media (max-width: 360px) {
     .future-list {
         grid-template-columns: 1fr;
+    }
+}
+
+
+/* ---------- Scroll Reveal Animations ---------- */
+.js .reveal {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: opacity, transform;
+}
+
+.js .reveal.is-revealed {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Stagger delay for grid items */
+.reveal-stagger > *:nth-child(1) { transition-delay: 0.05s; }
+.reveal-stagger > *:nth-child(2) { transition-delay: 0.12s; }
+.reveal-stagger > *:nth-child(3) { transition-delay: 0.19s; }
+.reveal-stagger > *:nth-child(4) { transition-delay: 0.26s; }
+.reveal-stagger > *:nth-child(5) { transition-delay: 0.33s; }
+.reveal-stagger > *:nth-child(6) { transition-delay: 0.40s; }
+
+/* Future list micro-interaction */
+.future-list li {
+    transition: transform 0.2s ease, color 0.2s ease;
+}
+.future-list li:hover {
+    transform: translateX(3px);
+    color: var(--brand);
+}
+
+/* Role link hover nudge */
+.role-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    transition: gap 0.2s ease, color 0.15s ease;
+}
+.role-link:hover {
+    gap: 0.45rem;
+}
+
+/* Reduced motion accessibility */
+@media (prefers-reduced-motion: reduce) {
+    .js .reveal {
+        opacity: 1 !important;
+        transform: none !important;
+        transition: none !important;
+    }
+    .hero-kicker,
+    .hero-copy h1,
+    .hero-lead,
+    .hero-copy .cta-row,
+    .hero-media img,
+    .cta-leaf {
+        animation: none !important;
+        transform: none !important;
+    }
+    .btn:hover,
+    .card:hover,
+    .strip-item:hover .ic {
+        transform: none !important;
     }
 }

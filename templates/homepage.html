@@ -90,7 +90,7 @@
         </section>
 
         <!-- ===== Flow strip ===== -->
-        <div class="wrap strip-wrap">
+        <div class="wrap strip-wrap reveal">
             <ol class="strip" aria-label="The process in five steps">
                 <li class="strip-item"><span class="ic">{{ icon('search') }}</span><span>Search</span></li>
                 <li class="strip-item"><span class="ic">{{ icon('leaf') }}</span><span>Select</span></li>
@@ -103,32 +103,32 @@
         <!-- ===== How it works ===== -->
         <section class="section" id="how">
             <div class="wrap">
-                <div class="section-head">
+                <div class="section-head reveal">
                     <h2>How It Works</h2>
                     <p>From searching available stock to receiving delivery at your destination — five steps, one platform.</p>
                 </div>
-                <ol class="how-grid">
-                    <li class="card how-card">
+                <ol class="how-grid reveal-stagger">
+                    <li class="card how-card reveal">
                         <div class="card-top"><span class="num">1</span><span class="how-icon">{{ icon('search') }}</span></div>
                         <h3>Search Inventory</h3>
                         <p>Browse available grain, pulse, and oilseed lots stored across regional aggregation hubs.</p>
                     </li>
-                    <li class="card how-card">
+                    <li class="card how-card reveal">
                         <div class="card-top"><span class="num">2</span><span class="how-icon">{{ icon('leaf') }}</span></div>
                         <h3>Review Quality &amp; Price</h3>
                         <p>Check quality grades, available tonnage, and fixed prices per quintal before committing.</p>
                     </li>
-                    <li class="card how-card">
+                    <li class="card how-card reveal">
                         <div class="card-top"><span class="num">3</span><span class="how-icon">{{ icon('clipboard-check') }}</span></div>
                         <h3>Place Your Order</h3>
                         <p>Select a quantity and destination hub. Stock is reserved immediately — no double-selling.</p>
                     </li>
-                    <li class="card how-card">
+                    <li class="card how-card reveal">
                         <div class="card-top"><span class="num">4</span><span class="how-icon">{{ icon('truck') }}</span></div>
                         <h3>Carrier Is Assigned</h3>
                         <p>A verified transporter is automatically dispatched with a digital consignment waybill.</p>
                     </li>
-                    <li class="card how-card">
+                    <li class="card how-card reveal">
                         <div class="card-top"><span class="num">5</span><span class="how-icon">{{ icon('check-circle') }}</span></div>
                         <h3>Track &amp; Receive</h3>
                         <p>Follow each delivery milestone — loading, transit, offloading — until settlement.</p>
@@ -140,32 +140,32 @@
         <!-- ===== Features ===== -->
         <section class="section section-tight" id="features">
             <div class="wrap">
-                <div class="section-head">
+                <div class="section-head reveal">
                     <h2>Platform Features</h2>
                     <p>Everything needed to coordinate agricultural procurement and delivery across Ethiopia.</p>
                 </div>
-                <div class="feature-grid">
-                    <article class="card feature">
+                <div class="feature-grid reveal-stagger">
+                    <article class="card feature reveal">
                         <span class="ic ic-lg">{{ icon('leaf') }}</span>
                         <div><h3>Live Hub Stock</h3><p>Real-time inventory from cooperatives and collection centers, aggregated at certified hubs.</p></div>
                     </article>
-                    <article class="card feature">
+                    <article class="card feature reveal">
                         <span class="ic ic-lg">{{ icon('target') }}</span>
                         <div><h3>Quality Grading</h3><p>Every lot is inspected by extension agents and classified by national quality standards.</p></div>
                     </article>
-                    <article class="card feature">
+                    <article class="card feature reveal">
                         <span class="ic ic-lg">{{ icon('banknote') }}</span>
                         <div><h3>Transparent Pricing</h3><p>Fixed benchmark prices per quintal — no hidden fees or broker markups.</p></div>
                     </article>
-                    <article class="card feature">
+                    <article class="card feature reveal">
                         <span class="ic ic-lg">{{ icon('shield-check') }}</span>
                         <div><h3>Guaranteed Reservation</h3><p>Confirmed orders lock stock instantly. What you buy is held for your delivery.</p></div>
                     </article>
-                    <article class="card feature">
+                    <article class="card feature reveal">
                         <span class="ic ic-lg">{{ icon('truck') }}</span>
                         <div><h3>Automated Dispatch</h3><p>Transporters are assigned automatically and tracked through loading, transit, and offloading.</p></div>
                     </article>
-                    <article class="card feature">
+                    <article class="card feature reveal">
                         <span class="ic ic-lg">{{ icon('activity') }}</span>
                         <div><h3>Full Traceability</h3><p>Digital waybills and milestone tracking from origin hub to final destination.</p></div>
                     </article>
@@ -176,12 +176,12 @@
         <!-- ===== About / Roles ===== -->
         <section class="section section-mint" id="about">
             <div class="wrap">
-                <div class="section-head">
+                <div class="section-head reveal">
                     <h2>Who Uses AgriBridge</h2>
                     <p>The platform connects four roles to move produce from farm to market.</p>
                 </div>
-                <div class="roles-grid">
-                    <article class="card role">
+                <div class="roles-grid reveal-stagger">
+                    <article class="card role reveal">
                         <div class="role-top"><span class="ic ic-lg">{{ icon('users') }}</span><h3>Extension Agents</h3></div>
                         <ul>
                             <li>Register farmers and record produce lots</li>
@@ -190,7 +190,7 @@
                         </ul>
                         <span class="role-note">Staff portal access</span>
                     </article>
-                    <article class="card role">
+                    <article class="card role reveal">
                         <div class="role-top"><span class="ic ic-lg ic-blue">{{ icon('user') }}</span><h3>Buyers</h3></div>
                         <ul>
                             <li>Search and compare available stock</li>
@@ -199,7 +199,7 @@
                         </ul>
                         <a class="role-link" href="/auth?mode=signup">Create an account &rarr;</a>
                     </article>
-                    <article class="card role">
+                    <article class="card role reveal">
                         <div class="role-top"><span class="ic ic-lg ic-orange">{{ icon('truck') }}</span><h3>Transporters</h3></div>
                         <ul>
                             <li>Register vehicles for roadworthiness review</li>
@@ -208,7 +208,7 @@
                         </ul>
                         <span class="role-note">Staff portal access</span>
                     </article>
-                    <article class="card role">
+                    <article class="card role reveal">
                         <div class="role-top"><span class="ic ic-lg ic-purple">{{ icon('shield-check') }}</span><h3>Administrators</h3></div>
                         <ul>
                             <li>Verify users and inspect vehicles</li>
@@ -220,7 +220,7 @@
                 </div>
 
                 <!-- Staff portal link -->
-                <div style="margin-top: 1.75rem; background: #fff; border: 1.5px solid var(--line); border-left: 4px solid var(--brand); border-radius: var(--radius-m, 10px); padding: 1.15rem 1.5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .75rem;">
+                <div class="reveal" style="margin-top: 1.75rem; background: #fff; border: 1.5px solid var(--line); border-left: 4px solid var(--brand); border-radius: var(--radius-m, 10px); padding: 1.15rem 1.5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .75rem;">
                     <div>
                         <h4 style="margin: 0 0 .2rem; font-size: 1rem; font-weight: 700; color: var(--deep);">Staff &amp; Logistics Partners</h4>
                         <p style="margin: 0; color: var(--ink-soft); font-size: .9rem;">Agents, transporters, and administrators sign in through the staff portal.</p>
@@ -228,7 +228,7 @@
                     <a href="/staff/login" class="btn btn-outline btn-sm" style="white-space: nowrap;">Staff Sign In {{ icon('arrow-right') }}</a>
                 </div>
 
-                <div class="future">
+                <div class="future reveal">
                     <div class="future-text">
                         <h3>Coming Soon</h3>
                         <p>Features we're working on for future releases.</p>
@@ -250,7 +250,7 @@
                 <path d="M3.5 19.5C3.5 12 8 6.5 15.5 4.5c.4 7.5-3 13.5-12 15Z"/>
                 <path d="M7 28C6 15 14 6 28.5 4.5 29 18.5 21 27 7 28Z"/>
             </svg>
-            <div class="wrap cta-inner">
+            <div class="wrap cta-inner reveal">
                 <div>
                     <h2>Ready to get started?</h2>
                     <p>Create an account to search live hub inventory, place orders, and coordinate delivery across Ethiopia.</p>
